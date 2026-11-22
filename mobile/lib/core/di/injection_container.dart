@@ -1,97 +1,73 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../features/todo/data/datasources/todo_fake_remote_data_source.dart';
-import '../../features/todo/data/datasources/todo_local_data_source.dart';
-import '../../features/todo/data/datasources/todo_remote_data_source.dart';
-import '../../features/todo/data/repositories/todo_repository_impl.dart';
-import '../../features/todo/domain/repositories/todo_repository.dart';
-import '../../features/todo/domain/usecases/create_todo.dart';
-import '../../features/todo/domain/usecases/delete_todo.dart';
-import '../../features/todo/domain/usecases/get_all_todos.dart';
-import '../../features/todo/presentation/bloc/todo_bloc.dart';
-import '../network/dio_client.dart';
-import '../network/network_info.dart';
-import '../security/biometric_authenticator.dart';
-import '../security/device_integrity.dart';
-import '../security/secure_token_storage.dart';
-import '../security/security_policy.dart';
+import '../../features/auth/data/datasources/auth_local_datasource.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/get_cached_user_usecase.dart';
+import '../../features/auth/domain/usecases/login_usecase.dart';
+import '../../features/auth/domain/usecases/logout_usecase.dart';
+import '../../features/auth/domain/usecases/register_usecase.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../network/api_client.dart';
 
 final sl = GetIt.instance;
 
-/// One place to see every dependency the app has and how it's wired.
-///
-/// * The BLoC is a factory (a fresh instance per screen).
-/// * Everything below it is a lazy singleton (one shared instance).
-///
-/// [useFakeBackend] swaps the remote data source between an in-memory fake
-/// (demo mode, works offline) and the real Dio-based implementation. That
-/// this is the *only* place the choice is made is the payoff of the
-/// architecture: the domain and presentation layers never notice.
-Future<void> initDependencies({
-  required String apiBaseUrl,
-  bool useFakeBackend = true,
-  SecurityPolicy securityPolicy = const SecurityPolicy(),
-}) async {
-  await Hive.initFlutter();
-  final todoBox = await Hive.openBox<Map>(TodoLocalDataSourceImpl.boxName);
+/// The real API is used by default. To use the offline mock instead:
+///   flutter run --dart-define=USE_FAKE_BACKEND=true
+const bool useFakeBackend = bool.fromEnvironment(
+  'USE_FAKE_BACKEND',
+  defaultValue: false,
+);
 
-  // Security
-  sl.registerLazySingleton<SecurityPolicy>(() => securityPolicy);
-  sl.registerLazySingleton<TokenStorage>(() => SecureTokenStorage());
-  sl.registerLazySingleton<BiometricAuthenticator>(
-    () => LocalAuthBiometricAuthenticator(),
-  );
-  sl.registerLazySingleton<DeviceIntegrityChecker>(
-    () => SafeDeviceIntegrityChecker(),
+Future<void> initDependencies() async {
+  // External
+  sl.registerLazySingleton<FlutterSecureStorage>(
+    () => const FlutterSecureStorage(),
   );
 
-  // Core
+  // Auth local data source (registered first: the HTTP client reads the token)
+  sl.registerLazySingleton<AuthLocalDataSource>(
+    () => AuthLocalDataSourceImpl(storage: sl()),
+  );
+
+  // Network
   sl.registerLazySingleton<Dio>(
-    () => DioClient.create(
-      baseUrl: apiBaseUrl,
-      certificatePins: securityPolicy.certificatePins,
+    () => ApiClient.create(
+      tokenProvider: () => sl<AuthLocalDataSource>().getToken(),
     ),
   );
-  sl.registerLazySingleton<Connectivity>(() => Connectivity());
 
-  if (useFakeBackend) {
-    sl.registerLazySingleton<NetworkInfo>(
-      () => const AlwaysOnlineNetworkInfo(),
-    );
-    sl.registerLazySingleton<TodoRemoteDataSource>(
-      () => TodoFakeRemoteDataSource(),
-    );
-  } else {
-    sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-    sl.registerLazySingleton<TodoRemoteDataSource>(
-      () => TodoRemoteDataSourceImpl(sl()),
-    );
-  }
-
-  // Todo feature
-  sl.registerLazySingleton<TodoLocalDataSource>(
-    () => TodoLocalDataSourceImpl(todoBox),
+  // Auth remote data source
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => useFakeBackend
+        ? AuthRemoteDataSourceFake()
+        : AuthRemoteDataSourceImpl(client: sl()),
   );
-  sl.registerLazySingleton<TodoRepository>(
-    () => TodoRepositoryImpl(
+
+  // Auth Repository
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
-      networkInfo: sl(),
     ),
   );
 
-  sl.registerLazySingleton(() => GetAllTodos(sl()));
-  sl.registerLazySingleton(() => CreateTodo(sl()));
-  sl.registerLazySingleton(() => DeleteTodo(sl()));
+  // Auth Use Cases
+  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => RegisterUseCase(sl()));
+  sl.registerLazySingleton(() => LogoutUseCase(sl()));
+  sl.registerLazySingleton(() => GetCachedUserUseCase(sl()));
 
+  // Auth Bloc (one instance, provided at the app root in main.dart)
   sl.registerFactory(
-    () => TodoBloc(
-      getAllTodos: sl(),
-      createTodo: sl(),
-      deleteTodo: sl(),
+    () => AuthBloc(
+      loginUseCase: sl(),
+      registerUseCase: sl(),
+      logoutUseCase: sl(),
+      getCachedUserUseCase: sl(),
     ),
   );
 }
