@@ -18,7 +18,16 @@ interface ErrorBoundaryProps {
 }
 
 const ErrorBoundary = ({ error, retry }: ErrorBoundaryProps) => {
-  const t = useTranslations("errorBoundary");
+  let title = "حدث خطأ غير متوقع";
+  let retryLabel = "إعادة المحاولة";
+
+  try {
+    const t = useTranslations("errorBoundary");
+    title = t("title") || title;
+    retryLabel = t("retry") || retryLabel;
+  } catch {
+    // Graceful fallback if invoked outside NextIntl context
+  }
 
   useEffect(() => {
     console.error(error);
@@ -28,13 +37,13 @@ const ErrorBoundary = ({ error, retry }: ErrorBoundaryProps) => {
     <main className="flex min-h-96 items-center justify-center px-4 py-12">
       <div className="grid max-w-lg gap-4 text-center">
         <h1 className="text-title-sm font-semibold text-gray-900 dark:text-white">
-          {t("title")}
+          {title}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {getErrorMessage(error)}
         </p>
         <Button className="mx-auto" onClick={retry}>
-          {t("retry")}
+          {retryLabel}
         </Button>
       </div>
     </main>

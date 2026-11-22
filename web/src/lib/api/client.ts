@@ -3,7 +3,8 @@ Pseudocode:
 Objective: expose typed HTTP methods for external JSON APIs.
 Input: an absolute API base URL, optional headers, and request/response hooks.
 Process: resolve the endpoint, run the request hook, call fetch, run the response
-hook, and parse successful bodies; represent non-success responses as ApiError.
+hook, and parse successful bodies; represent non-success responses as ApiError
+with a readable message extracted from JSON error bodies.
 Output: get, post, put, patch, delete, and request methods; network and parse
 errors remain rejected so callers cannot mistake failures for successful data.
 */
@@ -20,10 +21,7 @@ interface ApiClientConfig {
 }
 
 interface ApiClient {
-  request: <TResponse>(
-    path: string,
-    init?: RequestInit,
-  ) => Promise<TResponse>;
+  request: <TResponse>(path: string, init?: RequestInit) => Promise<TResponse>;
   get: <TResponse>(path: string, init?: RequestInit) => Promise<TResponse>;
   post: <TResponse, TBody>(
     path: string,
@@ -43,11 +41,36 @@ interface ApiClient {
   delete: <TResponse>(path: string, init?: RequestInit) => Promise<TResponse>;
 }
 
+const readErrorMessage = (status: number, body: string): string => {
+  if (!body) return `Request failed with status ${status}`;
+
+  try {
+    const parsed = JSON.parse(body) as { message?: unknown; error?: unknown };
+    const message = parsed?.message;
+
+    if (typeof message === "string" && message.trim()) return message;
+    if (Array.isArray(message)) {
+      const parts = message.filter(
+        (part): part is string => typeof part === "string" && part.trim() !== "",
+      );
+      if (parts.length > 0) return parts.join(", ");
+    }
+    if (typeof parsed?.error === "string" && parsed.error.trim()) {
+      return parsed.error;
+    }
+  } catch {
+    // The response body was not JSON, so use it as the message below.
+  }
+
+  return body;
+};
+
 const createApiError = (status: number, body: string): ApiError => {
-  const error = Object.assign(
-    new Error(body || `Request failed with status ${status}`),
-    { name: "ApiError", status, body },
-  );
+  const error = Object.assign(new Error(readErrorMessage(status, body)), {
+    name: "ApiError",
+    status,
+    body,
+  });
 
   return error;
 };
