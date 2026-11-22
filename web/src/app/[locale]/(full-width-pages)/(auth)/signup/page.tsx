@@ -1,14 +1,14 @@
-import SignUpForm from "@/components/others/auth/sign-up";
-import { Metadata } from "next";
+/*
+Pseudocode:
+Objective: render the Sign Up route forwarding to the InstaMall Auth Portal with initialMode="signup".
+Input: none.
+Process: render AuthPortal with initialMode="signup".
+Output: the sign up page.
+*/
+import AuthPortal from "../auth/page";
 
-export const metadata: Metadata = {
-  title: "Next.js SignUp Page | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js SignUp Page TailAdmin Dashboard Template",
-  // other metadata
+const SignUpPage = () => {
+  return <AuthPortal initialMode="signup" />;
 };
 
-const SignUp = () => {
-  return <SignUpForm />;
-};
-
-export default SignUp;
+export default SignUpPage;

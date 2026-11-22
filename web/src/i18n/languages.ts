@@ -1,5 +1,5 @@
+import { SaFlagIcon } from "@/icons";
 import { UsFlagIcon } from "@/icons";
-
 import type { Locale } from "./routing";
 
 export interface Language {
@@ -13,39 +13,28 @@ export interface Language {
 
 export const languages: Language[] = [
   {
+    id: "ar",
+    name: "العربية (سوريا)",
+    shortName: "العربية",
+    dir: "rtl",
+    FlagIcon: SaFlagIcon,
+    badge: "RTL",
+  },
+  {
     id: "en",
     name: "English",
     shortName: "English",
     dir: "ltr",
     FlagIcon: UsFlagIcon,
   },
-  // Add languages according to requirement
-  // {
-  //   id: "ar",
-  //   name: "Arabic (Saudi)",
-  //   shortName: "Arabic",
-  //   dir: "rtl",
-  //   FlagIcon: SaFlagIcon,
-  //   badge: "RTL",
-  // },
-  // {
-  //   id: "es",
-  //   name: "Español",
-  //   shortName: "Español",
-  //   dir: "ltr",
-  //   FlagIcon: EsFlagIcon,
-  // },
-  // {
-  //   id: "de",
-  //   name: "Deutsch",
-  //   shortName: "Deutsch",
-  //   dir: "ltr",
-  //   FlagIcon: DeFlagIcon,
-  // },
 ];
 
 export const getLanguage = (locale: Locale): Language => {
-  return languages.find((l) => l.id === locale) || languages[0];
+  return (
+    languages.find((l) => l.id === locale) ||
+    languages.find((l) => l.id === "en") ||
+    languages[0]
+  );
 };
 
 export const isRtl = (locale: Locale): boolean => {

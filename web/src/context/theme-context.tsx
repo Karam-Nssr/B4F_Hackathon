@@ -23,15 +23,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // This code will only run on the client side
-    const savedMode = localStorage.getItem("theme-mode") as ThemeMode | null;
-    const legacySavedTheme = localStorage.getItem(
-      "theme",
-    ) as ResolvedTheme | null;
-    const initialMode = savedMode || (legacySavedTheme as ThemeMode) || "light";
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      // This code will only run on the client side
+      const savedMode = localStorage.getItem("theme-mode") as ThemeMode | null;
+      const legacySavedTheme = localStorage.getItem(
+        "theme",
+      ) as ResolvedTheme | null;
+      const initialMode = savedMode || (legacySavedTheme as ThemeMode) || "light";
 
-    setThemeModeState(initialMode);
-    setIsInitialized(true);
+      setThemeModeState(initialMode);
+      setIsInitialized(true);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -47,14 +54,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
         setTheme(resolved);
       };
 
-      handleChange();
+      queueMicrotask(handleChange);
 
       mediaQuery.addEventListener("change", handleChange);
       return () => {
         mediaQuery.removeEventListener("change", handleChange);
       };
     } else {
-      setTheme(themeMode as ResolvedTheme);
+      queueMicrotask(() => setTheme(themeMode as ResolvedTheme));
     }
   }, [themeMode, isInitialized]);
 

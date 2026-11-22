@@ -4,7 +4,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
-  /* config options here */
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -27,6 +26,18 @@ const nextConfig: NextConfig = {
         as: "*.js",
       },
     },
+  },
+  async rewrites() {
+    const backendUrl = (
+      process.env.BACKEND_API_URL ?? "http://127.0.0.1:3000"
+    ).replace(/\/+$/, "");
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
   },
   redirects() {
     return [
