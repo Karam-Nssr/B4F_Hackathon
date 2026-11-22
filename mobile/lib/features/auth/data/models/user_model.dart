@@ -7,15 +7,17 @@ class UserModel extends UserEntity {
     required super.phone,
     required super.nationalId,
     required super.email,
+    super.role,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      fullName: json['fullName']?.toString() ?? '',
+      fullName: (json['fullName'] ?? json['full_name'])?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      nationalId: json['nationalId']?.toString() ?? '',
+      nationalId: (json['nationalId'] ?? json['national_id'])?.toString() ?? '',
       email: json['email']?.toString() ?? '',
+      role: json['role']?.toString() ?? 'user',
     );
   }
 
@@ -26,6 +28,7 @@ class UserModel extends UserEntity {
       'phone': phone,
       'nationalId': nationalId,
       'email': email,
+      'role': role,
     };
   }
 }
