@@ -23,7 +23,7 @@ class ApiEndpoints {
   /// POST – body: phone, password → { token, user }
   static const String login = '$_api/auth/login';
 
-  /// GET – active products; query: search, category, shopId, minPrice, maxPrice
+  /// GET – active products; query: search, category, shopId, minPriceSyp, maxPriceSyp
   static const String products = '$_api/products';
 
   /// GET – list of shops
@@ -37,8 +37,11 @@ class ApiEndpoints {
   static const String userProfile = '$_api/user/profile';
 
   /// POST: submit cart (server splits into shop sub-orders + invoices)
+  /// body: { items: [{ productId, quantity }] }
+  static const String orders = '$_api/orders';
+
   /// GET: order history with sub-orders and invoices
-  static const String userOrders = '$_api/user/orders';
+  static const String myOrders = '$_api/orders/my';
 
   // ── 7.3 Shop (role: shop) ──────────────────────────────────────────────
   /// GET – dashboard stats (products count, orders count, sales in SYP)

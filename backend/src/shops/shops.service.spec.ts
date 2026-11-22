@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { Product } from '../products/schemas/product.schema.js';
 import { Shop } from './schemas/shop.schema.js';
 import { ShopsService } from './shops.service.js';
 
@@ -11,6 +12,7 @@ describe('ShopsService', () => {
       providers: [
         ShopsService,
         { provide: getModelToken(Shop.name), useValue: {} },
+        { provide: getModelToken(Product.name), useValue: {} },
       ],
     }).compile();
 

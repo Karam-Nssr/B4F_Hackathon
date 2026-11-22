@@ -1,0 +1,24 @@
+import '../../domain/entities/shop_entity.dart';
+
+class ShopModel extends ShopEntity {
+  const ShopModel({
+    required super.id,
+    required super.shopName,
+    required super.category,
+    super.description,
+    super.isActive,
+  });
+
+  /// Parses a document from `GET /api/shops`.
+  factory ShopModel.fromJson(Map<String, dynamic> json) {
+    final active = json['isActive'] ?? json['is_active'];
+
+    return ShopModel(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      shopName: json['shopName']?.toString() ?? json['shop_name']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      isActive: active is bool ? active : true,
+    );
+  }
+}

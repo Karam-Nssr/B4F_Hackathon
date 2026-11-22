@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/di/injection_container.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/cart/presentation/bloc/cart_bloc.dart';
+import 'features/cart/presentation/bloc/cart_event.dart';
 import 'routes/app_router.dart';
 
 Future<void> main() async {
@@ -20,8 +22,12 @@ class InstaMallApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<AuthBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<AuthBloc>()),
+        // App-level: the cart badge on every screen reads this instance.
+        BlocProvider(create: (_) => sl<CartBloc>()..add(CartLoadRequested())),
+      ],
       child: MaterialApp.router(
         title: 'InstaMall',
         debugShowCheckedModeBanner: false,
