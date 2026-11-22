@@ -77,10 +77,10 @@ Use the buyer account to log in and browse products:
 
 ```powershell
 '{"email":"buyer@instamall.local","password":"Buyer12345!"}' |
-  curl.exe -X POST http://localhost:3000/api/auth/login `
+  curl.exe -X POST http://localhost:4000/api/auth/login `
     -H "Content-Type: application/json" --data-binary "@-"
 
-curl.exe http://localhost:3000/api/products
+curl.exe http://localhost:4000/api/products
 ```
 
 For checkout, copy the returned buyer token and a product `_id` from
@@ -88,7 +88,7 @@ For checkout, copy the returned buyer token and a product `_id` from
 
 ```powershell
 '{"items":[{"productId":"<product-id>","quantity":1}]}' |
-  curl.exe -X POST http://localhost:3000/api/orders `
+  curl.exe -X POST http://localhost:4000/api/orders `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer <buyer-token>" --data-binary "@-"
 ```
