@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -30,21 +31,34 @@ export class UsersService {
     if (!Object.keys(updates).length) {
       throw new BadRequestException('At least one profile field is required');
     }
-    const user = await this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $set: updates },
-        {
-          returnDocument: 'after',
-          runValidators: true,
-        },
-      )
-      .select('-passwordHash')
-      .lean()
-      .exec();
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          { $set: updates },
+          {
+            returnDocument: 'after',
+            runValidators: true,
+          },
+        )
+        .select('-passwordHash')
+        .lean()
+        .exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return user;
+    } catch (error) {
+      // MongoDB duplicate-key (code 11000) on the unique `email` index.
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as { code?: unknown }).code === 11000
+      ) {
+        throw new ConflictException('This email is already in use');
+      }
+      throw error;
     }
-    return user;
   }
 }

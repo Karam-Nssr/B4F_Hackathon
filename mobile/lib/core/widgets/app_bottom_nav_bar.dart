@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 
@@ -20,6 +21,24 @@ class AppBottomNavBar extends StatelessWidget {
     Icons.receipt_long_outlined,
     Icons.person_outline,
   ];
+
+  /// Single source of truth for tab navigation — every screen's bar calls
+  /// this, so tapping the current tab is a no-op and the rest go to the
+  /// right route.
+  static void goToTab(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        context.go('/home');
+      case 1:
+        context.go('/stores');
+      case 2:
+        context.go('/cart');
+      case 3:
+        context.go('/orders');
+      case 4:
+        context.go('/profile');
+    }
+  }
 
   final int currentIndex;
   final ValueChanged<int> onTap;

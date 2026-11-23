@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -31,46 +33,43 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _searchController = TextEditingController();
+  Timer? _searchDebounce;
   String _selectedCategory = 'الكل';
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _submitSearch(String value) {
-    context.read<HomeBloc>().add(HomeSearchChanged(query: value.trim()));
+  /// Search applies live while typing (debounced) and instantly on submit.
+  ///
+  /// The [HomeBloc] reference is always taken from the BlocBuilder's
+  /// context: this State's own `context` sits *above* the BlocProvider
+  /// returned by [build], so `context.read<HomeBloc>()` here would throw
+  /// a ProviderNotFound (that is what broke search and the category chips).
+  void _submitSearch(HomeBloc bloc, String value) {
+    _searchDebounce?.cancel();
+    bloc.add(HomeSearchChanged(query: value.trim()));
   }
 
-  void _clearSearch() {
+  void _onSearchChanged(HomeBloc bloc, String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      bloc.add(HomeSearchChanged(query: value.trim()));
+    });
+  }
+
+  void _clearSearch(HomeBloc bloc) {
     _searchController.clear();
-    _submitSearch('');
+    _submitSearch(bloc, '');
   }
 
-  void _selectCategory(String category) {
+  void _selectCategory(HomeBloc bloc, String category) {
     setState(() => _selectedCategory = category);
-    context.read<HomeBloc>().add(HomeCategorySelected(category: category));
-  }
-
-  /// Bottom navigation: stores and cart are built, the rest are not.
-  void _onNavTap(int index) {
-    switch (index) {
-      case 0:
-        return; // already home
-      case 1:
-        context.go('/stores');
-      case 2:
-        context.go('/cart');
-      default:
-        _comingSoonAction(AppBottomNavBar.labels[index]);
-    }
-  }
-
-  void _comingSoonAction(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature — قيد التطوير')),
-    );
+    bloc.add(HomeCategorySelected(category: category));
   }
 
   void _addToCart(ProductEntity product) {
@@ -95,14 +94,18 @@ class _HomePageState extends State<HomePage> {
         },
         child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
+            final homeBloc = context.read<HomeBloc>();
             return Scaffold(
               backgroundColor: AppColors.background,
               body: Column(
                 children: [
                   HomeHeader(
                     controller: _searchController,
-                    onSearchSubmitted: _submitSearch,
-                    onSearchCleared: _clearSearch,
+                    onSearchSubmitted: (value) =>
+                        _submitSearch(homeBloc, value),
+                    onSearchChanged: (value) =>
+                        _onSearchChanged(homeBloc, value),
+                    onSearchCleared: () => _clearSearch(homeBloc),
                     cartCount: context.watch<CartBloc>().state.itemCount,
                     onCartTap: () => context.go('/cart'),
                   ),
@@ -111,7 +114,9 @@ class _HomePageState extends State<HomePage> {
               ),
               bottomNavigationBar: AppBottomNavBar(
                 currentIndex: 0,
-                onTap: _onNavTap,
+                onTap: (index) {
+                  if (index != 0) AppBottomNavBar.goToTab(context, index);
+                },
               ),
             );
           },
@@ -136,7 +141,11 @@ class _HomePageState extends State<HomePage> {
           children: [
             const HeroBanner(),
             const SizedBox(height: 16),
-            CategoryChips(selected: _selectedCategory, onSelected: _selectCategory),
+            CategoryChips(
+              selected: _selectedCategory,
+              onSelected: (category) =>
+                  _selectCategory(context.read<HomeBloc>(), category),
+            ),
             const SizedBox(height: 20),
             if (!isError && !isEmpty) _sectionHeader(products.length),
             const SizedBox(height: 12),

@@ -4,6 +4,8 @@ import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/cart/presentation/pages/cart_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
+import '../features/orders/presentation/pages/orders_page.dart';
+import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/stores/presentation/pages/store_detail_page.dart';
 import '../features/stores/presentation/pages/stores_page.dart';
@@ -29,6 +31,8 @@ class AppRouter {
         ),
       ),
       GoRoute(path: '/cart', builder: (context, state) => const CartPage()),
+      GoRoute(path: '/orders', builder: (context, state) => const OrdersPage()),
+      GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
     ],
   );
 }

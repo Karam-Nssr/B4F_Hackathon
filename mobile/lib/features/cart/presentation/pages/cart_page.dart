@@ -19,23 +19,6 @@ import '../widgets/cart_item_tile.dart';
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
-  void _onNavTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-      case 1:
-        context.go('/stores');
-      case 2:
-        return; // already here
-      default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppBottomNavBar.labels[index]} — قيد التطوير'),
-          ),
-        );
-    }
-  }
-
   void _checkout(BuildContext context) {
     // The backend requires a JWT with role `user` — send guests to login.
     final authState = context.read<AuthBloc>().state;
@@ -84,7 +67,9 @@ class CartPage extends StatelessWidget {
             ),
             bottomNavigationBar: AppBottomNavBar(
               currentIndex: 2,
-              onTap: (index) => _onNavTap(context, index),
+              onTap: (index) {
+                if (index != 2) AppBottomNavBar.goToTab(context, index);
+              },
             ),
           );
         },

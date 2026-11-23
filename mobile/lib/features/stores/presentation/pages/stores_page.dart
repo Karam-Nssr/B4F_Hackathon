@@ -16,23 +16,6 @@ import '../widgets/store_card.dart';
 class StoresPage extends StatelessWidget {
   const StoresPage({super.key});
 
-  void _onNavTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-      case 1:
-        return; // already here
-      case 2:
-        context.go('/cart');
-      default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppBottomNavBar.labels[index]} — قيد التطوير'),
-          ),
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -49,7 +32,9 @@ class StoresPage extends StatelessWidget {
             ),
             bottomNavigationBar: AppBottomNavBar(
               currentIndex: 1,
-              onTap: (index) => _onNavTap(context, index),
+              onTap: (index) {
+                if (index != 1) AppBottomNavBar.goToTab(context, index);
+              },
             ),
           );
         },

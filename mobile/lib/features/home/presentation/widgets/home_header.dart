@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 class HomeHeader extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSearchSubmitted;
+  final ValueChanged<String>? onSearchChanged;
   final VoidCallback onSearchCleared;
   final int cartCount;
   final VoidCallback onCartTap;
@@ -15,6 +16,7 @@ class HomeHeader extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onSearchSubmitted,
+    this.onSearchChanged,
     required this.onSearchCleared,
     required this.cartCount,
     required this.onCartTap,
@@ -80,6 +82,7 @@ class HomeHeader extends StatelessWidget {
               _SearchField(
                 controller: controller,
                 onSubmitted: onSearchSubmitted,
+                onChanged: onSearchChanged,
                 onCleared: onSearchCleared,
               ),
             ],
@@ -146,11 +149,13 @@ class _CartPill extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onChanged;
   final VoidCallback onCleared;
 
   const _SearchField({
     required this.controller,
     required this.onSubmitted,
+    this.onChanged,
     required this.onCleared,
   });
 
@@ -160,6 +165,7 @@ class _SearchField extends StatelessWidget {
       controller: controller,
       textInputAction: TextInputAction.search,
       onSubmitted: onSubmitted,
+      onChanged: onChanged,
       style: const TextStyle(color: AppColors.textPrimary, fontSize: 13.5),
       decoration: InputDecoration(
         hintText: 'ابحث عن منتج أو متجر',
