@@ -44,9 +44,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-[18px] border border-[#EBE1D6] bg-white shadow-[0px_6px_18px_rgba(15,23,42,0.08)] transition-all hover:shadow-[0px_8px_24px_rgba(15,23,42,0.12)]">
+    <div className="group flex flex-col overflow-hidden rounded-[18px] border border-line bg-white p-5 shadow-product transition-all hover:shadow-[0px_8px_24px_rgba(15,23,42,0.12)]">
       {/* 150-160px Thumbnail matching Figma ratio */}
-      <div className="relative h-[160px] w-full overflow-hidden bg-[#F6F0E9]">
+      <div className="relative h-40 w-full overflow-hidden bg-low">
         <img
           src={imgSrc}
           alt={product.title}
@@ -59,8 +59,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Content - 12px (p-3) matching Figma wireframe */}
       <div className="flex flex-1 flex-col justify-between p-3 text-right">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-normal text-[#475569]">{product.shopName}</span>
-          <h3 className="line-clamp-1 text-sm font-semibold text-[#0F172A]" title={product.title}>
+          <span className="text-xs font-normal text-muted">
+            {product.shopName}
+          </span>
+          <h3
+            className="line-clamp-1 text-sm font-semibold text-[#0F172A]"
+            title={product.title}
+          >
             {product.title}
           </h3>
         </div>
@@ -71,17 +76,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <span className="font-mono text-base font-semibold text-[#0F172A]">
               {product.priceSyp.toLocaleString("en-US")}
             </span>
-            <span className="text-xs font-normal text-[#475569]">ل.س</span>
+            <span className="text-xs font-normal text-muted">ل.س</span>
           </div>
 
           <button
             type="button"
             onClick={handleAdd}
             aria-label={added ? "تمت الإضافة" : "أضف إلى السلة"}
-            className={`flex size-11 items-center justify-center rounded-full text-white transition-all active:scale-95 hover:scale-105 ${
+            className={`flex size-11 items-center justify-center rounded-full text-white transition-all hover:scale-105 active:scale-95 ${
               added
-                ? "bg-[#15803D] shadow-[0px_4px_12px_rgba(21,128,61,0.28)]"
-                : "bg-[#C40027] shadow-[0px_4px_12px_rgba(196,0,39,0.28)] hover:bg-[#A50021]"
+                ? "bg-ok shadow-[0px_4px_12px_rgba(21,128,61,0.28)]"
+                : "bg-red shadow-red hover:bg-[#A50021]"
             }`}
           >
             {added ? (

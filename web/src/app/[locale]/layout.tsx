@@ -70,7 +70,7 @@ const RootLayout = async ({
     <html lang={locale} dir={rtl ? "rtl" : "ltr"}>
       <body
         className={cn(
-          "relative isolate min-h-screen bg-[#FBF8F4] text-[#0F172A] antialiased",
+          "relative isolate min-h-screen bg-bg text-navy antialiased",
           rubik.variable,
           splineSansMono.variable,
           alatsi.variable,

@@ -92,7 +92,9 @@ const StoreContext = createContext<InstaMallStore | null>(null);
 export const useInstaMallStore = (): InstaMallStore => {
   const ctx = useContext(StoreContext);
   if (!ctx) {
-    throw new Error("useInstaMallStore must be used within InstaMallStoreProvider");
+    throw new Error(
+      "useInstaMallStore must be used within InstaMallStoreProvider",
+    );
   }
   return ctx;
 };
@@ -112,7 +114,9 @@ const makeFallbackShop = (id: string, shopName: string): Shop => ({
   isActive: true,
 });
 
-const toCreateProductBody = (product: Omit<Product, "id">): CreateProductBody => ({
+const toCreateProductBody = (
+  product: Omit<Product, "id">,
+): CreateProductBody => ({
   title: product.title,
   description: product.description,
   category: product.category,
@@ -132,7 +136,9 @@ const toUpdateProductBody = (updates: Partial<Product>): UpdateProductBody => {
   return body;
 };
 
-export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps) => {
+export const InstaMallStoreProvider = ({
+  children,
+}: InstaMallStoreProviderProps) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -224,7 +230,8 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
       if (controller.signal.aborted) return;
 
       const failed = results.find(
-        (result): result is PromiseRejectedResult => result.status === "rejected",
+        (result): result is PromiseRejectedResult =>
+          result.status === "rejected",
       );
       if (failed) reportError(failed.reason);
       setIsLoading(false);
@@ -284,15 +291,18 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
 
   const clearCart = useCallback(() => setCart([]), []);
 
-  const applyAuth = useCallback((response: api.AuthResponseDto): UserProfile => {
-    api.setStoredToken(response.accessToken);
-    api.setStoredUser(response.user);
-    const profile = api.toUserProfile(response.user);
-    setCurrentUser(profile);
-    setActiveRoleState(profile.role);
-    setError(null);
-    return profile;
-  }, []);
+  const applyAuth = useCallback(
+    (response: api.AuthResponseDto): UserProfile => {
+      api.setStoredToken(response.accessToken);
+      api.setStoredUser(response.user);
+      const profile = api.toUserProfile(response.user);
+      setCurrentUser(profile);
+      setActiveRoleState(profile.role);
+      setError(null);
+      return profile;
+    },
+    [],
+  );
 
   const login = useCallback(
     async (email: string, password: string): Promise<UserProfile> => {
@@ -366,7 +376,10 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
     if (cart.length === 0) return null;
     try {
       const created = await api.createOrder(
-        cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+        cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
       );
       const orders = await api.listMyOrders();
       setMasterOrders(orders);
@@ -383,53 +396,62 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
     }
   }, [cart, clearCart, reportError]);
 
-  const confirmSubOrder = useCallback(async (id: string) => {
-    try {
-      await api.updateSubOrderStatus(id, "CONFIRMED");
-      setShopSubOrders((prev) =>
-        prev.map((sub) =>
-          sub.id === id
-            ? { ...sub, status: "CONFIRMED" as const, remainingHours: 0 }
-            : sub,
-        ),
-      );
-      setError(null);
-    } catch (caught) {
-      reportError(caught);
-      throw caught;
-    }
-  }, [reportError]);
+  const confirmSubOrder = useCallback(
+    async (id: string) => {
+      try {
+        await api.updateSubOrderStatus(id, "CONFIRMED");
+        setShopSubOrders((prev) =>
+          prev.map((sub) =>
+            sub.id === id
+              ? { ...sub, status: "CONFIRMED" as const, remainingHours: 0 }
+              : sub,
+          ),
+        );
+        setError(null);
+      } catch (caught) {
+        reportError(caught);
+        throw caught;
+      }
+    },
+    [reportError],
+  );
 
-  const rejectSubOrder = useCallback(async (id: string) => {
-    try {
-      await api.updateSubOrderStatus(id, "CANCELLED");
-      setShopSubOrders((prev) =>
-        prev.map((sub) =>
-          sub.id === id
-            ? { ...sub, status: "CANCELLED" as const, remainingHours: 0 }
-            : sub,
-        ),
-      );
-      setError(null);
-    } catch (caught) {
-      reportError(caught);
-      throw caught;
-    }
-  }, [reportError]);
+  const rejectSubOrder = useCallback(
+    async (id: string) => {
+      try {
+        await api.updateSubOrderStatus(id, "CANCELLED");
+        setShopSubOrders((prev) =>
+          prev.map((sub) =>
+            sub.id === id
+              ? { ...sub, status: "CANCELLED" as const, remainingHours: 0 }
+              : sub,
+          ),
+        );
+        setError(null);
+      } catch (caught) {
+        reportError(caught);
+        throw caught;
+      }
+    },
+    [reportError],
+  );
 
-  const addProduct = useCallback(async (product: Omit<Product, "id">) => {
-    try {
-      const dto = await api.createProduct(toCreateProductBody(product));
-      setProducts((prev) => [
-        api.mapCreatedProduct(dto),
-        ...prev.filter((item) => item.id !== dto._id),
-      ]);
-      setError(null);
-    } catch (caught) {
-      reportError(caught);
-      throw caught;
-    }
-  }, [reportError]);
+  const addProduct = useCallback(
+    async (product: Omit<Product, "id">) => {
+      try {
+        const dto = await api.createProduct(toCreateProductBody(product));
+        setProducts((prev) => [
+          api.mapCreatedProduct(dto),
+          ...prev.filter((item) => item.id !== dto._id),
+        ]);
+        setError(null);
+      } catch (caught) {
+        reportError(caught);
+        throw caught;
+      }
+    },
+    [reportError],
+  );
 
   const updateProduct = useCallback(
     async (id: string, updates: Partial<Product>) => {
@@ -449,16 +471,19 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
     [reportError],
   );
 
-  const deleteProduct = useCallback(async (id: string) => {
-    try {
-      await api.deleteProduct(id);
-      setProducts((prev) => prev.filter((item) => item.id !== id));
-      setError(null);
-    } catch (caught) {
-      reportError(caught);
-      throw caught;
-    }
-  }, [reportError]);
+  const deleteProduct = useCallback(
+    async (id: string) => {
+      try {
+        await api.deleteProduct(id);
+        setProducts((prev) => prev.filter((item) => item.id !== id));
+        setError(null);
+      } catch (caught) {
+        reportError(caught);
+        throw caught;
+      }
+    },
+    [reportError],
+  );
 
   const value = useMemo<InstaMallStore>(
     () => ({
@@ -535,5 +560,7 @@ export const InstaMallStoreProvider = ({ children }: InstaMallStoreProviderProps
     ],
   );
 
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
+  );
 };

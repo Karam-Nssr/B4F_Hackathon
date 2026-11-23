@@ -98,7 +98,7 @@ const AccountPage = () => {
             الدخول المباشر كمشتري تجريبي
           </button>
           <Link
-            href="/auth"
+            href="/signin"
             className="inline-flex h-11 items-center justify-center rounded-full border border-[#0F172A] bg-white px-6 text-sm font-semibold text-[#0F172A] hover:bg-[#F6F0E9]"
           >
             صفحة تسجيل الدخول

@@ -18,7 +18,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useInstaMallStore } from "@/context/instamall-store";
 import type { Product } from "@/types/instamall";
 import { PencilIcon, TrashBinIcon, PlusIcon, CallIcon } from "@/icons";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -34,7 +40,9 @@ const productSchema = z.object({
   title: z.string().min(2, "عنوان المنتج مطلوب (حرفين على الأقل)"),
   category: z.string().min(2, "التصنيف مطلوب"),
   description: z.string().min(2, "الوصف مطلوب"),
-  priceSyp: z.string().regex(/^\d+$/, "السعر يجب أن يكون رقماً صحيحاً بالليرة السورية"),
+  priceSyp: z
+    .string()
+    .regex(/^\d+$/, "السعر يجب أن يكون رقماً صحيحاً بالليرة السورية"),
 });
 
 const ShopOverview = () => {
@@ -55,8 +63,12 @@ const ShopOverview = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
-  const [callModalSub, setCallModalSub] = useState<typeof shopSubOrders[0] | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(
+    null,
+  );
+  const [callModalSub, setCallModalSub] = useState<
+    (typeof shopSubOrders)[0] | null
+  >(null);
 
   // The shop endpoints are already scoped to the signed-in owner.
   const currentShopSubOrders = shopSubOrders;
@@ -128,7 +140,9 @@ const ShopOverview = () => {
       }
       setIsDialogOpen(false);
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "تعذر حفظ المنتج");
+      setActionError(
+        caught instanceof Error ? caught.message : "تعذر حفظ المنتج",
+      );
     }
   };
 
@@ -139,7 +153,9 @@ const ShopOverview = () => {
       await deleteProduct(deletingProductId);
       setDeletingProductId(null);
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "تعذر حذف المنتج");
+      setActionError(
+        caught instanceof Error ? caught.message : "تعذر حذف المنتج",
+      );
     }
   };
 
@@ -149,7 +165,9 @@ const ShopOverview = () => {
       if (confirm) await confirmSubOrder(id);
       else await rejectSubOrder(id);
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "تعذر تحديث حالة الطلب");
+      setActionError(
+        caught instanceof Error ? caught.message : "تعذر تحديث حالة الطلب",
+      );
     }
   };
 
@@ -157,7 +175,8 @@ const ShopOverview = () => {
   const formatBuyerPhone = (phone: string, status: string) => {
     const raw = phone.replace(/\D/g, "");
     if (status === "CONFIRMED") {
-      if (raw.length === 10) return `${raw.slice(0, 4)} ${raw.slice(4, 7)} ${raw.slice(7)}`;
+      if (raw.length === 10)
+        return `${raw.slice(0, 4)} ${raw.slice(4, 7)} ${raw.slice(7)}`;
       return phone;
     }
     // Masked format: 0944 ••• 034
@@ -190,7 +209,7 @@ const ShopOverview = () => {
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {/* Card 1: Active Products */}
-        <div className="rounded-[22px] border border-[#EBE1D6] bg-[#DFF3EA] p-5 shadow-xs text-right">
+        <div className="rounded-[22px] border border-[#EBE1D6] bg-[#DFF3EA] p-5 text-right shadow-xs">
           <p className="text-sm font-medium text-[#475569]">المنتجات النشطة</p>
           <p className="mt-2 font-mono text-3xl font-bold text-[#0F172A]">
             {shopOverview?.totalProducts ?? "—"}
@@ -198,10 +217,12 @@ const ShopOverview = () => {
         </div>
 
         {/* Card 2: Urgent Pending Confirmation */}
-        <div className="rounded-[22px] border-2 border-[#B45309] bg-[#FFF1D2] p-5 shadow-xs text-right">
+        <div className="rounded-[22px] border-2 border-[#B45309] bg-[#FFF1D2] p-5 text-right shadow-xs">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#B45309]">بانتظار التأكيد (1-24h)</p>
-            <span className="flex size-2.5 rounded-full bg-[#B45309] animate-pulse" />
+            <p className="text-sm font-medium text-[#B45309]">
+              بانتظار التأكيد (1-24h)
+            </p>
+            <span className="flex size-2.5 animate-pulse rounded-full bg-[#B45309]" />
           </div>
           <p className="mt-2 font-mono text-3xl font-bold text-[#B45309]">
             {shopOverview?.pendingOrders ?? "—"}
@@ -212,8 +233,10 @@ const ShopOverview = () => {
         </div>
 
         {/* Card 3: Incoming Sub-Orders */}
-        <div className="rounded-[22px] border border-[#EBE1D6] bg-[#E0EEFB] p-5 shadow-xs text-right">
-          <p className="text-sm font-medium text-[#475569]">الطلبات الفرعية الواردة</p>
+        <div className="rounded-[22px] border border-[#EBE1D6] bg-[#E0EEFB] p-5 text-right shadow-xs">
+          <p className="text-sm font-medium text-[#475569]">
+            الطلبات الفرعية الواردة
+          </p>
           <p className="mt-2 font-mono text-3xl font-bold text-[#0F172A]">
             {shopOverview?.totalOrders ?? "—"}
           </p>
@@ -231,22 +254,43 @@ const ShopOverview = () => {
             </p>
           </div>
 
-          <div dir="rtl" className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
-            <table dir="rtl" className="w-full min-w-[620px] text-right text-sm">
-              <thead className="bg-[#F6F0E9] border-b border-[#EBE1D6]">
+          <div
+            dir="rtl"
+            className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]"
+          >
+            <table
+              dir="rtl"
+              className="w-full min-w-[620px] text-right text-sm"
+            >
+              <thead className="border-b border-[#EBE1D6] bg-[#F6F0E9]">
                 <tr>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">الفاتورة</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المشتري</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">الإجمالي</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المتبقي</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">الحالة</th>
-                  <th className="py-3 px-3 text-center text-xs font-semibold text-[#475569]">إجراء</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    الفاتورة
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    المشتري
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    الإجمالي
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    المتبقي
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    الحالة
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-semibold text-[#475569]">
+                    إجراء
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EBE1D6]/60">
                 {currentShopSubOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-sm text-[#475569]">
+                    <td
+                      colSpan={6}
+                      className="py-8 text-center text-sm text-[#475569]"
+                    >
                       لا توجد طلبات فرعية مسجلة حالياً
                     </td>
                   </tr>
@@ -256,23 +300,28 @@ const ShopOverview = () => {
                     const isConfirmed = sub.status === "CONFIRMED";
 
                     return (
-                      <tr key={sub.id} className="hover:bg-[#FBF8F4] transition-colors">
-                        <td className="py-3.5 px-3 font-mono text-xs font-bold text-[#0F172A]">
+                      <tr
+                        key={sub.id}
+                        className="transition-colors hover:bg-[#FBF8F4]"
+                      >
+                        <td className="px-3 py-3.5 font-mono text-xs font-bold text-[#0F172A]">
                           {sub.invoiceNumber}
                         </td>
-                        <td className="py-3.5 px-3">
-                          <p className="text-xs font-semibold text-[#0F172A]">{sub.customerName}</p>
-                          <p className="font-mono text-[11px] text-[#475569] mt-0.5">
+                        <td className="px-3 py-3.5">
+                          <p className="text-xs font-semibold text-[#0F172A]">
+                            {sub.customerName}
+                          </p>
+                          <p className="mt-0.5 font-mono text-[11px] text-[#475569]">
                             {formatBuyerPhone(sub.customerPhone, sub.status)}
                           </p>
                           <p className="font-mono text-[11px] text-[#94A3B8]">
                             {formatBuyerNid(sub.customerNationalId, sub.status)}
                           </p>
                         </td>
-                        <td className="py-3.5 px-3 font-mono font-semibold text-xs text-[#0F172A]">
+                        <td className="px-3 py-3.5 font-mono text-xs font-semibold text-[#0F172A]">
                           {sub.subtotalSyp.toLocaleString("en-US")} ل.س
                         </td>
-                        <td className="py-3.5 px-3 text-xs">
+                        <td className="px-3 py-3.5 text-xs">
                           {isPending ? (
                             <span className="font-mono font-bold text-[#B45309]">
                               {sub.remainingHours} ساعات
@@ -281,9 +330,9 @@ const ShopOverview = () => {
                             <span className="text-[#94A3B8]">—</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-3">
+                        <td className="px-3 py-3.5">
                           {isConfirmed && (
-                            <span className="inline-block rounded-full bg-[#D8F1E4] px-2.5 py-1 text-xs font-semibold text-[#15803D]">
+                            <span className="inline-block rounded-full bg-[#D8F1E4] px-3 py-1 text-center text-xs font-semibold text-[#15803D]">
                               تم التأكيد
                             </span>
                           )}
@@ -298,21 +347,25 @@ const ShopOverview = () => {
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-3">
+                        <td className="px-3 py-3.5">
                           <div className="flex items-center justify-center gap-1.5">
                             {isPending && (
                               <>
                                 <button
                                   type="button"
-                                  onClick={() => void handleStatusChange(sub.id, true)}
-                                  className="h-9 rounded-full bg-[#C40027] px-4 text-xs font-semibold text-white shadow-xs hover:bg-[#a50021] active:scale-95 transition-all"
+                                  onClick={() =>
+                                    void handleStatusChange(sub.id, true)
+                                  }
+                                  className="h-9 rounded-full bg-[#C40027] px-4 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#a50021] active:scale-95"
                                 >
                                   تأكيد
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => void handleStatusChange(sub.id, false)}
-                                  className="h-9 rounded-full border border-[#0F172A] bg-white px-3 text-xs font-semibold text-[#0F172A] hover:bg-[#0F172A] hover:text-white transition-all"
+                                  onClick={() =>
+                                    void handleStatusChange(sub.id, false)
+                                  }
+                                  className="h-9 rounded-full border border-[#0F172A] bg-white px-3 text-xs font-semibold text-[#0F172A] transition-all hover:bg-[#0F172A] hover:text-white"
                                 >
                                   رفض
                                 </button>
@@ -322,7 +375,7 @@ const ShopOverview = () => {
                               <button
                                 type="button"
                                 onClick={() => setCallModalSub(sub)}
-                                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#0F172A] bg-white px-3.5 text-xs font-semibold text-[#0F172A] hover:bg-[#0F172A] hover:text-white transition-all"
+                                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#0F172A] bg-white px-3.5 text-xs font-semibold text-[#0F172A] transition-all hover:bg-[#0F172A] hover:text-white"
                               >
                                 <CallIcon className="size-3.5" />
                                 <span>اتصل بالمشتري</span>
@@ -343,45 +396,65 @@ const ShopOverview = () => {
         <div className="space-y-4 lg:col-span-5">
           <div className="flex items-center justify-between border-b border-[#EBE1D6]/70 pb-3">
             <div>
-              <h2 className="text-lg font-bold text-[#0F172A]">إدارة المنتجات</h2>
+              <h2 className="text-lg font-bold text-[#0F172A]">
+                إدارة المنتجات
+              </h2>
               <p className="text-xs text-[#475569]">التسعير بالليرة السورية</p>
             </div>
             <button
               type="button"
               onClick={openCreateDialog}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#C40027] px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[#a50021] transition-all"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#C40027] px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#a50021]"
             >
               <PlusIcon className="size-3.5" />
               <span>إضافة منتج</span>
             </button>
           </div>
 
-          <div dir="rtl" className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
+          <div
+            dir="rtl"
+            className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]"
+          >
             <table dir="rtl" className="w-full text-right text-sm">
-              <thead className="bg-[#F6F0E9] border-b border-[#EBE1D6]">
+              <thead className="border-b border-[#EBE1D6] bg-[#F6F0E9]">
                 <tr>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المنتج</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">التصنيف</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">السعر</th>
-                  <th className="py-3 px-3 text-center text-xs font-semibold text-[#475569]">إجراء</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    المنتج
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    التصنيف
+                  </th>
+                  <th className="px-3 py-3 text-xs font-semibold text-[#475569]">
+                    السعر
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-semibold text-[#475569]">
+                    إجراء
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EBE1D6]/60">
                 {shopProducts.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#FBF8F4] transition-colors">
-                    <td className="py-3 px-3">
-                      <p className="text-xs font-bold text-[#0F172A] line-clamp-1">{p.title}</p>
+                  <tr
+                    key={p.id}
+                    className="transition-colors hover:bg-[#FBF8F4]"
+                  >
+                    <td className="px-3 py-3">
+                      <p className="line-clamp-1 text-xs font-bold text-[#0F172A]">
+                        {p.title}
+                      </p>
                     </td>
-                    <td className="py-3 px-3 text-xs text-[#475569]">{p.category}</td>
-                    <td className="py-3 px-3 font-mono text-xs font-semibold text-[#0F172A]">
+                    <td className="px-3 py-3 text-xs text-[#475569]">
+                      {p.category}
+                    </td>
+                    <td className="px-3 py-3 font-mono text-xs font-semibold text-[#0F172A]">
                       {p.priceSyp.toLocaleString("en-US")} ل.س
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="px-3 py-3">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => openEditDialog(p)}
-                          className="flex size-8 items-center justify-center rounded-full border border-[#0F172A]/30 text-[#0F172A] hover:bg-[#0F172A] hover:text-white transition-all"
+                          className="flex size-8 items-center justify-center rounded-full border border-[#0F172A]/30 text-[#0F172A] transition-all hover:bg-[#0F172A] hover:text-white"
                           title="تعديل"
                         >
                           <PencilIcon className="size-3.5" />
@@ -389,7 +462,7 @@ const ShopOverview = () => {
                         <button
                           type="button"
                           onClick={() => setDeletingProductId(p.id)}
-                          className="flex size-8 items-center justify-center rounded-full border border-[#BA1A1A]/30 text-[#BA1A1A] hover:bg-[#BA1A1A] hover:text-white transition-all"
+                          className="flex size-8 items-center justify-center rounded-full border border-[#BA1A1A]/30 text-[#BA1A1A] transition-all hover:bg-[#BA1A1A] hover:text-white"
                           title="حذف"
                         >
                           <TrashBinIcon className="size-3.5" />
@@ -407,7 +480,7 @@ const ShopOverview = () => {
       {/* Add / Edit Product Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md rounded-[24px] bg-white p-6 text-right">
-          <DialogHeader className="text-right border-b border-[#EBE1D6] pb-3">
+          <DialogHeader className="border-b border-[#EBE1D6] pb-3 text-right">
             <DialogTitle className="text-lg font-bold text-[#0F172A]">
               {editingProduct ? "تعديل منتج" : "إضافة منتج جديد"}
             </DialogTitle>
@@ -424,7 +497,9 @@ const ShopOverview = () => {
             noValidate
           >
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">اسم المنتج</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                اسم المنتج
+              </FieldLabel>
               <Input
                 {...register("title")}
                 type="text"
@@ -435,7 +510,9 @@ const ShopOverview = () => {
             </Field>
 
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">التصنيف</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                التصنيف
+              </FieldLabel>
               <Input
                 {...register("category")}
                 type="text"
@@ -453,13 +530,15 @@ const ShopOverview = () => {
                 {...register("priceSyp")}
                 type="text"
                 placeholder="مثال: 150000"
-                className="font-mono h-11 rounded-[14px]"
+                className="h-11 rounded-[14px] font-mono"
               />
               <FieldError errors={[errors.priceSyp]} />
             </Field>
 
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">الوصف</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                الوصف
+              </FieldLabel>
               <Input
                 {...register("description")}
                 type="text"
@@ -469,7 +548,7 @@ const ShopOverview = () => {
               <FieldError errors={[errors.description]} />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EBE1D6]">
+            <div className="flex items-center justify-end gap-3 border-t border-[#EBE1D6] pt-3">
               <button
                 type="button"
                 onClick={() => setIsDialogOpen(false)}
@@ -491,13 +570,16 @@ const ShopOverview = () => {
 
       {/* Delete Confirmation Dialog */}
       {deletingProductId && (
-        <Dialog open={Boolean(deletingProductId)} onOpenChange={() => setDeletingProductId(null)}>
+        <Dialog
+          open={Boolean(deletingProductId)}
+          onOpenChange={() => setDeletingProductId(null)}
+        >
           <DialogContent className="max-w-sm rounded-[24px] bg-white p-6 text-right">
             <DialogHeader className="text-right">
               <DialogTitle className="text-base font-bold text-[#BA1A1A]">
                 تأكيد حذف المنتج
               </DialogTitle>
-              <DialogDescription className="text-xs text-[#475569] mt-2">
+              <DialogDescription className="mt-2 text-xs text-[#475569]">
                 هل أنت متأكد من رغبتك في حذف هذا المنتج نهائياً من المتجر؟
               </DialogDescription>
             </DialogHeader>
@@ -524,9 +606,12 @@ const ShopOverview = () => {
 
       {/* Call Customer Modal */}
       {callModalSub && (
-        <Dialog open={Boolean(callModalSub)} onOpenChange={() => setCallModalSub(null)}>
+        <Dialog
+          open={Boolean(callModalSub)}
+          onOpenChange={() => setCallModalSub(null)}
+        >
           <DialogContent className="max-w-sm rounded-[24px] bg-white p-6 text-right">
-            <DialogHeader className="text-right border-b border-[#EBE1D6] pb-3">
+            <DialogHeader className="border-b border-[#EBE1D6] pb-3 text-right">
               <DialogTitle className="text-base font-bold text-[#0F172A]">
                 بيانات اتصال المشتري
               </DialogTitle>
@@ -536,13 +621,19 @@ const ShopOverview = () => {
             </DialogHeader>
 
             <div className="mt-4 space-y-3 text-sm">
-              <div className="rounded-[14px] bg-[#FBF8F4] p-3 space-y-2">
+              <div className="space-y-2 rounded-[14px] bg-[#FBF8F4] p-3">
                 <div>
-                  <span className="text-xs text-[#475569] block">اسم المشتري:</span>
-                  <span className="font-bold text-[#0F172A]">{callModalSub.customerName}</span>
+                  <span className="block text-xs text-[#475569]">
+                    اسم المشتري:
+                  </span>
+                  <span className="font-bold text-[#0F172A]">
+                    {callModalSub.customerName}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-xs text-[#475569] block">رقم الهاتف:</span>
+                  <span className="block text-xs text-[#475569]">
+                    رقم الهاتف:
+                  </span>
                   <a
                     href={`tel:${callModalSub.customerPhone}`}
                     className="font-mono font-bold text-[#C40027] hover:underline"
@@ -551,13 +642,17 @@ const ShopOverview = () => {
                   </a>
                 </div>
                 <div>
-                  <span className="text-xs text-[#475569] block">الرقم الوطني:</span>
+                  <span className="block text-xs text-[#475569]">
+                    الرقم الوطني:
+                  </span>
                   <span className="font-mono text-xs font-semibold text-[#0F172A]">
                     {callModalSub.customerNationalId}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-[#475569] block">إجمالي الفاتورة:</span>
+                  <span className="block text-xs text-[#475569]">
+                    إجمالي الفاتورة:
+                  </span>
                   <span className="font-mono font-bold text-[#0F172A]">
                     {callModalSub.subtotalSyp.toLocaleString("en-US")} ل.س
                   </span>
