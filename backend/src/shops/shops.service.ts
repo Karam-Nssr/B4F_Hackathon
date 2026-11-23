@@ -18,7 +18,9 @@ export class ShopsService {
   listActive() {
     return this.shopModel
       .find({ isActive: true })
-      .select('shopName category description isActive createdAt')
+      .select(
+        'shopName category description imageUrl imageCredit imageCreditUrl isActive createdAt',
+      )
       .sort({ shopName: 1 })
       .lean()
       .exec();
@@ -31,7 +33,9 @@ export class ShopsService {
     }
     const shop = await this.shopModel
       .findOne({ _id: id, isActive: true })
-      .select('shopName category description isActive createdAt')
+      .select(
+        'shopName category description imageUrl imageCredit imageCreditUrl isActive createdAt',
+      )
       .lean()
       .exec();
     if (!shop) {
@@ -47,6 +51,9 @@ export class ShopsService {
       shopName: shop.shopName,
       category: shop.category,
       description: shop.description,
+      imageUrl: shop.imageUrl,
+      imageCredit: shop.imageCredit,
+      imageCreditUrl: shop.imageCreditUrl,
       isActive: shop.isActive,
       // Added at runtime by `timestamps: true`, not declared on the class.
       createdAt: (shop as { createdAt?: Date }).createdAt,

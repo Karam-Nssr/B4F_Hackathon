@@ -12,6 +12,33 @@ Output: a responsive platform admin overview with no fabricated data.
 
 import AdminUsersDirectory from "@/components/main/admin/users-directory";
 import { useInstaMallStore } from "@/context/instamall-store";
+<<<<<<< HEAD
+import { ShopImage } from "@/components/storefront/shop-image";
+import { SearchIcon } from "@/icons";
+import type { UserRole } from "@/types/instamall";
+
+type RoleFilter = "الكل" | "user" | "shop" | "admin";
+
+const ROLE_FILTERS: Array<{ value: RoleFilter; label: string }> = [
+  { value: "الكل", label: "الكل" },
+  { value: "user", label: "مشتري" },
+  { value: "shop", label: "صاحب متجر" },
+  { value: "admin", label: "مشرف" },
+];
+
+const roleLabel = (role: UserRole): string => {
+  if (role === "shop") return "صاحب متجر";
+  if (role === "admin") return "مشرف";
+  return "مشتري";
+};
+
+const roleClass = (role: UserRole): string => {
+  if (role === "shop") return "bg-[#FFF1D2] text-[#B45309]";
+  if (role === "admin") return "bg-[#D8F1E4] text-[#15803D]";
+  return "bg-[#E0EEFB] text-[#1D4ED8]";
+};
+=======
+>>>>>>> fe28a030207d08e00b725cecbe5bdaacd15df8a3
 
 const AdminOverview = () => {
   const { adminStats, adminShops, error, isLoading } = useInstaMallStore();
@@ -90,11 +117,7 @@ const AdminOverview = () => {
                     <tr key={shop.id} className="hover:bg-[#FBF8F4] transition-colors">
                       <td className="py-3.5 px-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`flex size-9 shrink-0 items-center justify-center rounded-[12px] text-xs font-bold text-[#0F172A] ${shop.avatarBg}`}
-                          >
-                            {shop.avatarChar}
-                          </div>
+                          <ShopImage shop={shop} sizeClassName="size-9" />
                           <div>
                             <p className="text-xs font-bold text-[#0F172A]">{shop.shopName}</p>
                             <p className="text-[11px] text-[#475569]">{shop.description || "—"}</p>

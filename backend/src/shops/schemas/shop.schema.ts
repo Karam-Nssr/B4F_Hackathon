@@ -18,6 +18,15 @@ export class Shop {
   @Prop({ trim: true, maxlength: 2000 })
   description?: string;
 
+  @Prop({ trim: true, maxlength: 2048 })
+  imageUrl?: string;
+
+  @Prop({ trim: true, maxlength: 160 })
+  imageCredit?: string;
+
+  @Prop({ trim: true, maxlength: 2048 })
+  imageCreditUrl?: string;
+
   @Prop({ required: true, default: true })
   isActive!: boolean;
 }

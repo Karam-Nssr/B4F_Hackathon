@@ -17,6 +17,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BrandLogo } from "@/components/storefront/brand-logo";
 import { LayoutGridIcon, InboxIcon, PencilIcon, CartIcon } from "@/icons";
 import { useInstaMallStore } from "@/context/instamall-store";
+import { ShopImage } from "@/components/storefront/shop-image";
 
 const NAV_ITEMS = [
   {
@@ -145,11 +146,13 @@ const ShopSidebarInner = ({ onNavigate }: InnerProps) => {
       {/* Footer Shop Info */}
       <div className="border-t border-[#1E293B] pt-4">
         <div className="flex items-center gap-3 rounded-[14px] bg-[#1E293B]/50 p-2.5">
-          <div
-            className={`flex size-10 shrink-0 items-center justify-center rounded-[12px] font-bold text-sm text-[#0F172A] ${shop?.avatarBg ?? "bg-rose-100 dark:bg-rose-950"}`}
-          >
-            {shop?.avatarChar ?? "م"}
-          </div>
+          {shop ? (
+            <ShopImage shop={shop} sizeClassName="size-10" />
+          ) : (
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-rose-100 font-bold text-sm text-[#0F172A]">
+              م
+            </div>
+          )}
           <div className="overflow-hidden">
             <p className="truncate text-sm font-semibold text-white">
               {shop?.shopName ?? "متجرك"}
