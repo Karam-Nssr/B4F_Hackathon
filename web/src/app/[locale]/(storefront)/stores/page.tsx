@@ -14,6 +14,7 @@ Output: an interactive, localized Stores Directory page.
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
+import { ShopImage } from "@/components/storefront/shop-image";
 
 type CategoryFilter = "الكل" | "أزياء" | "هدايا" | "ديكور" | "إكسسوارات";
 
@@ -147,12 +148,7 @@ const StoresDirectory = () => {
                 {/* Header Row: Avatar + Details + Verified Badge */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    {/* Monogram Avatar */}
-                    <div
-                      className={`flex size-12 shrink-0 items-center justify-center rounded-[18px] text-base font-bold text-[#0F172A] shadow-xs ${shop.avatarBg}`}
-                    >
-                      {shop.avatarChar}
-                    </div>
+                    <ShopImage shop={shop} sizeClassName="size-14" />
 
                     <div>
                       <h2 className="text-lg font-semibold text-[#0F172A]">{shop.shopName}</h2>

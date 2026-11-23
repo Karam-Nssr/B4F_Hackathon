@@ -32,7 +32,9 @@ export class AdminService {
   listShops() {
     return this.shopModel
       .find()
-      .select('ownerId shopName category description isActive createdAt')
+      .select(
+        'ownerId shopName category description imageUrl imageCredit imageCreditUrl isActive createdAt',
+      )
       .sort({ createdAt: -1 })
       .lean()
       .exec();

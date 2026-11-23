@@ -64,14 +64,21 @@ npm run seed
 ```
 
 The idempotent seeder is restricted to a local MongoDB host and the `instamall`
-database. It creates one admin, one buyer, one shop owner, one active shop, and
-three sample products. The demo credentials are:
+database. It creates two admins, 28 buyers, 20 shop owners, 20 active shops, and
+200 products. Each shop has its own category-matched photo; product photos are
+selected from matching product categories. The demo credentials are:
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Admin | `admin@instamall.local` | `Admin12345!` |
-| User | `buyer@instamall.local` | `Buyer12345!` |
-| Shop | `shop@instamall.local` | `Shop12345!` |
+| Role  | Email                     | Password      |
+| ----- | ------------------------- | ------------- |
+| Admin | `admin@instamall.local`   | `Admin12345!` |
+| Admin | `admin-2@instamall.local` | `Admin23456!` |
+| User  | `buyer@instamall.local`   | `Buyer12345!` |
+| Shop  | `shop@instamall.local`    | `Shop12345!`  |
+
+Additional buyers use `buyer-02@instamall.local` through
+`buyer-28@instamall.local` and share the buyer password. Additional shop owners
+use `shop-owner-02@instamall.local` through `shop-owner-20@instamall.local` and
+share the shop password.
 
 Use the buyer account to log in and browse products:
 

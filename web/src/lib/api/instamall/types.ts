@@ -49,6 +49,9 @@ export interface ShopDto {
   shopName: string;
   category: string;
   description?: string;
+  imageUrl?: string;
+  imageCredit?: string;
+  imageCreditUrl?: string;
   isActive?: boolean;
   createdAt?: string;
   ownerId?: string;

@@ -47,6 +47,9 @@ export interface Shop {
   shopName: string;
   category: string;
   description: string;
+  imageUrl?: string;
+  imageCredit?: string;
+  imageCreditUrl?: string;
   avatarChar: string;
   avatarBg: string;
   city?: string;

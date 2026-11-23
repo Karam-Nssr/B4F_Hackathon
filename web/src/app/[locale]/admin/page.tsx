@@ -13,6 +13,7 @@ Output: a responsive platform admin overview with no fabricated data.
 
 import { useState } from "react";
 import { useInstaMallStore } from "@/context/instamall-store";
+import { ShopImage } from "@/components/storefront/shop-image";
 import { SearchIcon } from "@/icons";
 import type { UserRole } from "@/types/instamall";
 
@@ -127,11 +128,7 @@ const AdminOverview = () => {
                     <tr key={shop.id} className="hover:bg-[#FBF8F4] transition-colors">
                       <td className="py-3.5 px-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`flex size-9 shrink-0 items-center justify-center rounded-[12px] text-xs font-bold text-[#0F172A] ${shop.avatarBg}`}
-                          >
-                            {shop.avatarChar}
-                          </div>
+                          <ShopImage shop={shop} sizeClassName="size-9" />
                           <div>
                             <p className="text-xs font-bold text-[#0F172A]">{shop.shopName}</p>
                             <p className="text-[11px] text-[#475569]">{shop.description || "—"}</p>
