@@ -670,7 +670,6 @@ const demoAccounts: DemoAccount[] = [
     phone: '+963900000001',
     nationalId: '00000000001',
   },
-<<<<<<< HEAD
   ...buyerNames.slice(1).map((fullName, index): DemoAccount => {
     const buyerNumber = index + 2;
     return {
@@ -685,19 +684,6 @@ const demoAccounts: DemoAccount[] = [
   ...demoShops.map((shop, index): DemoAccount => ({
     fullName: shop.ownerName,
     email: shopOwnerEmail(index),
-=======
-  {
-    fullName: 'haidra Buyer',
-    email: 'buyer@instamall.local',
-    password: 'Buyer12345!',
-    role: 'user' as const,
-    phone: '+963900000001',
-    nationalId: '00000000001',
-  },
-  {
-    fullName: 'Demo Shop Owner',
-    email: 'shop@instamall.local',
->>>>>>> fe28a030207d08e00b725cecbe5bdaacd15df8a3
     password: 'Shop12345!',
     role: 'shop',
   })),
