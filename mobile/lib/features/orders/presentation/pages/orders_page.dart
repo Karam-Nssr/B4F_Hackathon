@@ -21,6 +21,8 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthUnauthenticated) context.go('/login');
@@ -35,7 +37,7 @@ class OrdersPage extends StatelessWidget {
             child: BlocBuilder<OrdersBloc, OrdersState>(
               builder: (context, state) {
                 return Scaffold(
-                  backgroundColor: AppColors.background,
+                  backgroundColor: theme.scaffoldBackgroundColor,
                   body: Column(
                     children: [
                       const _OrdersHeader(),
@@ -61,7 +63,9 @@ class OrdersPage extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, OrdersState state) {
     if (state is OrdersLoading || state is OrdersInitial) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
     if (state is OrdersFailure) {
       return _ErrorView(
@@ -73,6 +77,7 @@ class OrdersPage extends StatelessWidget {
     if (state is OrdersLoaded) {
       if (state.orders.isEmpty) return const _EmptyView();
       return RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async =>
             context.read<OrdersBloc>().add(OrdersLoadRequested()),
         child: ListView.separated(
@@ -94,7 +99,9 @@ class _OrdersHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.navy,
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -121,17 +128,17 @@ class _OrdersHeader extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(color: AppColors.primary, width: 2),
                 ),
                 child: const Icon(
                   Icons.receipt_long_rounded,
                   color: Colors.white,
-                  size: 21,
+                  size: 22,
                 ),
               ),
             ],
@@ -156,13 +163,12 @@ class _ErrorView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.wifi_off_rounded,
-              size: 44, color: AppColors.textSecondary),
+              size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
-            style:
-                const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -184,41 +190,51 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 88,
-            height: 88,
+            width: 90,
+            height: 90,
             decoration: BoxDecoration(
               color: AppColors.navy.withValues(alpha: 0.06),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.receipt_long_outlined,
-              size: 40,
+              size: 44,
               color: AppColors.navy,
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
+          Text(
             'لا توجد طلبات بعد',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleLarge?.color,
+            ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'طلباتك ستظهر هنا بعد إتمام أول طلب',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 13.5,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 24),
           SizedBox(
             width: 210,
             child: AppButton(
               text: 'ابدأ التسوق',
               height: 46,
+              icon: Icons.shopping_bag_outlined,
               onPressed: () => context.go('/home'),
             ),
           ),
@@ -233,8 +249,10 @@ class _LoginRequiredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -246,41 +264,43 @@ class _LoginRequiredView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 88,
-                      height: 88,
+                      width: 90,
+                      height: 90,
                       decoration: BoxDecoration(
                         color: AppColors.navy.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.lock_outline,
-                        size: 38,
+                        Icons.lock_outline_rounded,
+                        size: 42,
                         color: AppColors.navy,
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text(
+                    Text(
                       'سجّل الدخول لعرض طلباتك',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
+                        color: theme.textTheme.titleLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'نحتاج حسابك لعرض الطلبات والفواتير الخاصة بك',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
+                        fontSize: 13.5,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: 210,
                       child: AppButton(
                         text: 'تسجيل الدخول',
                         height: 46,
+                        icon: Icons.login_rounded,
                         onPressed: () => context.push('/login'),
                       ),
                     ),

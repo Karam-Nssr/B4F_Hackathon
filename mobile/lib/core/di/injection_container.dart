@@ -45,6 +45,8 @@ import '../../features/stores/domain/usecases/get_stores_usecase.dart';
 import '../../features/stores/presentation/bloc/stores_bloc.dart';
 import '../network/api_client.dart';
 
+import '../theme/theme_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// The real API is used by default. To use the offline mock instead:
@@ -58,6 +60,11 @@ Future<void> initDependencies() async {
   // External
   sl.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
+  );
+
+  // Theme Cubit (persists mode to secure storage)
+  sl.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(storage: sl()),
   );
 
   // Local storage — Hive backs the cart (opened once, app-wide).

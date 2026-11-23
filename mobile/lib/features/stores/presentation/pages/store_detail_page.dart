@@ -24,15 +24,24 @@ class StoreDetailPage extends StatelessWidget {
   void _addToCart(BuildContext context, ProductEntity product) {
     context.read<CartBloc>().add(CartItemAdded(product));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        duration: Duration(seconds: 1),
-        content: Text('تمت الإضافة إلى السلة'),
+      SnackBar(
+        duration: const Duration(seconds: 1),
+        backgroundColor: AppColors.navy,
+        content: Row(
+          children: const [
+            Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text('تمت الإضافة إلى السلة'),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocProvider(
       create: (_) =>
           sl<StoresBloc>()..add(StoreDetailLoadRequested(shopId: shopId)),
@@ -41,13 +50,14 @@ class StoreDetailPage extends StatelessWidget {
           final shop = state is StoreDetailLoaded ? state.shop : null;
 
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: Column(
               children: [
                 _ShopHeader(
                   shopName: shop?.shopName,
                   category: shop?.category,
                   description: shop?.description,
+                  imageUrl: shop?.imageUrl,
                   onBack: () => context.pop(),
                 ),
                 Expanded(child: _buildBody(context, state)),
@@ -60,8 +70,12 @@ class StoreDetailPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, StoresState state) {
+    final theme = Theme.of(context);
+
     if (state is StoreDetailLoading || state is StoresInitial) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
     if (state is StoreDetailFailure) {
       return Padding(
@@ -70,13 +84,12 @@ class StoreDetailPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.wifi_off_rounded,
-                size: 44, color: AppColors.textSecondary),
+                size: 48, color: AppColors.textMuted),
             const SizedBox(height: 12),
             Text(
               state.message,
               textAlign: TextAlign.center,
-              style:
-                  const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -101,11 +114,11 @@ class StoreDetailPage extends StatelessWidget {
           child: Column(
             children: [
               Icon(Icons.inventory_2_outlined,
-                  size: 44, color: AppColors.textSecondary),
+                  size: 48, color: AppColors.textMuted),
               SizedBox(height: 12),
               Text(
                 'لا توجد منتجات في هذا المتجر',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -118,21 +131,30 @@ class StoreDetailPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     'منتجات المتجر',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.5,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: theme.textTheme.titleMedium?.color,
                     ),
                   ),
                 ),
-                Text(
-                  Formatters.productsCount(products.length),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    Formatters.productsCount(products.length),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                    ),
                   ),
                 ),
               ],
@@ -145,7 +167,7 @@ class StoreDetailPage extends StatelessWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.62,
+                childAspectRatio: 0.60,
               ),
               itemCount: products.length,
               itemBuilder: (context, index) {
@@ -168,83 +190,124 @@ class _ShopHeader extends StatelessWidget {
   final String? shopName;
   final String? category;
   final String? description;
+  final String? imageUrl;
   final VoidCallback onBack;
 
   const _ShopHeader({
     this.shopName,
     this.category,
     this.description,
+    this.imageUrl,
     required this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.navy,
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 16, 18),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 20),
+          child: Column(
             children: [
-              IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName ?? 'المتجر',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                  ),
+                  const SizedBox(width: 4),
+                  if (imageUrl != null && imageUrl!.isNotEmpty) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.network(
+                        imageUrl!,
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _defaultAvatar(),
                       ),
                     ),
-                    if (category != null && category!.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          category!,
+                    const SizedBox(width: 12),
+                  ] else ...[
+                    _defaultAvatar(),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          shopName ?? 'المتجر',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
-                    if (description != null && description!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12.5,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                        if (category != null && category!.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              category!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (description != null && description!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12.5,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _defaultAvatar() {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: const Icon(
+        Icons.storefront_rounded,
+        color: Colors.white,
+        size: 26,
       ),
     );
   }

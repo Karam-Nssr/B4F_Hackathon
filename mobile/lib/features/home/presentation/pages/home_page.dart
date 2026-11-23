@@ -33,22 +33,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
   Timer? _searchDebounce;
   String _selectedCategory = 'الكل';
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    if (currentScroll >= (maxScroll * 0.85)) {
+      context.read<HomeBloc>().add(HomeLoadMoreRequested());
+    }
+  }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
-  /// Search applies live while typing (debounced) and instantly on submit.
-  ///
-  /// The [HomeBloc] reference is always taken from the BlocBuilder's
-  /// context: this State's own `context` sits *above* the BlocProvider
-  /// returned by [build], so `context.read<HomeBloc>()` here would throw
-  /// a ProviderNotFound (that is what broke search and the category chips).
   void _submitSearch(HomeBloc bloc, String value) {
     _searchDebounce?.cancel();
     bloc.add(HomeSearchChanged(query: value.trim()));
@@ -77,9 +89,16 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 1),
-          content: Text('تمت الإضافة إلى السلة'),
+        SnackBar(
+          duration: const Duration(seconds: 1),
+          backgroundColor: AppColors.navy,
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+              SizedBox(width: 8),
+              Text('تمت الإضافة إلى السلة'),
+            ],
+          ),
         ),
       );
   }
@@ -95,8 +114,12 @@ class _HomePageState extends State<HomePage> {
         child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
             final homeBloc = context.read<HomeBloc>();
+            final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
             return Scaffold(
-              backgroundColor: AppColors.background,
+              backgroundColor: isDarkMode
+                  ? AppColors.darkBackground
+                  : AppColors.background,
               body: Column(
                 children: [
                   HomeHeader(
@@ -130,10 +153,14 @@ class _HomePageState extends State<HomePage> {
     final isLoading = state is HomeLoading;
     final isError = state is HomeFailure && products.isEmpty;
     final isEmpty = state is HomeLoaded && products.isEmpty;
+    final hasMore = state is HomeLoaded && state.hasMore;
+    final totalCount = state is HomeLoaded ? state.totalCount : products.length;
 
     return RefreshIndicator(
+      color: AppColors.primary,
       onRefresh: () async => context.read<HomeBloc>().add(HomeLoadRequested()),
       child: SingleChildScrollView(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
@@ -147,12 +174,12 @@ class _HomePageState extends State<HomePage> {
                   _selectCategory(context.read<HomeBloc>(), category),
             ),
             const SizedBox(height: 20),
-            if (!isError && !isEmpty) _sectionHeader(products.length),
+            if (!isError && !isEmpty) _sectionHeader(products.length, totalCount),
             const SizedBox(height: 12),
             if (isLoading && products.isEmpty)
               const SizedBox(
                 height: 280,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
               )
             else if (state is HomeFailure && products.isEmpty)
               _errorView(context, state.message)
@@ -161,9 +188,22 @@ class _HomePageState extends State<HomePage> {
             else
               Column(
                 children: [
-                  if (isLoading) const LinearProgressIndicator(minHeight: 2),
+                  if (isLoading)
+                    const LinearProgressIndicator(
+                      minHeight: 2,
+                      color: AppColors.primary,
+                      backgroundColor: AppColors.border,
+                    ),
                   if (isLoading) const SizedBox(height: 8),
                   _grid(products),
+                  if (hasMore) ...[
+                    const SizedBox(height: 18),
+                    _PaginationButton(
+                      onPressed: () => context
+                          .read<HomeBloc>()
+                          .add(HomeLoadMoreRequested()),
+                    ),
+                  ],
                 ],
               ),
           ],
@@ -179,22 +219,35 @@ class _HomePageState extends State<HomePage> {
     return const [];
   }
 
-  Widget _sectionHeader(int count) {
+  Widget _sectionHeader(int count, int total) {
+    final countText = total > count
+        ? 'عرض $count من أصل $total منتج'
+        : Formatters.productsCount(count);
+
     return Row(
       children: [
         const Expanded(
           child: Text(
             'وصل حديثاً للشباب',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.5,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
             ),
           ),
         ),
-        Text(
-          Formatters.productsCount(count),
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            countText,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );
@@ -208,7 +261,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.62,
+        childAspectRatio: 0.60,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -227,12 +280,12 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           const Icon(Icons.wifi_off_rounded,
-              size: 44, color: AppColors.textSecondary),
+              size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -250,6 +303,30 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+class _PaginationButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _PaginationButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        side: const BorderSide(color: AppColors.primary, width: 1.3),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      icon: const Icon(Icons.arrow_downward_rounded, size: 18),
+      label: const Text(
+        'عرض المزيد من المنتجات',
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
 class _EmptyView extends StatelessWidget {
   const _EmptyView();
 
@@ -259,16 +336,16 @@ class _EmptyView extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 40),
       child: Column(
         children: [
-          Icon(Icons.search_off_rounded, size: 44, color: AppColors.textSecondary),
+          Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted),
           SizedBox(height: 12),
           Text(
             'لا توجد منتجات مطابقة',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4),
           Text(
             'جرّب كلمة بحث أو تصنيفاً آخر',
-            style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),

@@ -6,6 +6,7 @@ class ShopEntity extends Equatable {
   final String shopName;
   final String category;
   final String description;
+  final String imageUrl;
   final bool isActive;
 
   const ShopEntity({
@@ -13,9 +14,10 @@ class ShopEntity extends Equatable {
     required this.shopName,
     required this.category,
     this.description = '',
+    this.imageUrl = '',
     this.isActive = true,
   });
 
   @override
-  List<Object?> get props => [id, shopName, category, description, isActive];
+  List<Object?> get props => [id, shopName, category, description, imageUrl, isActive];
 }

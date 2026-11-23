@@ -12,6 +12,7 @@ class ShopDetailEntity extends Equatable {
   final String shopName;
   final String category;
   final String description;
+  final String imageUrl;
   final bool isActive;
   final List<ProductEntity> products;
 
@@ -20,6 +21,7 @@ class ShopDetailEntity extends Equatable {
     required this.shopName,
     required this.category,
     this.description = '',
+    this.imageUrl = '',
     this.isActive = true,
     this.products = const [],
   });
@@ -30,6 +32,7 @@ class ShopDetailEntity extends Equatable {
         shopName,
         category,
         description,
+        imageUrl,
         isActive,
         products,
       ];

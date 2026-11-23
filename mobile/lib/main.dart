@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/di/injection_container.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/cart/presentation/bloc/cart_bloc.dart';
 import 'features/cart/presentation/bloc/cart_event.dart';
@@ -24,25 +25,32 @@ class InstaMallApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: sl<ThemeCubit>()),
         BlocProvider(create: (_) => sl<AuthBloc>()),
         // App-level: the cart badge on every screen reads this instance.
         BlocProvider(create: (_) => sl<CartBloc>()..add(CartLoadRequested())),
       ],
-      child: MaterialApp.router(
-        title: 'InstaMall',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        routerConfig: AppRouter.router,
-        // With the Arabic locale + localization delegates Flutter applies RTL
-        // itself and Material widgets (date pickers, text-selection menus,
-        // tooltips) are properly Arabic. No forced Directionality needed.
-        locale: const Locale('ar'),
-        supportedLocales: const [Locale('ar')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp.router(
+            title: 'InstaMall',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: AppRouter.router,
+            // With the Arabic locale + localization delegates Flutter applies RTL
+            // itself and Material widgets (date pickers, text-selection menus,
+            // tooltips) are properly Arabic. No forced Directionality needed.
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          );
+        },
       ),
     );
   }

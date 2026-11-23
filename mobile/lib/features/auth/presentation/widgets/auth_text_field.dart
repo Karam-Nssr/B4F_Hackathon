@@ -11,6 +11,7 @@ class AuthTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final TextDirection? textDirection;
   final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final String? Function(String?)? validator;
 
   const AuthTextField({
@@ -22,6 +23,7 @@ class AuthTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.textDirection,
     this.suffixIcon,
+    this.prefixIcon,
     this.validator,
   });
 
@@ -33,7 +35,7 @@ class AuthTextField extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 13.5,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -45,7 +47,40 @@ class AuthTextField extends StatelessWidget {
           keyboardType: keyboardType,
           validator: validator,
           textDirection: textDirection,
-          decoration: InputDecoration(hintText: hint, suffixIcon: suffixIcon),
+          style: const TextStyle(
+            fontSize: 14.5,
+            color: AppColors.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13.5,
+            ),
+            prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+            ),
+          ),
         ),
       ],
     );

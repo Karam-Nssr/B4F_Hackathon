@@ -27,7 +27,7 @@ class CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 38,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
@@ -38,21 +38,34 @@ class CategoryChips extends StatelessWidget {
           return InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () => onSelected(label),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.navy : AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? AppColors.navy : AppColors.border,
+                  width: isSelected ? 1.5 : 1.0,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.navy.withValues(alpha: 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : [],
               ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+              child: Center(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                  ),
                 ),
               ),
             ),

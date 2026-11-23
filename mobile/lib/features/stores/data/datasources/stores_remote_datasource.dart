@@ -47,8 +47,6 @@ class StoresRemoteDataSourceImpl implements StoresRemoteDataSource {
   }
 }
 
-/// Offline mock — reuses the home feature's fake feed so the demo data
-/// (shops + products) stays identical across both screens.
 class StoresRemoteDataSourceFake implements StoresRemoteDataSource {
   final HomeRemoteDataSource _catalog = HomeRemoteDataSourceFake();
 

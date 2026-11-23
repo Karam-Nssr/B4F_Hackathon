@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -67,21 +68,21 @@ class _ProfilePageState extends State<ProfilePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'تسجيل الخروج',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
         content: const Text(
           'هل تريد تسجيل الخروج من حسابك؟',
-          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text(
               'إلغاء',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
             ),
           ),
           TextButton(
@@ -102,6 +103,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthUnauthenticated) context.go('/login');
@@ -135,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
 
                 return Scaffold(
-                  backgroundColor: AppColors.background,
+                  backgroundColor: theme.scaffoldBackgroundColor,
                   body: Column(
                     children: [
                       const _ProfileHeader(),
@@ -163,7 +166,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final profile = state.profile;
     if (profile == null) {
       if (state.isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
       }
       return _ErrorView(
         message: state.message ?? 'تعذر تحميل بيانات الحساب',
@@ -191,6 +196,8 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 14),
           _MenuCard(onOrdersTap: () => context.go('/orders')),
           const SizedBox(height: 14),
+          const _ThemeSwitchCard(),
+          const SizedBox(height: 14),
           _LogoutButton(
             onLogout: () => _confirmLogout(context.read<AuthBloc>()),
           ),
@@ -206,7 +213,9 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.navy,
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -233,17 +242,17 @@ class _ProfileHeader extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(color: AppColors.primary, width: 2),
                 ),
                 child: const Icon(
-                  Icons.person_outline,
+                  Icons.person_outline_rounded,
                   color: Colors.white,
-                  size: 21,
+                  size: 22,
                 ),
               ),
             ],
@@ -261,6 +270,7 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final initial = profile.fullName.trim().isEmpty
         ? 'م'
         : profile.fullName.trim()[0];
@@ -268,19 +278,27 @@ class _ProfileCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+        boxShadow: AppColors.softShadow,
       ),
       child: Row(
         children: [
           Container(
-            width: 58,
-            height: 58,
+            width: 60,
+            height: 60,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.navy,
+            decoration: BoxDecoration(
+              gradient: AppColors.navyGradient,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.navy.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Text(
               initial,
@@ -300,10 +318,10 @@ class _ProfileCard extends StatelessWidget {
                   profile.fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16.5,
+                  style: TextStyle(
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: theme.textTheme.titleMedium?.color,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -311,9 +329,9 @@ class _ProfileCard extends StatelessWidget {
                   profile.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -346,54 +364,83 @@ class _EditForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+        boxShadow: AppColors.softShadow,
       ),
       child: Form(
         key: formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'تعديل البيانات',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              children: [
+                const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  'تعديل البيانات الشخصية',
+                  style: TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.titleMedium?.color,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             AuthTextField(
               controller: nameController,
               label: 'الاسم الكامل',
+              prefixIcon: const Icon(
+                Icons.person_outline_rounded,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               validator: (value) => Validators.required(value, 'الاسم الكامل'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             AuthTextField(
               controller: emailController,
               label: 'البريد الإلكتروني',
               keyboardType: TextInputType.emailAddress,
+              prefixIcon: const Icon(
+                Icons.email_outlined,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               validator: Validators.email,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             AuthTextField(
               controller: phoneController,
               label: 'رقم الهاتف',
               keyboardType: TextInputType.phone,
+              prefixIcon: const Icon(
+                Icons.phone_outlined,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               validator: Validators.syrianPhone,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             AuthTextField(
               controller: nationalIdController,
               label: 'الرقم الوطني',
               keyboardType: TextInputType.number,
+              prefixIcon: const Icon(
+                Icons.badge_outlined,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               validator: Validators.nationalId,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
             AppButton(
               text: 'حفظ التغييرات',
               icon: Icons.save_outlined,
@@ -414,35 +461,107 @@ class _MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
-      ),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        onTap: onOrdersTap,
-        leading: const CircleAvatar(
-          radius: 18,
-          backgroundColor: AppColors.navy,
-          child: Icon(Icons.receipt_long_outlined, color: Colors.white, size: 18),
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(18),
+      elevation: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+          boxShadow: AppColors.softShadow,
         ),
-        title: const Text(
-          'طلباتي',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+        child: ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          onTap: onOrdersTap,
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.navy.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.receipt_long_rounded, color: AppColors.navy, size: 22),
+          ),
+          title: Text(
+            'طلباتي',
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleMedium?.color,
+            ),
+          ),
+          subtitle: Text(
+            'عرض الطلبات والفواتير ومتابعة حالتها',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
+          ),
+          trailing: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 16,
+            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
           ),
         ),
-        subtitle: const Text(
-          'عرض الطلبات والفواتير',
-          style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+      ),
+    );
+  }
+}
+
+class _ThemeSwitchCard extends StatelessWidget {
+  const _ThemeSwitchCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeCubit = context.watch<ThemeCubit>();
+    final isDark = themeCubit.state == ThemeMode.dark;
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(18),
+      elevation: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+          boxShadow: AppColors.softShadow,
         ),
-        trailing: const Icon(
-          Icons.chevron_right,
-          color: AppColors.textSecondary,
+        child: SwitchListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          value: isDark,
+          onChanged: (_) => themeCubit.toggleTheme(),
+          secondary: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.primary.withValues(alpha: 0.2)
+                  : AppColors.navy.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: isDark ? AppColors.primary : AppColors.navy,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            'الوضع الليلي (Dark Mode)',
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleMedium?.color,
+            ),
+          ),
+          subtitle: Text(
+            isDark ? 'الوضع المظلم مفعّل' : 'الوضع الفاتح مفعّل',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
+          ),
         ),
       ),
     );
@@ -460,14 +579,14 @@ class _LogoutButton extends StatelessWidget {
       onPressed: onLogout,
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary, width: 1.3),
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
         padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      icon: const Icon(Icons.logout_rounded, size: 19),
+      icon: const Icon(Icons.logout_rounded, size: 20),
       label: const Text(
         'تسجيل الخروج',
-        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -487,13 +606,12 @@ class _ErrorView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.wifi_off_rounded,
-              size: 44, color: AppColors.textSecondary),
+              size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
-            style:
-                const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -501,7 +619,8 @@ class _ErrorView extends StatelessWidget {
             child: AppButton(
               text: 'إعادة المحاولة',
               height: 44,
-              onPressed: onRetry,
+              onPressed: () =>
+                  context.read<ProfileBloc>().add(ProfileLoadRequested()),
             ),
           ),
         ],
@@ -515,8 +634,10 @@ class _LoginRequiredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -528,41 +649,43 @@ class _LoginRequiredView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 88,
-                      height: 88,
+                      width: 90,
+                      height: 90,
                       decoration: BoxDecoration(
                         color: AppColors.navy.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.lock_outline,
-                        size: 38,
+                        Icons.lock_outline_rounded,
+                        size: 42,
                         color: AppColors.navy,
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text(
+                    Text(
                       'سجّل الدخول لعرض حسابك',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
+                        color: theme.textTheme.titleLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'نحتاج حسابك لإدارة بياناتك الشخصية',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
+                        fontSize: 13.5,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: 210,
                       child: AppButton(
                         text: 'تسجيل الدخول',
                         height: 46,
+                        icon: Icons.login_rounded,
                         onPressed: () => context.push('/login'),
                       ),
                     ),
