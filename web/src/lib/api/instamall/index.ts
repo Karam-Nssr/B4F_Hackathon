@@ -84,21 +84,49 @@ export const getApiErrorMessage = (error: unknown): string => {
     "body" in error
   ) {
     const { status, body } = error as ApiError;
-    try {
-      const parsed = JSON.parse(body) as { message?: string | string[] };
-      if (Array.isArray(parsed.message) && parsed.message.length > 0) {
-        return parsed.message.join("، ");
-      }
-      if (typeof parsed.message === "string") return parsed.message;
-    } catch {
-      // Fall back to the raw body below.
+    if (status === 401) {
+      return "انتهت صلاحية الجلسة أو بيانات الدخول غير صحيحة. يرجى تسجيل الدخول مجدداً.";
     }
-    if (status === 401) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-    if (status === 403) return "غير مسموح لك بتنفيذ هذا الإجراء";
-    return body || `تعذر إكمال الطلب (${status})`;
+    if (status === 403) return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
+
+    let message: string | undefined;
+    try {
+      const parsed = JSON.parse(body) as {
+        message?: unknown;
+        error?: unknown;
+      };
+      if (typeof parsed.message === "string" && parsed.message.trim()) {
+        message = parsed.message.trim();
+      } else if (Array.isArray(parsed.message)) {
+        const parts = parsed.message.filter(
+          (part): part is string =>
+            typeof part === "string" && part.trim().length > 0,
+        );
+        if (parts.length > 0) message = parts.join("، ");
+      }
+      if (!message && typeof parsed.error === "string" && parsed.error.trim()) {
+        message = parsed.error.trim();
+      }
+    } catch {
+      // Non-JSON response bodies are not suitable for user-facing messages.
+    }
+
+    if (status === 429)
+      return "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة.";
+    if (status >= 500)
+      return "حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.";
+    if (message) return message;
+    if (status === 404) return "لم يتم العثور على البيانات المطلوبة.";
+    if (status === 408)
+      return "استغرق الطلب وقتاً طويلاً. يرجى المحاولة مرة أخرى.";
+    return "تعذر إكمال الطلب. يرجى التحقق من البيانات والمحاولة مرة أخرى.";
   }
 
-  return error instanceof Error ? error.message : "حدث خطأ غير متوقع";
+  if (error instanceof TypeError) {
+    return "تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.";
+  }
+  if (error instanceof Error && error.message.trim()) return error.message;
+  return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
 };
 
 let productShopNames = new Map<string, string>();
@@ -129,7 +157,8 @@ const shopProductsAdapter = createCollectionAdapter<ProductDto, Product>({
     productShopNames = new Map(shops.map((shop) => [shop._id, shop.shopName]));
     return products;
   },
-  toModel: (dto) => mapProduct(dto, productShopNames.get(dto.shopId) ?? "متجرك"),
+  toModel: (dto) =>
+    mapProduct(dto, productShopNames.get(dto.shopId) ?? "متجرك"),
 });
 
 const myOrdersAdapter = createCollectionAdapter<MasterOrderDto, MasterOrder>({
@@ -168,9 +197,7 @@ export const register = (body: RegisterBody): Promise<AuthResponseDto> =>
 export const getMe = (): Promise<AuthUserDto> =>
   client.get<AuthUserDto>("/users/me");
 
-export const updateMe = (
-  body: UpdateProfileBody,
-): Promise<AuthUserDto> =>
+export const updateMe = (body: UpdateProfileBody): Promise<AuthUserDto> =>
   client.patch<AuthUserDto, UpdateProfileBody>("/users/me", body);
 
 export const listShops = (signal?: AbortSignal): Promise<Shop[]> =>
@@ -182,9 +209,7 @@ export const listProducts = (signal?: AbortSignal): Promise<Product[]> =>
 export const listShopProducts = (signal?: AbortSignal): Promise<Product[]> =>
   shopProductsAdapter.list(signal);
 
-export const createProduct = (
-  body: CreateProductBody,
-): Promise<ProductDto> =>
+export const createProduct = (body: CreateProductBody): Promise<ProductDto> =>
   client.post<ProductDto, CreateProductBody>("/shop/products", body);
 
 export const updateProduct = (
@@ -199,10 +224,10 @@ export const deleteProduct = (id: string): Promise<void> =>
 export const createOrder = (
   items: Array<{ productId: string; quantity: number }>,
 ): Promise<MasterOrderDto> =>
-  client.post<MasterOrderDto, { items: Array<{ productId: string; quantity: number }> }>(
-    "/orders",
-    { items },
-  );
+  client.post<
+    MasterOrderDto,
+    { items: Array<{ productId: string; quantity: number }> }
+  >("/orders", { items });
 
 export const listMyOrders = (signal?: AbortSignal): Promise<MasterOrder[]> =>
   myOrdersAdapter.list(signal);
@@ -225,9 +250,7 @@ export const getShopOverview = (
   client.get<ShopOverviewDto>("/shop/overview", { signal });
 
 export const getAdminStats = (signal?: AbortSignal): Promise<AdminStats> =>
-  client
-    .get<AdminStatsDto>("/admin/stats", { signal })
-    .then(mapAdminStats);
+  client.get<AdminStatsDto>("/admin/stats", { signal }).then(mapAdminStats);
 
 export const listAdminShops = (signal?: AbortSignal): Promise<Shop[]> =>
   adminShopsAdapter.list(signal);

@@ -1,6 +1,8 @@
-# TailAdmin Next.js - Front-End Boilerplate
+# InstaMall Web Frontend (TailAdmin + Next.js)
 
-This repository is a reusable, front-end-only boilerplate based on TailAdmin, Next.js, and Tailwind CSS. It provides a dashboard UI and conventions for starting future web applications; it does not implement a project-specific product or backend.
+This web app started from the TailAdmin Next.js template and now contains the InstaMall storefront, authentication flow, shop dashboard, and admin pages. It calls the separate backend through a browser-side API adapter; backend code is not part of this package.
+
+For a high-level map of the current folders, routes, data flow, components, and naming conventions, read [the Arabic frontend architecture guide](./docs/frontend-architecture.md).
 
 ![TailAdmin - Next.js Dashboard Preview](./banner.png)
 
@@ -25,7 +27,7 @@ The starter UI includes reusable components, layouts, forms, charts, tables, and
 - **Styling:** Use Tailwind utility classes and the existing design tokens. Avoid inline styles; when a third-party component requires runtime styles, isolate that exception and prefer its class-based API where supported.
 - **Routing:** Keep pages in the existing App Router route groups and preserve the locale-aware root layout. Each route segment owns `layout.tsx`, `loading.tsx`, `error.tsx`, and `not-found.tsx`; keep these thin and reuse shared boundary UI.
 - **Notifications and failures:** Surface request and runtime failures through shared error formatting and the app notification UI; do not silently substitute success-shaped data.
-- **Scope:** This repository is a generic starting point. Avoid adding domain-specific business logic, backend services, test frameworks, or CI/CD configuration.
+- **Scope:** InstaMall features coexist with TailAdmin sample dashboards and UI pages. Keep product behavior in the existing feature components and API adapters; do not add Next.js server APIs or database code to this frontend.
 - **Code conventions:** Write components and helpers as arrow functions with a dedicated default export at the bottom of component modules. Use Tailwind classes instead of inline styles. New and complex modules begin with concise pseudocode describing their objective, flow, and failure behavior.
 
 See [AGENTS.md](./AGENTS.md) for code conventions, the repository map, and implementation guidance.

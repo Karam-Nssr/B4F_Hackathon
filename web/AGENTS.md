@@ -1,8 +1,8 @@
-# AGENTS.md — TailAdmin Next.js Boilerplate
+# AGENTS.md — InstaMall Web Frontend
 
 Next.js 16 (App Router) · React 19 · strict TypeScript · Tailwind CSS v4 · next-intl v4 · Base UI · react-hook-form + zod · TanStack Table · ApexCharts · FullCalendar · Swiper · flatpickr
 
-- **Project scope:** This is a generic, front-end-only boilerplate. Do not add Next.js API routes, application server actions, databases, or project-specific business services. External and mock data are consumed through browser-side adapters.
+- **Project scope:** This is the InstaMall web frontend built on the TailAdmin template. It contains storefront, shop, and admin experiences and calls the separate backend through browser-side adapters. Do not add Next.js API routes, application server actions, or databases here.
 - **Keep it lightweight:** Prefer platform APIs and installed libraries over custom infrastructure. Use composition and existing UI primitives; do not introduce wrappers, packages, or abstractions without a concrete need.
 - **No inline styles:** Use Tailwind classes and existing design tokens. Prefer class-based APIs for third-party components rather than `style` props.
 - **Function syntax:** Write components, hooks, and helpers as arrow functions. Use a dedicated `export default Name` statement at the end of component modules. Preserve any necessary named exports used by barrels or shared modules.
@@ -16,40 +16,44 @@ Next.js 16 (App Router) · React 19 · strict TypeScript · Tailwind CSS v4 · n
 
 ## Repo map
 
-Route groups `(name)/` don't affect URLs. Component folders mirror the route groups. Explore below this level directly.
+Route groups `(name)/` don't affect URLs. Keep feature UI in the matching component area rather than putting it all in route files.
 
 ```
 src/
-├── app/[locale]/                 # every page lives under [locale]
-│   ├── (admin)/                  # dashboard shell, main pages, charts, and UI demos
-│   ├── (full-width-pages)/       # auth and error pages without the dashboard shell
-│   ├── [route-segment]/          # each segment owns layout/loading/error/not-found files
+├── app/[locale]/                 # localized routes and route layouts
+│   ├── (storefront)/             # home, stores, cart, orders, account
+│   ├── (full-width-pages)/       # authentication and error pages
+│   ├── admin/                    # platform admin pages and TailAdmin samples
+│   ├── shop/                     # shop owner dashboard
 │   ├── global-error.tsx          # fallback for root-layout failures
-│   └── layout.tsx                # locale root: NextIntlClientProvider → ThemeProvider → DirectionProvider → TooltipProvider → ToastProvider
+│   └── layout.tsx                # locale root and shared providers
 ├── components/
 │   ├── ui/                       # primitives (Base UI + cva): button, dialog, sheet, field, input, select, combobox, table, tabs, sidebar…
-│   ├── common/                   # component-card, page-breadcrumb, route boundaries, vector-map
-│   ├── main/<area>/              # e.g. main/dashboard/analytics/active-user-graph/
-│   ├── others/                   # charts, maps, ui-elements
-│   ├── support/                  # chat, email, support
-│   └── full-width-pages/         # auth, pages
-├── lib/api/                      # shared fetch client and collection adapter
+│   ├── common/                   # breadcrumbs, cards, errors and route states
+│   ├── storefront/               # storefront header, footer, product card and logo
+│   ├── admin/, shop/             # dashboard headers and sidebars
+│   ├── main/<area>/              # feature widgets and dashboard components
+│   └── others/                   # auth portal, charts and template UI samples
+├── context/                      # InstaMall state store and theme context
+├── hooks/                        # reusable browser/UI hooks
 ├── layout/
-│   ├── app-layout/{header,sidebar}/  # main shell; nav menu is sidebar/data.tsx
-│   ├── header/                   # notification-dropdown, theme-toggler, user-dropdown
-│   └── layout-one … layout-six/  # {header,sidebar} for the alternative shells
-├── context/theme-context.tsx     # ThemeProvider / useTheme (light | dark | auto)
-├── hooks/use-mobile.ts           # useIsMobile (< xl)
+│   ├── app-layout/{header,sidebar}/  # TailAdmin sample dashboard shell
+│   └── header/                   # shared template header widgets
 ├── icons/                        # icon components + index.tsx barrel
 ├── i18n/                         # routing.ts, request.ts, navigation.ts, languages.ts
-├── lib/api/                      # shared fetch client and adapter helpers
-├── messages/                     # en.json (add locales only when explicitly configured)
-├── utils/                        # cn, getInitials (barrel: "@/utils")
+├── lib/
+│   ├── auth-routes.ts            # canonical sign-in and signup URLs
+│   └── api/                      # HTTP client, InstaMall adapter and DTO mappers
+├── messages/                     # ar.json and en.json
+├── mock/                         # placeholder for mock data
+├── types/                        # UI-facing InstaMall models
+├── utils/                        # class, initials and error helpers
 └── proxy.ts                      # next-intl middleware
 ```
 
-- New admin page: add the route under the right group, then add its menu entry in `src/layout/app-layout/sidebar/data.tsx`. Renamed routes get a permanent redirect in `next.config.ts` `redirects()`.
-- Data flow: page/client component → feature adapter → shared `createApiClient` (`fetch`) → external API; adapt external DTOs to UI models before rendering. Mock implementations can satisfy the same adapter contract.
+- Add InstaMall admin and shop navigation in `src/components/admin/admin-sidebar.tsx` and `src/components/shop/shop-sidebar.tsx`; TailAdmin sample navigation lives in `src/layout/app-layout/sidebar/data.tsx`.
+- Authentication uses one portal at `/signin`. `/auth` and `/signup` redirect there; `?mode=signup` shows buyer/seller registration links, and `accountType=buyer|seller` opens the corresponding form. Shared URL helpers live in `src/lib/auth-routes.ts`.
+- Data flow: page/component → `useInstaMallStore` → `src/lib/api/instamall/` → shared `createApiClient` (`fetch`) → `/api/*` rewrite in `next.config.ts`. Convert backend DTOs to UI models in `mappers.ts`.
 
 ## Components
 
@@ -61,7 +65,7 @@ src/
 - Modals/drawers: `@/components/ui/dialog` / `sheet`. Tooltips: `@/components/ui/tooltip` (provider is already in the root layout).
 - Add `"use client"` for hooks, event handlers, or browser APIs. Server layouts/pages inside `[locale]` call `setRequestLocale(locale)` (all `(layouts)/*` and the ai-assistant/support pages do).
 - Global state: `useTheme` (`@/context/theme-context`) and `useSidebar` (`@/components/ui/sidebar`). Don't add new providers without need.
-- **Forms**: `react-hook-form` + `zodResolver` with a zod schema, rendered with `ui/field` + `ui/input` (see `full-width-pages/auth/sign-in/form.tsx`).
+- **Forms**: `react-hook-form` + `zodResolver` with a zod schema, rendered with `ui/field` + `ui/input` (see `components/others/auth/auth-portal.tsx`).
 - **Tables**: `@tanstack/react-table` rendered through `@/components/ui/table` (see `main/tables/data-tables/`).
 - **Charts**: always `const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })`, never a static import.
 - **FullCalendar / Swiper / flatpickr**: imported inside a `"use client"` component (see `main/calendar/`, `others/ui-elements/carousels/`, `main/forms/form-elements/default-inputs/date-picker-input.tsx`). Follow that pattern.
@@ -70,7 +74,7 @@ src/
 ## i18n (next-intl)
 
 - `Link`, `useRouter`, `usePathname`, `redirect` come from `@/i18n/navigation`, never `next/link` / `next/navigation`. (`notFound` and `useParams` from `next/navigation` are fine.)
-- Only `en` is currently configured in `src/i18n/routing.ts` (`localePrefix: "never"`, so URLs carry no locale). Add a locale only when its message catalog is provided.
+- `ar` and `en` are configured in `src/i18n/routing.ts` with Arabic as the default and `localePrefix: "as-needed"` (Arabic paths are unprefixed; English paths use `/en`). Add a locale only when its message catalog is provided.
 - Client: `useTranslations("ns")`. Server: `getTranslations("ns")` from `next-intl/server`. Nest keys by feature (`ecommerce.metrics.customers`).
 - Translated today: dashboards (`main/dashboard/*`), headers, sidebar, dropdowns, not-found. Top-level namespaces: `common`, `sidebar`, `header`, `userDropdown`, `notFound`, plus one per dashboard. Other demo pages are still hardcoded English.
 - New user-facing text uses translations. Never leave a hardcoded string in an already-translated area. Add keys to every configured locale catalog.

@@ -42,6 +42,26 @@ const nextConfig: NextConfig = {
   redirects() {
     return [
       {
+        source: "/auth",
+        destination: "/signin",
+        permanent: false,
+      },
+      {
+        source: "/signup",
+        destination: "/signin?mode=signup",
+        permanent: false,
+      },
+      {
+        source: "/en/auth",
+        destination: "/en/signin",
+        permanent: false,
+      },
+      {
+        source: "/en/signup",
+        destination: "/en/signin?mode=signup",
+        permanent: false,
+      },
+      {
         source: "/buttons-group",
         destination: "/buttons",
         permanent: true,

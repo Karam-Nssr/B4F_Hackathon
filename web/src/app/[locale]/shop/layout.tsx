@@ -68,7 +68,7 @@ const ShopLayout = ({ children }: { children: React.ReactNode }) => {
             </button>
 
             <Link
-              href="/auth"
+              href="/signin"
               className="w-full inline-flex h-12 items-center justify-center rounded-full border border-[#0F172A] bg-white text-sm font-semibold text-[#0F172A] hover:bg-[#F6F0E9] transition-all"
             >
               تسجيل الدخول بحساب تاجر

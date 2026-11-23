@@ -6,40 +6,44 @@
 @theme {
   /* ---------- Fonts ---------- */
   --font-sans: var(--font-rubik), Rubik, system-ui, sans-serif;
-  --font-mono: var(--font-mono), "Spline Sans Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-mono:
+    var(--font-mono), "Spline Sans Mono", ui-monospace, SFMono-Regular,
+    monospace;
   --font-brand: var(--font-brand), Alatsi, cursive;
 
   /* ---------- Brand color tokens ---------- */
-  --color-red: #C40027;
+  --color-red: #c40027;
   --color-red-shadow: rgba(196, 0, 39, 0.28);
-  --color-navy: #0F172A;
-  --color-navy2: #1E293B;
-  --color-onNavy: #FFFFFF;
-  --color-onNavyMuted: #BEC6E0;
-  --color-bg: #FBF8F4;
-  --color-surface: #FFFFFF;
-  --color-low: #F6F0E9;
-  --color-high: #ECE3D9;
-  --color-line: #EBE1D6;
-  --color-lineStrong: #94A3B8;
-  --color-text: #0F172A;
+  --color-navy: #0f172a;
+  --color-navy2: #1e293b;
+  --color-brand-blue: #2c4180;
+  --color-brand-blue-hover: #243668;
+  --color-onNavy: #ffffff;
+  --color-onNavyMuted: #bec6e0;
+  --color-bg: #fbf8f4;
+  --color-surface: #ffffff;
+  --color-low: #f6f0e9;
+  --color-high: #ece3d9;
+  --color-line: #ebe1d6;
+  --color-lineStrong: #94a3b8;
+  --color-text: #0f172a;
   --color-muted: #475569;
-  --color-ok: #15803D;
-  --color-okBg: #D8F1E4;
-  --color-warn: #B45309;
-  --color-warnBg: #FDEFCB;
-  --color-err: #BA1A1A;
-  --color-errBg: #FDDFDC;
+  --color-ok: #15803d;
+  --color-okBg: #d8f1e4;
+  --color-warn: #b45309;
+  --color-warnBg: #fdefcb;
+  --color-err: #ba1a1a;
+  --color-errBg: #fddfdc;
 
   /* ---------- KPI tints ---------- */
-  --color-kpi1: #DFF3EA;
-  --color-kpi2: #FFF1D2;
-  --color-kpi3: #E0EEFB;
-  --color-kpi4: #EBE7FA;
-  --color-kpi5: #FDE7EA;
+  --color-kpi1: #dff3ea;
+  --color-kpi2: #fff1d2;
+  --color-kpi3: #e0eefb;
+  --color-kpi4: #ebe7fa;
+  --color-kpi5: #fde7ea;
 
   /* ---------- Cart summary ---------- */
-  --color-cartSummary: #FFF3F1;
+  --color-cartSummary: #fff3f1;
 
   /* ---------- Radii ---------- */
   --radius-pill: 9999px;
@@ -55,13 +59,40 @@
   --shadow-red: 0 4px 12px rgba(196, 0, 39, 0.28);
 }
 
+.dark {
+  color-scheme: dark;
+  --color-bg: #0b1120;
+  --color-surface: #111827;
+  --color-low: #1e293b;
+  --color-high: #334155;
+  --color-line: #334155;
+  --color-lineStrong: #64748b;
+  --color-text: #f1f5f9;
+  --color-muted: #aab8ca;
+  --color-ok: #4ade80;
+  --color-okBg: #123323;
+  --color-warn: #fbbf24;
+  --color-warnBg: #3b2a10;
+  --color-err: #fca5a5;
+  --color-errBg: #3b1e24;
+  --color-kpi1: #12352a;
+  --color-kpi2: #3b2a10;
+  --color-kpi3: #142e46;
+  --color-kpi4: #2e2354;
+  --color-kpi5: #421c25;
+  --color-cartSummary: #3b2027;
+  --color-brand-link: #9db4ff;
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.24);
+  --shadow-product: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-line, #EBE1D6);
+    border-color: var(--color-line, #ebe1d6);
   }
 
   button:not(:disabled),
@@ -69,10 +100,12 @@
     cursor: pointer;
   }
 
+  html {
+    color-scheme: light;
+  }
+
   body {
-    @apply relative z-1 bg-[#FBF8F4] font-sans text-[#0F172A];
-    background-color: #FBF8F4;
-    color: #0F172A;
+    @apply relative z-1 bg-bg font-sans text-navy;
   }
 }
 
@@ -103,4 +136,91 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@layer utilities {
+  .dark .text-navy:not([class*="dark:text-"]),
+  .dark [class~="text-[#0F172A]"]:not([class*="dark:text-"]),
+  .dark [class~="hover:text-navy"]:not([class*="dark:hover:text-"]):hover,
+  .dark [class~="hover:text-[#0F172A]"]:not([class*="dark:hover:text-"]):hover {
+    color: var(--color-text);
+  }
+
+  .dark .text-brand-blue:not([class*="dark:text-"]) {
+    color: var(--color-brand-link);
+  }
+
+  .dark [class~="text-[#475569]"]:not([class*="dark:text-"]) {
+    color: var(--color-muted);
+  }
+
+  .dark [class~="text-[#15803D]"]:not([class*="dark:text-"]) {
+    color: var(--color-ok);
+  }
+
+  .dark [class~="text-[#B45309]"]:not([class*="dark:text-"]) {
+    color: var(--color-warn);
+  }
+
+  .dark [class~="text-[#BA1A1A]"]:not([class*="dark:text-"]) {
+    color: var(--color-err);
+  }
+
+  .dark [class~="bg-white"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-surface);
+  }
+
+  .dark [class~="bg-[#FBF8F4]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-bg);
+  }
+
+  .dark [class~="bg-[#F6F0E9]"]:not([class*="dark:bg-"]),
+  .dark [class~="hover:bg-[#F6F0E9]"]:not([class*="dark:hover:bg-"]):hover {
+    background-color: var(--color-low);
+  }
+
+  .dark [class~="bg-[#DFF3EA]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-kpi1);
+  }
+
+  .dark [class~="bg-[#FFF1D2]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-kpi2);
+  }
+
+  .dark [class~="bg-[#E0EEFB]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-kpi3);
+  }
+
+  .dark [class~="bg-[#EBE7FA]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-kpi4);
+  }
+
+  .dark [class~="bg-[#FDE7EA]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-kpi5);
+  }
+
+  .dark [class~="bg-[#D8F1E4]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-okBg);
+  }
+
+  .dark [class~="bg-[#FDDFDC]"]:not([class*="dark:bg-"]),
+  .dark [class~="bg-[#FFF3F1]"]:not([class*="dark:bg-"]) {
+    background-color: var(--color-errBg);
+  }
+
+  .dark [class~="border-[#EBE1D6]"]:not([class*="dark:border-"]),
+  .dark [class~="border-[#EBE1D6]/60"]:not([class*="dark:border-"]),
+  .dark [class~="border-[#EBE1D6]/70"]:not([class*="dark:border-"]) {
+    border-color: var(--color-line);
+  }
+
+  .dark [class~="border-[#0F172A]"]:not([class*="dark:border-"]) {
+    border-color: var(--color-lineStrong);
+  }
+
+  .dark
+    [class~="divide-[#EBE1D6]/60"]:not([class*="dark:divide-"])
+    > :not(:last-child) {
+    border-color: var(--color-line);
+  }
 }
