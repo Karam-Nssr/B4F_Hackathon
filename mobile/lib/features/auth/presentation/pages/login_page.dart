@@ -53,7 +53,10 @@ class _LoginPageState extends State<LoginPage> {
             context.go('/home');
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                backgroundColor: AppColors.error,
+                content: Text(state.message),
+              ),
             );
           }
         },
@@ -65,64 +68,108 @@ class _LoginPageState extends State<LoginPage> {
               const AuthHeader(isLogin: true),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            AuthTextField(
-                              controller: _emailController,
-                              label: 'البريد الإلكتروني',
-                              hint: 'name@email.com',
-                              keyboardType: TextInputType.emailAddress,
-                              textDirection: TextDirection.ltr,
-                              validator: Validators.email,
-                            ),
-                            const SizedBox(height: 16),
-                            AuthTextField(
-                              controller: _passwordController,
-                              label: 'كلمة المرور',
-                              hint: '••••••••',
-                              obscureText: _obscurePassword,
-                              textDirection: TextDirection.ltr,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                ),
-                                onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword,
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.border.withValues(alpha: 0.6),
+                          ),
+                          boxShadow: AppColors.softShadow,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'تسجيل الدخول',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'يرجى إدخال كلمة المرور';
-                                }
-                                return null;
-                              },
-                            ),
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  'نسيت كلمة المرور؟',
-                                  style: TextStyle(color: AppColors.primary),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'أدخل بيانات حسابك للمتابعة',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            AppButton(
-                              text: 'تسجيل الدخول',
-                              isLoading: isLoading,
-                              onPressed: _submit,
-                            ),
-                          ],
+                              const SizedBox(height: 20),
+                              AuthTextField(
+                                controller: _emailController,
+                                label: 'البريد الإلكتروني',
+                                hint: 'name@email.com',
+                                keyboardType: TextInputType.emailAddress,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.email_outlined,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: Validators.email,
+                              ),
+                              const SizedBox(height: 16),
+                              AuthTextField(
+                                controller: _passwordController,
+                                label: 'كلمة المرور',
+                                hint: '••••••••',
+                                obscureText: _obscurePassword,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'يرجى إدخال كلمة المرور';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: const Text(
+                                    'نسيت كلمة المرور؟',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              AppButton(
+                                text: 'تسجيل الدخول',
+                                isLoading: isLoading,
+                                icon: Icons.login_rounded,
+                                onPressed: _submit,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

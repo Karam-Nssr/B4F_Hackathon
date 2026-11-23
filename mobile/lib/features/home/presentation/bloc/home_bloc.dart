@@ -11,10 +11,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetProductsUseCase getProductsUseCase;
   final GetShopsUseCase getShopsUseCase;
 
-  /// Current filters — kept here so a refresh or a category change doesn't
-  /// lose the active search.
+  static const int _pageSize = 6;
+
+  /// Current search filter (passed to backend search query if needed).
   String _search = '';
+
+  /// Active category filter — filtered locally in Flutter on the loaded list.
   String? _category;
+
+  /// Full unfiltered products list from the backend.
+  List<ProductEntity> _allProducts = [];
+
+  /// Current pagination page.
+  int _currentPage = 1;
 
   HomeBloc({
     required this.getProductsUseCase,
@@ -23,32 +32,52 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeLoadRequested>(_onLoad);
     on<HomeSearchChanged>(_onSearch);
     on<HomeCategorySelected>(_onCategory);
+    on<HomeLoadMoreRequested>(_onLoadMore);
   }
 
   Future<void> _onLoad(
     HomeLoadRequested event,
     Emitter<HomeState> emit,
-  ) => _fetch(emit);
+  ) async {
+    _currentPage = 1;
+    await _fetchBackend(emit);
+  }
 
   Future<void> _onSearch(
     HomeSearchChanged event,
     Emitter<HomeState> emit,
   ) async {
     _search = event.query;
-    await _fetch(emit);
+    _currentPage = 1;
+    await _fetchBackend(emit);
   }
 
-  Future<void> _onCategory(
+  /// Category filter is handled completely on the client side in Flutter.
+  void _onCategory(
     HomeCategorySelected event,
     Emitter<HomeState> emit,
-  ) async {
-    _category = event.category == 'الكل' ? null : event.category;
-    await _fetch(emit);
+  ) {
+    _category = (event.category == 'الكل' || event.category.isEmpty)
+        ? null
+        : event.category;
+    _currentPage = 1;
+    _emitPaginatedState(emit);
   }
 
-  /// Loads the products and the shops in parallel, then attaches the shop
-  /// name to each product so the card can show which store sells it.
-  Future<void> _fetch(Emitter<HomeState> emit) async {
+  void _onLoadMore(
+    HomeLoadMoreRequested event,
+    Emitter<HomeState> emit,
+  ) {
+    final filtered = _getFilteredProducts();
+    if (_currentPage * _pageSize < filtered.length) {
+      _currentPage++;
+      _emitPaginatedState(emit);
+    }
+  }
+
+  /// Fetches products from backend without passing `category` param, so that
+  /// category filtering happens client-side in Flutter.
+  Future<void> _fetchBackend(Emitter<HomeState> emit) async {
     final previous = state is HomeLoaded
         ? (state as HomeLoaded).products
         : state is HomeLoading
@@ -59,16 +88,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     emit(HomeLoading(previous));
 
-    // Both futures are started before awaiting, so the calls run in parallel.
+    // Notice category parameter is NOT passed to backend: client-side filtering.
     final productsFuture = getProductsUseCase(
-      ProductsParams(search: _search.isEmpty ? null : _search, category: _category),
+      ProductsParams(search: _search.isEmpty ? null : _search),
     );
     final shopsFuture = getShopsUseCase(const NoParams());
+
     final productsResult = await productsFuture;
     final shopsResult = await shopsFuture;
 
-    // The shops feed is only used for labels — if it fails we still show
-    // the products without shop names.
     final shopNames = shopsResult.fold(
       (_) => <String, String>{},
       (shops) => {for (final shop in shops) shop.id: shop.shopName},
@@ -76,15 +104,43 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     productsResult.fold(
       (failure) => emit(HomeFailure(failure.message, previous)),
-      (products) => emit(
-        HomeLoaded(
-          products: [
-            for (final product in products)
-              product.copyWith(shopName: shopNames[product.shopId] ?? product.shopName),
-          ],
-          searchQuery: _search,
-          selectedCategory: _category,
-        ),
+      (products) {
+        _allProducts = [
+          for (final product in products)
+            product.copyWith(
+              shopName: shopNames[product.shopId] ?? product.shopName,
+            ),
+        ];
+        _emitPaginatedState(emit);
+      },
+    );
+  }
+
+  /// Filters `_allProducts` client-side in Flutter by `_category`.
+  List<ProductEntity> _getFilteredProducts() {
+    if (_category == null || _category!.isEmpty) {
+      return _allProducts;
+    }
+    final target = _category!.trim().toLowerCase();
+    return _allProducts.where((p) {
+      return p.category.trim().toLowerCase() == target;
+    }).toList();
+  }
+
+  void _emitPaginatedState(Emitter<HomeState> emit) {
+    final filtered = _getFilteredProducts();
+    final limit = _currentPage * _pageSize;
+    final visibleProducts = filtered.take(limit).toList();
+    final hasMore = limit < filtered.length;
+
+    emit(
+      HomeLoaded(
+        products: visibleProducts,
+        searchQuery: _search,
+        selectedCategory: _category,
+        hasMore: hasMore,
+        currentPage: _currentPage,
+        totalCount: filtered.length,
       ),
     );
   }

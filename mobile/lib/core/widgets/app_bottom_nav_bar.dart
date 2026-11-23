@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 
@@ -14,12 +15,30 @@ class AppBottomNavBar extends StatelessWidget {
   ];
 
   static const List<IconData> icons = [
-    Icons.home_outlined,
-    Icons.storefront_outlined,
-    Icons.shopping_cart_outlined,
-    Icons.receipt_long_outlined,
-    Icons.person_outline,
+    Icons.home_rounded,
+    Icons.storefront_rounded,
+    Icons.shopping_bag_outlined,
+    Icons.receipt_long_rounded,
+    Icons.person_outline_rounded,
   ];
+
+  /// Single source of truth for tab navigation — every screen's bar calls
+  /// this, so tapping the current tab is a no-op and the rest go to the
+  /// right route.
+  static void goToTab(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        context.go('/home');
+      case 1:
+        context.go('/stores');
+      case 2:
+        context.go('/cart');
+      case 3:
+        context.go('/orders');
+      case 4:
+        context.go('/profile');
+    }
+  }
 
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -35,7 +54,16 @@ class AppBottomNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border.withValues(alpha: 0.7))),
+        border: Border(
+          top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
@@ -44,12 +72,14 @@ class AppBottomNavBar extends StatelessWidget {
           child: Row(
             children: [
               for (var i = 0; i < labels.length; i++)
-                Expanded(child: _NavBarItem(
-                  label: labels[i],
-                  icon: icons[i],
-                  isSelected: i == currentIndex,
-                  onTap: () => onTap(i),
-                )),
+                Expanded(
+                  child: _NavBarItem(
+                    label: labels[i],
+                    icon: icons[i],
+                    isSelected: i == currentIndex,
+                    onTap: () => onTap(i),
+                  ),
+                ),
             ],
           ),
         ),
@@ -74,18 +104,31 @@ class _NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
+                color: isSelected
+                    ? AppColors.primary
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : [],
               ),
               child: Icon(
                 icon,
@@ -97,7 +140,7 @@ class _NavBarItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10.5,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),

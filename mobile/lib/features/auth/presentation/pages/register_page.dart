@@ -63,7 +63,10 @@ class _RegisterPageState extends State<RegisterPage> {
             context.go('/home');
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                backgroundColor: AppColors.error,
+                content: Text(state.message),
+              ),
             );
           }
         },
@@ -75,101 +78,173 @@ class _RegisterPageState extends State<RegisterPage> {
               const AuthHeader(isLogin: false),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            AuthTextField(
-                              controller: _fullNameController,
-                              label: 'الاسم الكامل',
-                              hint: 'مثال: كريم الحلبي',
-                              validator: (v) =>
-                                  Validators.required(v, 'الاسم الكامل'),
-                            ),
-                            const SizedBox(height: 16),
-                            AuthTextField(
-                              controller: _phoneController,
-                              label: 'رقم الهاتف',
-                              hint: '09xx xxx xxx',
-                              keyboardType: TextInputType.phone,
-                              textDirection: TextDirection.ltr,
-                              validator: Validators.syrianPhone,
-                            ),
-                            const SizedBox(height: 16),
-                            AuthTextField(
-                              controller: _nationalIdController,
-                              label: 'الرقم الوطني (11 رقم)',
-                              hint: '00000000000',
-                              keyboardType: TextInputType.number,
-                              textDirection: TextDirection.ltr,
-                              validator: Validators.nationalId,
-                            ),
-                            const SizedBox(height: 16),
-                            AuthTextField(
-                              controller: _emailController,
-                              label: 'البريد الإلكتروني',
-                              hint: 'name@email.com',
-                              keyboardType: TextInputType.emailAddress,
-                              textDirection: TextDirection.ltr,
-                              validator: Validators.email,
-                            ),
-                            const SizedBox(height: 16),
-                            AuthTextField(
-                              controller: _passwordController,
-                              label: 'كلمة المرور',
-                              hint: '••••••••',
-                              obscureText: _obscurePassword,
-                              textDirection: TextDirection.ltr,
-                              validator: Validators.password,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                ),
-                                onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.warning.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Text(
-                                'نحفظ بيانات الهوية مرة واحدة ونرفقها تلقائياً '
-                                'مع كل فاتورة ليتحقق المتجر من الطلب.',
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.border.withValues(alpha: 0.6),
+                          ),
+                          boxShadow: AppColors.softShadow,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'إنشاء حساب جديد',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  height: 1.6,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'قم بتعبئة البيانات التالية للبدء بالتسوق',
+                                style: TextStyle(
+                                  fontSize: 12.5,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 20),
-                            AppButton(
-                              text: 'إنشاء الحساب والمتابعة',
-                              isLoading: isLoading,
-                              onPressed: _submit,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'الدفع والتسليم مباشرة بينك وبين المتجر بعد التأكيد',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
+                              const SizedBox(height: 20),
+                              AuthTextField(
+                                controller: _fullNameController,
+                                label: 'الاسم الكامل',
+                                hint: 'مثال: كريم الحلبي',
+                                prefixIcon: const Icon(
+                                  Icons.person_outline,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: (v) =>
+                                    Validators.required(v, 'الاسم الكامل'),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              AuthTextField(
+                                controller: _phoneController,
+                                label: 'رقم الهاتف',
+                                hint: '09xx xxx xxx',
+                                keyboardType: TextInputType.phone,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.phone_outlined,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: Validators.syrianPhone,
+                              ),
+                              const SizedBox(height: 16),
+                              AuthTextField(
+                                controller: _nationalIdController,
+                                label: 'الرقم الوطني (11 رقم)',
+                                hint: '00000000000',
+                                keyboardType: TextInputType.number,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.badge_outlined,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: Validators.nationalId,
+                              ),
+                              const SizedBox(height: 16),
+                              AuthTextField(
+                                controller: _emailController,
+                                label: 'البريد الإلكتروني',
+                                hint: 'name@email.com',
+                                keyboardType: TextInputType.emailAddress,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.email_outlined,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: Validators.email,
+                              ),
+                              const SizedBox(height: 16),
+                              AuthTextField(
+                                controller: _passwordController,
+                                label: 'كلمة المرور',
+                                hint: '••••••••',
+                                obscureText: _obscurePassword,
+                                textDirection: TextDirection.ltr,
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline,
+                                  color: AppColors.textSecondary,
+                                  size: 20,
+                                ),
+                                validator: Validators.password,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warning.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: AppColors.warning.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 18,
+                                      color: AppColors.warning,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Expanded(
+                                      child: Text(
+                                        'نحفظ بيانات الهوية مرة واحدة ونرفقها تلقائياً '
+                                        'مع كل فاتورة ليتحقق المتجر من الطلب.',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          height: 1.5,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              AppButton(
+                                text: 'إنشاء الحساب والمتابعة',
+                                isLoading: isLoading,
+                                icon: Icons.person_add_outlined,
+                                onPressed: _submit,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'الدفع والتسليم مباشرة بينك وبين المتجر بعد التأكيد',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

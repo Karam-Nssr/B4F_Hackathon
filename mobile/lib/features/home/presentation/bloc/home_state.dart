@@ -25,15 +25,28 @@ class HomeLoaded extends HomeState {
   final List<ProductEntity> products;
   final String searchQuery;
   final String? selectedCategory;
+  final bool hasMore;
+  final int currentPage;
+  final int totalCount;
 
   const HomeLoaded({
     required this.products,
     required this.searchQuery,
     required this.selectedCategory,
+    this.hasMore = false,
+    this.currentPage = 1,
+    this.totalCount = 0,
   });
 
   @override
-  List<Object?> get props => [products, searchQuery, selectedCategory];
+  List<Object?> get props => [
+        products,
+        searchQuery,
+        selectedCategory,
+        hasMore,
+        currentPage,
+        totalCount,
+      ];
 }
 
 class HomeFailure extends HomeState {

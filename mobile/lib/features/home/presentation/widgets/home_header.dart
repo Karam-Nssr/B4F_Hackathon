@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 class HomeHeader extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSearchSubmitted;
+  final ValueChanged<String>? onSearchChanged;
   final VoidCallback onSearchCleared;
   final int cartCount;
   final VoidCallback onCartTap;
@@ -15,6 +16,7 @@ class HomeHeader extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onSearchSubmitted,
+    this.onSearchChanged,
     required this.onSearchCleared,
     required this.cartCount,
     required this.onCartTap,
@@ -23,11 +25,13 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.navy,
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -38,20 +42,30 @@ class HomeHeader extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 38,
-                        height: 38,
+                        width: 42,
+                        height: 42,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(11),
-                          border: Border.all(color: AppColors.primary, width: 2),
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(13),
+                          border: Border.all(
+                            color: AppColors.primary,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: const Icon(
-                          Icons.shopping_cart_rounded,
+                          Icons.shopping_bag_rounded,
                           color: Colors.white,
-                          size: 20,
+                          size: 22,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -59,14 +73,18 @@ class HomeHeader extends StatelessWidget {
                             'InstaMall',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.4,
+                              letterSpacing: 0.5,
                             ),
                           ),
+                          SizedBox(height: 1),
                           Text(
                             'سوق المتاجر المستقلة',
-                            style: TextStyle(color: Colors.white70, fontSize: 11),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11.5,
+                            ),
                           ),
                         ],
                       ),
@@ -76,10 +94,11 @@ class HomeHeader extends StatelessWidget {
                   _CartPill(count: cartCount, onTap: onCartTap),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               _SearchField(
                 controller: controller,
                 onSubmitted: onSearchSubmitted,
+                onChanged: onSearchChanged,
                 onCleared: onSearchCleared,
               ),
             ],
@@ -99,29 +118,36 @@ class _CartPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white38),
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.white,
+              size: 18,
+            ),
+            const SizedBox(width: 6),
             const Text(
               'السلة',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
             if (count > 0) ...[
               const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
@@ -146,11 +172,13 @@ class _CartPill extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onChanged;
   final VoidCallback onCleared;
 
   const _SearchField({
     required this.controller,
     required this.onSubmitted,
+    this.onChanged,
     required this.onCleared,
   });
 
@@ -160,17 +188,18 @@ class _SearchField extends StatelessWidget {
       controller: controller,
       textInputAction: TextInputAction.search,
       onSubmitted: onSubmitted,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13.5),
+      onChanged: onChanged,
+      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
       decoration: InputDecoration(
-        hintText: 'ابحث عن منتج أو متجر',
-        hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13.5),
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        hintText: 'ابحث عن منتج أو متجر...',
+        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13.5),
+        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (context, value, _) {
             if (value.text.isEmpty) return const SizedBox.shrink();
             return IconButton(
-              icon: const Icon(Icons.close, size: 18, color: AppColors.textSecondary),
+              icon: const Icon(Icons.cancel_rounded, size: 20, color: AppColors.textSecondary),
               onPressed: onCleared,
             );
           },
@@ -188,7 +217,7 @@ class _SearchField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );

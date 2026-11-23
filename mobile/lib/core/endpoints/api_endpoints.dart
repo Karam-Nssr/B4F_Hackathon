@@ -10,7 +10,7 @@ class ApiEndpoints {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:4000',
+    defaultValue: 'http://10.0.2.2:3000',
   );
 
   static const String _api = '/api';
@@ -33,8 +33,8 @@ class ApiEndpoints {
   static String shopById(String id) => '$_api/shops/$id';
 
   // ── 7.2 User (role: user) ──────────────────────────────────────────────
-  /// GET profile / PATCH (fullName, phone, nationalId)
-  static const String userProfile = '$_api/user/profile';
+  /// GET profile / PATCH (fullName, email, phone, nationalId)
+  static const String userProfile = '$_api/users/me';
 
   /// POST: submit cart (server splits into shop sub-orders + invoices)
   /// body: { items: [{ productId, quantity }] }

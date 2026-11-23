@@ -18,40 +18,60 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+        boxShadow: AppColors.softShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ProductImage(url: product.imageUrl),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           if (product.shopName.isNotEmpty) ...[
-            Text(
-              product.shopName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            Row(
+              children: [
+                Icon(
+                  Icons.storefront_rounded,
+                  size: 13,
+                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    product.shopName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
           ],
           Text(
             product.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleMedium?.color,
               height: 1.35,
             ),
           ),
           const Spacer(),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
@@ -61,7 +81,7 @@ class ProductCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -81,43 +101,48 @@ class _ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const placeholder = SizedBox(
+    final placeholder = SizedBox(
       width: double.infinity,
-      height: 118,
+      height: 122,
       child: ColoredBox(
-        color: AppColors.background,
-        child: Icon(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Icon(
           Icons.shopping_bag_outlined,
-          color: AppColors.textSecondary,
-          size: 34,
+          color: AppColors.textMuted,
+          size: 36,
         ),
       ),
     );
 
-    if (url.isEmpty) return placeholder;
+    if (url.isEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: placeholder,
+      );
+    }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       child: Image.network(
         url,
         width: double.infinity,
-        height: 118,
+        height: 122,
         fit: BoxFit.cover,
         errorBuilder: (_, _, _) => placeholder,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
-          return const SizedBox(
+          return SizedBox(
             width: double.infinity,
-            height: 118,
+            height: 122,
             child: ColoredBox(
-              color: AppColors.background,
-              child: Center(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: const Center(
                 child: SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 22,
+                  height: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.textSecondary,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -142,11 +167,18 @@ class _AddButton extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.primary,
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        child: const Icon(Icons.add, color: Colors.white, size: 22),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
       ),
     );
   }

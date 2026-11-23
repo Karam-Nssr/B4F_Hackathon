@@ -26,6 +26,17 @@ import '../../features/home/domain/repositories/home_repository.dart';
 import '../../features/home/domain/usecases/get_products_usecase.dart';
 import '../../features/home/domain/usecases/get_shops_usecase.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
+import '../../features/orders/data/datasources/my_orders_remote_datasource.dart';
+import '../../features/orders/data/repositories/orders_repository_impl.dart';
+import '../../features/orders/domain/repositories/orders_repository.dart';
+import '../../features/orders/domain/usecases/get_my_orders_usecase.dart';
+import '../../features/orders/presentation/bloc/orders_bloc.dart';
+import '../../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/domain/usecases/get_profile_usecase.dart';
+import '../../features/profile/domain/usecases/update_profile_usecase.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/stores/data/datasources/stores_remote_datasource.dart';
 import '../../features/stores/data/repositories/stores_repository_impl.dart';
 import '../../features/stores/domain/repositories/stores_repository.dart';
@@ -33,6 +44,8 @@ import '../../features/stores/domain/usecases/get_shop_detail_usecase.dart';
 import '../../features/stores/domain/usecases/get_stores_usecase.dart';
 import '../../features/stores/presentation/bloc/stores_bloc.dart';
 import '../network/api_client.dart';
+
+import '../theme/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -47,6 +60,11 @@ Future<void> initDependencies() async {
   // External
   sl.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
+  );
+
+  // Theme Cubit (persists mode to secure storage)
+  sl.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(storage: sl()),
   );
 
   // Local storage — Hive backs the cart (opened once, app-wide).
@@ -169,6 +187,44 @@ Future<void> initDependencies() async {
       getCartUseCase: sl(),
       saveCartUseCase: sl(),
       checkoutUseCase: sl(),
+    ),
+  );
+
+  // ── Orders (GET /api/orders/my, SAD FR-07) ─────────────────────────────
+  sl.registerLazySingleton<MyOrdersRemoteDataSource>(
+    () => useFakeBackend
+        ? MyOrdersRemoteDataSourceFake()
+        : MyOrdersRemoteDataSourceImpl(client: sl()),
+  );
+
+  sl.registerLazySingleton<OrdersRepository>(
+    () => OrdersRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton(() => GetMyOrdersUseCase(sl()));
+
+  // Orders Bloc (one per page visit — fresh list each time)
+  sl.registerFactory(() => OrdersBloc(getMyOrdersUseCase: sl()));
+
+  // ── Profile (GET/PATCH /api/users/me, SAD FR-07) ───────────────────────
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => useFakeBackend
+        ? ProfileRemoteDataSourceFake()
+        : ProfileRemoteDataSourceImpl(client: sl()),
+  );
+
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton(() => GetProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+
+  // Profile Bloc (one per page visit)
+  sl.registerFactory(
+    () => ProfileBloc(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
     ),
   );
 }

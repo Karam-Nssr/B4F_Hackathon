@@ -16,31 +16,16 @@ import '../widgets/store_card.dart';
 class StoresPage extends StatelessWidget {
   const StoresPage({super.key});
 
-  void _onNavTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-      case 1:
-        return; // already here
-      case 2:
-        context.go('/cart');
-      default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppBottomNavBar.labels[index]} — قيد التطوير'),
-          ),
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocProvider(
       create: (_) => sl<StoresBloc>()..add(StoresLoadRequested()),
       child: BlocBuilder<StoresBloc, StoresState>(
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: Column(
               children: [
                 const _StoresHeader(),
@@ -49,7 +34,9 @@ class StoresPage extends StatelessWidget {
             ),
             bottomNavigationBar: AppBottomNavBar(
               currentIndex: 1,
-              onTap: (index) => _onNavTap(context, index),
+              onTap: (index) {
+                if (index != 1) AppBottomNavBar.goToTab(context, index);
+              },
             ),
           );
         },
@@ -59,7 +46,9 @@ class StoresPage extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, StoresState state) {
     if (state is StoresLoading || state is StoresInitial) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
     if (state is StoresFailure) {
       return _ErrorView(
@@ -73,6 +62,7 @@ class StoresPage extends StatelessWidget {
         return const _EmptyView();
       }
       return RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async =>
             context.read<StoresBloc>().add(StoresLoadRequested()),
         child: GridView.builder(
@@ -82,7 +72,7 @@ class StoresPage extends StatelessWidget {
             crossAxisCount: 2,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 0.66,
+            childAspectRatio: 0.64,
           ),
           itemCount: state.shops.length,
           itemBuilder: (context, index) {
@@ -105,7 +95,9 @@ class _StoresHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.navy,
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -132,17 +124,17 @@ class _StoresHeader extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(color: AppColors.primary, width: 2),
                 ),
                 child: const Icon(
                   Icons.storefront_rounded,
                   color: Colors.white,
-                  size: 21,
+                  size: 22,
                 ),
               ),
             ],
@@ -167,12 +159,12 @@ class _ErrorView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.wifi_off_rounded,
-              size: 44, color: AppColors.textSecondary),
+              size: 48, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -195,16 +187,16 @@ class _EmptyView extends StatelessWidget {
       child: Column(
         children: [
           Icon(Icons.storefront_outlined,
-              size: 44, color: AppColors.textSecondary),
+              size: 48, color: AppColors.textMuted),
           SizedBox(height: 12),
           Text(
             'لا توجد متاجر بعد',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4),
           Text(
             'أول متجر سيظهر هنا قريباً',
-            style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),

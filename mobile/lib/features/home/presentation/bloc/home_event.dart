@@ -20,7 +20,7 @@ class HomeSearchChanged extends HomeEvent {
   List<Object?> get props => [query];
 }
 
-/// A category chip was tapped (`'الكل'` clears the filter).
+/// A category chip was tapped (`'الكل'` clears the filter). Filtered locally in Flutter.
 class HomeCategorySelected extends HomeEvent {
   final String category;
 
@@ -29,3 +29,6 @@ class HomeCategorySelected extends HomeEvent {
   @override
   List<Object?> get props => [category];
 }
+
+/// User requested next page of products (infinite scroll / load more).
+class HomeLoadMoreRequested extends HomeEvent {}
