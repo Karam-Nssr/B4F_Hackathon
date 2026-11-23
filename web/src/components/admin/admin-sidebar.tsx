@@ -127,7 +127,7 @@ const AdminSidebarInner = ({ onNavigate, isMobile }: InnerProps) => {
             <CartIcon className="size-5 shrink-0 text-[#C40027]" />
             <span>الرجوع للمتجر</span>
           </Link>
-          <Link
+          {/* <Link
             href="/shop"
             onClick={onNavigate}
             className="flex items-center gap-3 rounded-[14px] px-3.5 py-2.5 text-sm font-medium text-[#BEC6E0] hover:bg-[#1E293B] hover:text-white transition-colors"
@@ -136,7 +136,7 @@ const AdminSidebarInner = ({ onNavigate, isMobile }: InnerProps) => {
               S
             </span>
             <span>لوحة التاجر</span>
-          </Link>
+          </Link> */}
         </div>
       </div>
 

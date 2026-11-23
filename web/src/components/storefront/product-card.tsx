@@ -18,6 +18,7 @@ import type { Product } from "@/types/instamall";
 import ProductDetailsModal from "@/components/storefront/product-details-modal";
 import formatSypPrice from "@/utils/format-syp-price";
 import localizeProductTitle from "@/utils/localize-product-title";
+import { localizeShopName } from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 import styles from "./product-card.module.css";
 
@@ -101,7 +102,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
           <div className="flex flex-col gap-1 p-3 text-right">
             <span className="text-xs font-normal text-muted">
-              {product.shopName}
+              {localizeShopName(product.shopName, locale)}
             </span>
             <h3
               className="line-clamp-1 text-sm font-semibold text-[#0F172A]"

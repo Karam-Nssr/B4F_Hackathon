@@ -214,12 +214,13 @@ const ShopOverview = () => {
         </div>
       </div>
 
-      {/* Main Content: Sub-Orders Table & Products CMS Table */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Sub-Orders Section (7 cols on desktop) */}
-        <div className="space-y-4 lg:col-span-7">
+      {/* Recent activity */}
+      <div className="space-y-10">
+        <div className="space-y-4">
           <div className="border-b border-[#EBE1D6]/70 pb-3">
-            <h2 className="text-lg font-bold text-[#0F172A]">طلبات المتجر</h2>
+            <h2 className="text-lg font-bold text-[#0F172A]">
+              أحدث طلبات المتجر
+            </h2>
             <p className="text-xs text-[#475569]">
               مرتبة حسب الأقرب انتهاءً للمهلة · أرقام الهوية مخفية حتى التأكيد
             </p>
@@ -227,17 +228,17 @@ const ShopOverview = () => {
 
           <ShopOrdersTable
             compact
+            recentOnly
             orders={currentShopSubOrders}
             onStatusChange={handleStatusChange}
           />
         </div>
 
-        {/* Product CMS Section (5 cols on desktop) */}
-        <div className="space-y-4 lg:col-span-5">
+        <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-[#EBE1D6]/70 pb-3">
             <div>
               <h2 className="text-lg font-bold text-[#0F172A]">
-                إدارة المنتجات
+                أحدث المنتجات
               </h2>
               <p className="text-xs text-[#475569]">التسعير بالليرة السورية</p>
             </div>
@@ -253,6 +254,7 @@ const ShopOverview = () => {
 
           <ShopProductsTable
             compact
+            recentOnly
             products={shopProducts}
             onEdit={openEditDialog}
             onDelete={setDeletingProductId}

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import formatSypPrice from "@/utils/format-syp-price";
 import localizeProductTitle from "@/utils/localize-product-title";
+import { localizeShopName } from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 type StatusTab = "الكل" | "بانتظار" | "مؤكد" | "ملغي";
@@ -291,7 +292,7 @@ const OrdersPage = () => {
                 </div>
 
                 {/* Shop details & Items */}
-                <div className="space-y-1 text-sm text-[#475569]">
+                {/* <div className="space-y-1 text-sm text-[#475569]">
                   <p className="font-medium text-[#0F172A]">
                     متجر {sub.shopName} · {sub.shopCity || "المدينة غير متوفرة"}
                   </p>
@@ -300,7 +301,7 @@ const OrdersPage = () => {
                       .map((it) => `${it.title} × ${it.quantity}`)
                       .join("، ")}
                   </p>
-                </div>
+                </div> */}
 
                 {/* Countdown Timer Widget for Pending Sub-Orders */}
                 {isPending && (
@@ -363,7 +364,8 @@ const OrdersPage = () => {
                   {selectedInvoice.invoiceNumber}
                 </span>
                 <DialogTitle className="text-lg font-bold text-[#0F172A]">
-                  فاتورة متجر {selectedInvoice.shopName}
+                  فاتورة متجر{" "}
+                  {localizeShopName(selectedInvoice.shopName, locale)}
                 </DialogTitle>
               </div>
             </DialogHeader>

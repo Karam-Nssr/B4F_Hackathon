@@ -130,8 +130,9 @@ const PaginationNext = ({
 const PaginationEllipsis = ({
   className,
   children,
+  label = "More pages",
   ...props
-}: React.ComponentProps<"span">) => {
+}: React.ComponentProps<"span"> & { label?: string }) => {
   return (
     <span
       aria-hidden
@@ -143,7 +144,7 @@ const PaginationEllipsis = ({
       {...props}
     >
       {children ?? <HorizontalDotsIcon />}
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{label}</span>
     </span>
   );
 };

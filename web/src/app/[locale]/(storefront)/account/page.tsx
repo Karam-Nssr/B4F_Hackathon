@@ -178,18 +178,18 @@ const AccountPage = () => {
           <div className="rounded-[14px] bg-[#FBF8F4] p-3 text-right">
             <p className="text-xs font-medium text-[#475569]">التبديل بين البوابات (تجريبي):</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <Link
+              {/* <Link
                 href="/shop"
                 className="rounded-full bg-[#1E293B] px-3 py-1 text-xs font-medium text-white hover:bg-[#2C4180]"
               >
                 لوحة التاجر
-              </Link>
-              <Link
+              </Link> */}
+              {/* <Link
                 href="/admin"
                 className="rounded-full bg-[#1E293B] px-3 py-1 text-xs font-medium text-white hover:bg-[#2C4180]"
               >
                 لوحة المشرف
-              </Link>
+              </Link> */}
             </div>
           </div>
 

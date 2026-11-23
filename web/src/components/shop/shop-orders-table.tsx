@@ -13,6 +13,7 @@ interface ShopOrdersTableProps {
   compact?: boolean;
   onStatusChange: (id: string, confirm: boolean) => void | Promise<void>;
   orders: ShopSubOrder[];
+  recentOnly?: boolean;
 }
 
 const statusLabels: Record<ShopSubOrder["status"], string> = {
@@ -23,14 +24,15 @@ const statusLabels: Record<ShopSubOrder["status"], string> = {
 };
 
 const filterInputClass =
-  "h-8 rounded-md border-[#EBE1D6] px-2 text-[11px] dark:border-gray-700 dark:bg-gray-900";
+  "h-9 w-full min-w-[140px] rounded-md border-[#EBE1D6] px-2.5 text-xs dark:border-gray-700 dark:bg-gray-900";
 const filterSelectClass =
-  "h-8 w-full min-w-24 rounded-md border border-[#EBE1D6] bg-white px-2 text-[11px] text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
+  "h-9 w-full min-w-[150px] rounded-md border border-[#EBE1D6] bg-white px-2.5 text-xs text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
 const ShopOrdersTable = ({
   compact = false,
   onStatusChange,
   orders,
+  recentOnly = false,
 }: ShopOrdersTableProps) => {
   const [invoiceFilter, setInvoiceFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
@@ -44,37 +46,40 @@ const ShopOrdersTable = ({
       const totalQuery = totalFilter.replace(/\D/g, "");
       const remainingQuery = remainingFilter.replace(/\D/g, "");
 
-      return orders.filter((order) => {
-        if (
-          invoiceQuery &&
-          !order.invoiceNumber.toLocaleLowerCase().includes(invoiceQuery)
-        ) {
-          return false;
-        }
-        if (
-          customerQuery &&
-          !order.customerName.toLocaleLowerCase().includes(customerQuery)
-        ) {
-          return false;
-        }
-        if (
-          totalQuery &&
-          !String(Math.trunc(order.subtotalSyp / 100)).includes(totalQuery)
-        ) {
-          return false;
-        }
-        if (
-          remainingQuery &&
-          !String(order.remainingHours).includes(remainingQuery)
-        ) {
-          return false;
-        }
-        return statusFilter === "all" || order.status === statusFilter;
-      });
+      return orders
+        .slice(0, recentOnly ? 5 : orders.length)
+        .filter((order) => {
+          if (
+            invoiceQuery &&
+            !order.invoiceNumber.toLocaleLowerCase().includes(invoiceQuery)
+          ) {
+            return false;
+          }
+          if (
+            customerQuery &&
+            !order.customerName.toLocaleLowerCase().includes(customerQuery)
+          ) {
+            return false;
+          }
+          if (
+            totalQuery &&
+            !String(Math.trunc(order.subtotalSyp / 100)).includes(totalQuery)
+          ) {
+            return false;
+          }
+          if (
+            remainingQuery &&
+            !String(order.remainingHours).includes(remainingQuery)
+          ) {
+            return false;
+          }
+          return statusFilter === "all" || order.status === statusFilter;
+        });
     }, [
       customerFilter,
       invoiceFilter,
       orders,
+      recentOnly,
       remainingFilter,
       statusFilter,
       totalFilter,
@@ -109,7 +114,7 @@ const ShopOrdersTable = ({
       <div dir="rtl" className="overflow-x-auto">
         <table
           dir="rtl"
-          className={`w-full text-right text-sm ${compact ? "min-w-[620px]" : "min-w-[640px]"}`}
+          className={`w-full text-right text-sm ${compact ? "min-w-[780px]" : "min-w-[800px]"}`}
         >
           <thead className="border-b border-[#EBE1D6] bg-[#F6F0E9]">
             <tr>
@@ -125,7 +130,7 @@ const ShopOrdersTable = ({
               )}
             </tr>
             <tr className="border-t border-[#EBE1D6]/70">
-              <th className="px-2 py-2">
+              <th className="min-w-[160px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب رقم الفاتورة"
@@ -137,7 +142,7 @@ const ShopOrdersTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[160px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب اسم المشتري"
@@ -149,7 +154,7 @@ const ShopOrdersTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[140px] px-2 py-2">
                 <Input
                   type="search"
                   inputMode="numeric"
@@ -162,7 +167,7 @@ const ShopOrdersTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[140px] px-2 py-2">
                 <Input
                   type="search"
                   inputMode="numeric"
@@ -175,7 +180,7 @@ const ShopOrdersTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[160px] px-2 py-2">
                 <select
                   aria-label="تصفية حسب حالة الطلب"
                   value={statusFilter}
@@ -185,9 +190,9 @@ const ShopOrdersTable = ({
                   }}
                   className={filterSelectClass}
                 >
-                  <option value="all">كل الحالات</option>
+                  <option value="all" className="text-end">كل الحالات</option>
                   {Object.entries(statusLabels).map(([status, label]) => (
-                    <option key={status} value={status}>
+                    <option key={status} value={status}  className="text-end">
                       {label}
                     </option>
                   ))}

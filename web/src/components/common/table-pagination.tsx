@@ -47,6 +47,7 @@ const TablePagination = ({
               <PaginationPrevious
                 href="#"
                 text="السابق"
+                aria-label="الصفحة السابقة"
                 disabled={currentPage === 1}
                 onClick={(event) => {
                   event.preventDefault();
@@ -70,7 +71,7 @@ const TablePagination = ({
                     {page}
                   </PaginationLink>
                 ) : (
-                  <PaginationEllipsis />
+                  <PaginationEllipsis label="صفحات إضافية" />
                 )}
               </PaginationItem>
             ))}
@@ -78,6 +79,7 @@ const TablePagination = ({
               <PaginationNext
                 href="#"
                 text="التالي"
+                aria-label="الصفحة التالية"
                 disabled={currentPage === totalPages}
                 onClick={(event) => {
                   event.preventDefault();

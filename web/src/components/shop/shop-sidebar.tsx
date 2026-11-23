@@ -73,8 +73,27 @@ const ShopSidebarInner = ({ onNavigate }: InnerProps) => {
     <div className="flex h-full flex-col justify-between p-4 text-right">
       <div className="space-y-6">
         {/* Brand Header */}
+          <div className="border-t border-[#1E293B] pt-4">
+        <div className="flex items-center gap-3 rounded-[14px] bg-[#1E293B]/50 p-2.5">
+          {shop ? (
+            <ShopImage shop={shop} sizeClassName="size-10" />
+          ) : (
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-rose-100 font-bold text-sm text-[#0F172A]">
+              م
+            </div>
+          )}
+          <div className="overflow-hidden">
+            <p className="truncate text-sm font-semibold text-white">
+              {shop?.shopName ?? "متجرك"}
+            </p>
+            <p className="truncate text-xs text-[#BEC6E0]">
+              {shop?.category ?? "التصنيف غير متوفر"}
+            </p>
+          </div>
+        </div>
+      </div>
         <div className="flex items-center justify-between border-b border-[#1E293B] pb-4 pt-2">
-          <Link
+          {/* <Link
             href="/shop"
             onClick={onNavigate}
             className="flex items-center gap-2.5"
@@ -90,9 +109,9 @@ const ShopSidebarInner = ({ onNavigate }: InnerProps) => {
                 لوحة التاجر (Vendor)
               </span>
             </div>
-          </Link>
+          </Link> */}
         </div>
-
+        
         {/* Navigation Items */}
         <nav className="space-y-1.5">
           {NAV_ITEMS.map((item) => {
@@ -130,7 +149,7 @@ const ShopSidebarInner = ({ onNavigate }: InnerProps) => {
             <CartIcon className="size-5 shrink-0 text-[#C40027]" />
             <span>الرجوع للمتجر</span>
           </Link>
-          <Link
+          {/* <Link
             href="/admin"
             onClick={onNavigate}
             className="flex items-center gap-3 rounded-[14px] px-3.5 py-2.5 text-sm font-medium text-[#BEC6E0] hover:bg-[#1E293B] hover:text-white transition-colors"
@@ -139,30 +158,12 @@ const ShopSidebarInner = ({ onNavigate }: InnerProps) => {
               A
             </span>
             <span>لوحة المشرف</span>
-          </Link>
+          </Link> */}
         </div>
       </div>
 
       {/* Footer Shop Info */}
-      <div className="border-t border-[#1E293B] pt-4">
-        <div className="flex items-center gap-3 rounded-[14px] bg-[#1E293B]/50 p-2.5">
-          {shop ? (
-            <ShopImage shop={shop} sizeClassName="size-10" />
-          ) : (
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-rose-100 font-bold text-sm text-[#0F172A]">
-              م
-            </div>
-          )}
-          <div className="overflow-hidden">
-            <p className="truncate text-sm font-semibold text-white">
-              {shop?.shopName ?? "متجرك"}
-            </p>
-            <p className="truncate text-xs text-[#BEC6E0]">
-              {shop?.category ?? "التصنيف غير متوفر"}
-            </p>
-          </div>
-        </div>
-      </div>
+    
     </div>
   );
 };

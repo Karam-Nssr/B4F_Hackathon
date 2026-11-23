@@ -54,24 +54,30 @@ const AdminOverview = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Shops Governance */}
-        <div className="space-y-4 lg:col-span-7">
+      <div className="space-y-10">
+        <div className="space-y-4">
           <div className="border-b border-[#EBE1D6]/70 pb-3">
-            <h2 className="text-lg font-bold text-[#0F172A]">المتاجر المسجلة</h2>
+            <h2 className="text-lg font-bold text-[#0F172A]">
+              أحدث المتاجر المسجلة
+            </h2>
             <p className="text-xs text-[#475569]">
               {adminStats ? `إجمالي المتاجر: ${adminStats.totalShops}` : "بيانات المتاجر من الخادم"}
             </p>
-            <p className="mt-1 text-xs text-[#B45309]">
+            {/* <p className="mt-1 text-xs text-[#B45309]">
               واجهة الخلفية لا توفر تفعيلاً أو إيقافاً للمتاجر، لذلك عرض الحالة للقراءة فقط.
-            </p>
+            </p> */}
           </div>
 
-          <AdminShopsTable compact shops={adminShops} isLoading={isLoading} />
+          <AdminShopsTable
+            compact
+            recentOnly
+            shops={adminShops}
+            isLoading={isLoading}
+          />
         </div>
 
-        <div className="lg:col-span-5">
-          <AdminUsersDirectory compact />
+        <div>
+          <AdminUsersDirectory compact recentOnly />
         </div>
       </div>
     </div>

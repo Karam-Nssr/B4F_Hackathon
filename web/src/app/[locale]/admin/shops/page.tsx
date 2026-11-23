@@ -25,10 +25,10 @@ const AdminShopsPage = () => {
             ? `${adminStats.totalShops} متجر مسجّل، منها ${adminStats.activeShops} متجر نشط.`
             : "بيانات المتاجر المسجلة في المنصة."}
         </p>
-        <p className="mt-1 text-xs text-[#B45309]">
+        {/* <p className="mt-1 text-xs text-[#B45309]">
           لا تتوفر في واجهة الخلفية حالة مدينة أو عدد منتجات أو إجراء لتغيير
           حالة المتجر.
-        </p>
+        </p> */}
       </div>
 
       {error && (

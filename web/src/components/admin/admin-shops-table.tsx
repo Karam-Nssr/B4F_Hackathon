@@ -6,45 +6,61 @@ import TablePagination from "@/components/common/table-pagination";
 import { Input } from "@/components/ui/input";
 import useTablePagination from "@/hooks/use-table-pagination";
 import type { Shop } from "@/types/instamall";
+import {
+  localizeCategory,
+  localizeShopDescription,
+  localizeShopName,
+} from "@/utils/localize-catalog-text";
+import { useLocale } from "next-intl";
 
 type StatusFilter = "all" | "active" | "inactive";
 
 interface AdminShopsTableProps {
   compact?: boolean;
   isLoading: boolean;
+  recentOnly?: boolean;
   shops: Shop[];
 }
 
 const filterInputClass =
-  "h-8 rounded-md border-[#EBE1D6] px-2 text-[11px] dark:border-gray-700 dark:bg-gray-900";
+  "h-9 w-full min-w-[140px] rounded-md border-[#EBE1D6] px-2.5 text-xs dark:border-gray-700 dark:bg-gray-900";
 const filterSelectClass =
-  "h-8 w-full min-w-24 rounded-md border border-[#EBE1D6] bg-white px-2 text-[11px] text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
+  "h-9 w-full min-w-[140px] rounded-md border border-[#EBE1D6] bg-white px-2.5 text-xs text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
 const AdminShopsTable = ({
   compact = false,
   isLoading,
+  recentOnly = false,
   shops,
 }: AdminShopsTableProps) => {
+  const locale = useLocale();
   const [nameFilter, setNameFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const { pageItems, resetPage, ...pagination } = useTablePagination(
     useMemo(() => {
-      const nameQuery = nameFilter.trim().toLocaleLowerCase();
-      const categoryQuery = categoryFilter.trim().toLocaleLowerCase();
+      const nameQuery = nameFilter.trim().toLocaleLowerCase(locale);
+      const categoryQuery = categoryFilter.trim().toLocaleLowerCase(locale);
 
-      return shops.filter((shop) => {
+      return shops.slice(0, recentOnly ? 5 : shops.length).filter((shop) => {
+        const localizedName = localizeShopName(shop.shopName, locale);
+        const localizedDescription = localizeShopDescription(
+          shop.description,
+          locale,
+        );
         if (
           nameQuery &&
-          !`${shop.shopName} ${shop.description}`
-            .toLocaleLowerCase()
+          !`${shop.shopName} ${localizedName} ${shop.description} ${localizedDescription}`
+            .toLocaleLowerCase(locale)
             .includes(nameQuery)
         ) {
           return false;
         }
         if (
           categoryQuery &&
-          !shop.category.toLocaleLowerCase().includes(categoryQuery)
+          !`${shop.category} ${localizeCategory(shop.category, locale)}`
+            .toLocaleLowerCase(locale)
+            .includes(categoryQuery)
         ) {
           return false;
         }
@@ -53,7 +69,7 @@ const AdminShopsTable = ({
           (statusFilter === "active" ? shop.isActive : !shop.isActive)
         );
       });
-    }, [categoryFilter, nameFilter, shops, statusFilter]),
+    }, [categoryFilter, locale, nameFilter, recentOnly, shops, statusFilter]),
   );
 
   const updateTextFilter = (setter: (value: string) => void, value: string) => {
@@ -66,7 +82,7 @@ const AdminShopsTable = ({
       <div dir="rtl" className="overflow-x-auto">
         <table
           dir="rtl"
-          className={`w-full text-right text-sm ${compact ? "min-w-[620px]" : "min-w-[720px]"}`}
+          className={`w-full text-right text-sm ${compact ? "min-w-[780px]" : "min-w-[900px]"}`}
         >
           <thead className="border-b border-[#EBE1D6] bg-[#F6F0E9]">
             <tr>
@@ -87,7 +103,7 @@ const AdminShopsTable = ({
               ))}
             </tr>
             <tr className="border-t border-[#EBE1D6]/70">
-              <th className="px-2 py-2">
+              <th className="min-w-[180px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب اسم المتجر"
@@ -100,7 +116,7 @@ const AdminShopsTable = ({
                 />
               </th>
               <th />
-              <th className="px-2 py-2">
+              <th className="min-w-[180px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب تصنيف المتجر"
@@ -113,7 +129,7 @@ const AdminShopsTable = ({
                 />
               </th>
               <th />
-              <th className="px-2 py-2">
+              <th className="min-w-[160px] px-2 py-2">
                 <select
                   aria-label="تصفية حسب حالة المتجر"
                   value={statusFilter}
@@ -123,9 +139,9 @@ const AdminShopsTable = ({
                   }}
                   className={filterSelectClass}
                 >
-                  <option value="all">كل الحالات</option>
-                  <option value="active">نشط</option>
-                  <option value="inactive">متوقف</option>
+                  <option value="all" className="text-end px-3">كل الحالات</option>
+                  <option value="active" className="text-end">نشط</option>
+                  <option value="inactive" className="text-end">متوقف</option>
                 </select>
               </th>
               <th />
@@ -161,10 +177,11 @@ const AdminShopsTable = ({
                         <p
                           className={`${compact ? "text-xs" : "text-sm"} font-bold text-[#0F172A]`}
                         >
-                          {shop.shopName}
+                          {localizeShopName(shop.shopName, locale)}
                         </p>
                         <p className="text-xs text-[#475569]">
-                          {shop.description || "—"}
+                          {localizeShopDescription(shop.description, locale) ||
+                            "—"}
                         </p>
                       </div>
                     </div>
@@ -177,7 +194,7 @@ const AdminShopsTable = ({
                   <td
                     className={`${compact ? "px-3 py-3.5" : "px-4 py-4"} text-xs text-[#475569]`}
                   >
-                    {shop.category}
+                    {localizeCategory(shop.category, locale)}
                   </td>
                   <td
                     className={`${compact ? "px-3 py-3.5" : "px-4 py-4"} text-xs text-[#475569]`}

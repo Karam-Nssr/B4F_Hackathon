@@ -10,6 +10,11 @@ import {
 import type { Product } from "@/types/instamall";
 import formatSypPrice from "@/utils/format-syp-price";
 import localizeProductTitle from "@/utils/localize-product-title";
+import {
+  localizeCategory,
+  localizeProductDescription,
+  localizeShopName,
+} from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 interface ProductDetailsModalProps {
@@ -30,6 +35,11 @@ const ProductDetailsModal = ({
   const locale = useLocale();
   const isEnglish = locale === "en";
   const localizedTitle = localizeProductTitle(product.title, locale);
+  const localizedDescription = localizeProductDescription(
+    product.description,
+    product.title,
+    locale,
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,18 +63,18 @@ const ProductDetailsModal = ({
           >
             <DialogHeader className="gap-3">
               <p className="text-sm font-semibold text-[#C40027]">
-                {product.shopName}
+                {localizeShopName(product.shopName, locale)}
               </p>
               <DialogTitle className="text-2xl font-bold text-[#0F172A] dark:text-white/90">
                 {localizedTitle}
               </DialogTitle>
               <DialogDescription className="text-sm leading-7 text-[#475569] dark:text-gray-300">
-                {product.description}
+                {localizedDescription}
               </DialogDescription>
             </DialogHeader>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#EBE1D6] pt-5 dark:border-gray-700">
               <span className="rounded-full bg-[#F6F0E9] px-4 py-2 text-sm font-medium text-[#475569] dark:bg-gray-800 dark:text-gray-300">
-                {product.category}
+                {localizeCategory(product.category, locale)}
               </span>
               <p className="font-mono text-lg font-bold text-[#0F172A] dark:text-white/90">
                 {formatSypPrice(product.priceSyp)} {isEnglish ? "SYP" : "ل.س"}

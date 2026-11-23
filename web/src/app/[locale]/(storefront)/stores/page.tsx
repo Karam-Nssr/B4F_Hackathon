@@ -15,6 +15,11 @@ import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { ShopImage } from "@/components/storefront/shop-image";
+import {
+  localizeCategory,
+  localizeShopDescription,
+  localizeShopName,
+} from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 type CategoryFilter =
@@ -52,15 +57,6 @@ const CATEGORY_ALIASES: Record<Exclude<CategoryFilter, "all">, string[]> = {
     "pantry & household goods",
     "home & living",
   ],
-};
-
-const CATEGORY_LABELS_AR: Record<string, string> = {
-  Accessories: "إكسسوارات",
-  Clothing: "ملابس",
-  Gifts: "هدايا",
-  "Home Decor": "ديكور",
-  "Household Supplies": "مستلزمات منزلية",
-  Ornaments: "زينة",
 };
 
 const StoresDirectory = () => {
@@ -165,9 +161,9 @@ const StoresDirectory = () => {
             })}
           </div>
 
-          <span className="text-xs text-[#94A3B8]">
+          {/* <span className="text-xs text-[#94A3B8]">
             المدينة وعدد المنتجات غير متوفرين في بيانات الواجهة الخلفية
-          </span>
+          </span> */}
         </div>
       </div>
 
@@ -193,14 +189,10 @@ const StoresDirectory = () => {
 
                     <div>
                       <h2 className="text-lg font-semibold text-[#0F172A]">
-                        {shop.shopName}
+                        {localizeShopName(shop.shopName, locale)}
                       </h2>
                       <p className="text-xs text-[#475569]">
-                        {locale === "ar"
-                          ? (CATEGORY_LABELS_AR[shop.category] ?? shop.category)
-                          : shop.category}{" "}
-                        · {shop.city || "المدينة غير متوفرة"} ·{" "}
-                        {shop.productCount ?? "—"} منتج
+                        {localizeCategory(shop.category, locale)}
                       </p>
                     </div>
                   </div>
@@ -210,18 +202,18 @@ const StoresDirectory = () => {
 
                 {/* Description */}
                 <p className="text-sm leading-relaxed text-[#475569]">
-                  {shop.description}
+                  {localizeShopDescription(shop.description, locale)}
                 </p>
               </div>
 
               {/* Footer Row: Response Time + CTA */}
               <div className="mt-6 flex items-center justify-between border-t border-[#EBE1D6]/70 pt-4">
-                <span className="text-xs text-[#475569]">
+                {/* <span className="text-xs text-[#475569]">
                   وقت الرد المعتاد:{" "}
                   <span className="font-mono font-semibold text-[#0F172A]">
                     {shop.responseTimeHours ?? "غير متوفر"}
                   </span>
-                </span>
+                </span> */}
 
                 <Link
                   href={`/?shopId=${encodeURIComponent(shop.id)}#products-section`}

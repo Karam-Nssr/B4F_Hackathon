@@ -8,6 +8,10 @@ import useTablePagination from "@/hooks/use-table-pagination";
 import type { Product } from "@/types/instamall";
 import formatSypPrice from "@/utils/format-syp-price";
 import localizeProductTitle from "@/utils/localize-product-title";
+import {
+  localizeCategory,
+  localizeProductDescription,
+} from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 interface ShopProductsTableProps {
@@ -15,20 +19,22 @@ interface ShopProductsTableProps {
   onDelete: (productId: string) => void;
   onEdit: (product: Product) => void;
   products: Product[];
+  recentOnly?: boolean;
 }
 
 type StatusFilter = "all" | "active" | "inactive";
 
 const filterInputClass =
-  "h-8 rounded-md border-[#EBE1D6] px-2 text-[11px] dark:border-gray-700 dark:bg-gray-900";
+  "h-9 w-full min-w-[140px] rounded-md border-[#EBE1D6] px-2.5 text-xs dark:border-gray-700 dark:bg-gray-900";
 const filterSelectClass =
-  "h-8 w-full min-w-24 rounded-md border border-[#EBE1D6] bg-white px-2 text-[11px] text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
+  "h-9 w-full min-w-[140px] rounded-md border border-[#EBE1D6] bg-white px-2.5 text-xs text-[#0F172A] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
 const ShopProductsTable = ({
   compact = false,
   onDelete,
   onEdit,
   products,
+  recentOnly = false,
 }: ShopProductsTableProps) => {
   const locale = useLocale();
   const [titleFilter, setTitleFilter] = useState("");
@@ -37,43 +43,53 @@ const ShopProductsTable = ({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const { pageItems, resetPage, ...pagination } = useTablePagination(
     useMemo(() => {
-      const titleQuery = titleFilter.trim().toLocaleLowerCase();
-      const categoryQuery = categoryFilter.trim().toLocaleLowerCase();
+      const titleQuery = titleFilter.trim().toLocaleLowerCase(locale);
+      const categoryQuery = categoryFilter.trim().toLocaleLowerCase(locale);
       const priceQuery = priceFilter.replace(/\D/g, "");
 
-      return products.filter((product) => {
-        const localizedTitle = localizeProductTitle(product.title, locale);
-        if (
-          titleQuery &&
-          !`${product.title} ${localizedTitle} ${product.description}`
-            .toLocaleLowerCase()
-            .includes(titleQuery)
-        ) {
-          return false;
-        }
-        if (
-          categoryQuery &&
-          !product.category.toLocaleLowerCase().includes(categoryQuery)
-        ) {
-          return false;
-        }
-        if (
-          priceQuery &&
-          !String(Math.trunc(product.priceSyp / 100)).includes(priceQuery)
-        ) {
-          return false;
-        }
-        return (
-          compact ||
-          statusFilter === "all" ||
-          (statusFilter === "active" ? product.isActive : !product.isActive)
-        );
-      });
+      return products
+        .slice(0, recentOnly ? 5 : products.length)
+        .filter((product) => {
+          const localizedTitle = localizeProductTitle(product.title, locale);
+          const localizedDescription = localizeProductDescription(
+            product.description,
+            product.title,
+            locale,
+          );
+          if (
+            titleQuery &&
+            !`${product.title} ${localizedTitle} ${product.description} ${localizedDescription}`
+              .toLocaleLowerCase(locale)
+              .includes(titleQuery)
+          ) {
+            return false;
+          }
+          if (
+            categoryQuery &&
+            !`${product.category} ${localizeCategory(product.category, locale)}`
+              .toLocaleLowerCase(locale)
+              .includes(categoryQuery)
+          ) {
+            return false;
+          }
+          if (
+            priceQuery &&
+            !String(Math.trunc(product.priceSyp / 100)).includes(priceQuery)
+          ) {
+            return false;
+          }
+          return (
+            compact ||
+            statusFilter === "all" ||
+            (statusFilter === "active" ? product.isActive : !product.isActive)
+          );
+        });
     }, [
       categoryFilter,
       compact,
       priceFilter,
       products,
+      recentOnly,
       statusFilter,
       titleFilter,
       locale,
@@ -90,7 +106,7 @@ const ShopProductsTable = ({
       <div dir="rtl" className="overflow-x-auto">
         <table
           dir="rtl"
-          className={`w-full text-right text-sm ${compact ? "" : "min-w-[700px]"}`}
+          className={`w-full text-right text-sm ${compact ? "min-w-[620px]" : "min-w-[720px]"}`}
         >
           <thead className="border-b border-[#EBE1D6] bg-[#F6F0E9]">
             <tr>
@@ -113,7 +129,7 @@ const ShopProductsTable = ({
               </th>
             </tr>
             <tr className="border-t border-[#EBE1D6]/70">
-              <th className="px-2 py-2">
+              <th className="min-w-[160px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب اسم المنتج"
@@ -125,7 +141,7 @@ const ShopProductsTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[150px] px-2 py-2">
                 <Input
                   type="search"
                   aria-label="تصفية حسب تصنيف المنتج"
@@ -137,7 +153,7 @@ const ShopProductsTable = ({
                   className={filterInputClass}
                 />
               </th>
-              <th className="px-2 py-2">
+              <th className="min-w-[130px] px-2 py-2">
                 <Input
                   type="search"
                   inputMode="numeric"
@@ -151,7 +167,7 @@ const ShopProductsTable = ({
                 />
               </th>
               {!compact && (
-                <th className="px-2 py-2">
+                <th className="min-w-[150px] px-2 py-2">
                   <select
                     aria-label="تصفية حسب حالة المنتج"
                     value={statusFilter}
@@ -161,9 +177,9 @@ const ShopProductsTable = ({
                     }}
                     className={filterSelectClass}
                   >
-                    <option value="all">كل الحالات</option>
-                    <option value="active">نشط</option>
-                    <option value="inactive">غير نشط</option>
+                    <option value="all" className="text-end">كل الحالات</option>
+                    <option value="active"  className="text-end">نشط</option>
+                    <option value="inactive"  className="text-end">غير نشط</option>
                   </select>
                 </th>
               )}
@@ -205,14 +221,18 @@ const ShopProductsTable = ({
                             {localizeProductTitle(product.title, locale)}
                           </p>
                           <p className="line-clamp-1 text-xs text-[#475569]">
-                            {product.description}
+                            {localizeProductDescription(
+                              product.description,
+                              product.title,
+                              locale,
+                            )}
                           </p>
                         </div>
                       </div>
                     )}
                   </td>
                   <td className="px-3 py-3 text-xs text-[#475569]">
-                    {product.category}
+                    {localizeCategory(product.category, locale)}
                   </td>
                   <td className="px-3 py-3 font-mono text-xs font-semibold text-[#0F172A]">
                     {formatSypPrice(product.priceSyp)} ل.س

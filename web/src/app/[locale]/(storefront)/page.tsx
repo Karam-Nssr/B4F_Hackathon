@@ -26,50 +26,15 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import getPaginationPages from "@/utils/get-pagination-pages";
+import {
+  localizeCategory,
+  localizeShopName,
+} from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 const PRODUCTS_PER_PAGE = 12;
 const INITIAL_LOADER_MIN_MS = 2000;
 const INITIAL_LOADER_MAX_MS = 3000;
-const CATEGORY_LABELS_AR: Record<string, string> = {
-  Accessories: "إكسسوارات",
-  "Aleppo Soap": "صابون حلبي",
-  "Aleppo Sweets": "حلويات حلبية",
-  "Bakery & Sweets": "مخبوزات وحلويات",
-  "Carpets & Rugs": "سجاد وبسط",
-  "Citrus & Preserves": "حمضيات ومعلّبات",
-  Clothing: "ملابس",
-  "Clothing & Textiles": "ألبسة ومنسوجات",
-  "Coffee & Roastery": "قهوة ومحمصة",
-  "Coffee & Tea": "قهوة وشاي",
-  "Embroidery & Textiles": "تطريز ومنسوجات",
-  "Fresh Produce": "منتجات طازجة",
-  "General Store": "متجر عام",
-  Gifts: "هدايا",
-  Groceries: "بقالة",
-  "Handmade Gifts": "هدايا يدوية",
-  "Home Decor": "ديكور",
-  "Home & Living": "المنزل والمعيشة",
-  "Household Supplies": "مستلزمات منزلية",
-  "Leather Bags": "حقائب جلدية",
-  "Leather Goods": "منتجات جلدية",
-  "Local Crafts": "حرف محلية",
-  "Natural Care": "عناية طبيعية",
-  Ornaments: "زينة",
-  "Pantry & Household Goods": "مؤن وأدوات منزلية",
-  "Personal Care": "عناية شخصية",
-  Spices: "بهارات",
-  "Spices & Herbs": "بهارات وأعشاب",
-  "Sweets & Bakery": "حلويات ومخبوزات",
-  Sweets: "حلويات",
-  "Syrian Spices": "بهارات سورية",
-  "Tea & Coffee": "شاي وقهوة",
-  "Traditional Clothing": "أزياء تراثية",
-};
-
-const getCategoryLabel = (category: string, locale: string) =>
-  locale === "ar" ? (CATEGORY_LABELS_AR[category] ?? category) : category;
-
 const HomePageContent = () => {
   const locale = useLocale();
   const searchParams = useSearchParams();
@@ -185,7 +150,9 @@ const HomePageContent = () => {
           <p className="text-sm font-medium text-[#475569]">
             عرض {firstProduct}–{lastProduct} من {filteredProducts.length} منتجات
             مختارة
-            {selectedShop ? ` من متجر ${selectedShop.shopName}` : ""}
+            {selectedShop
+              ? ` من متجر ${localizeShopName(selectedShop.shopName, locale)}`
+              : ""}
           </p>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -209,7 +176,7 @@ const HomePageContent = () => {
                 },
                 ...categories.map((category) => ({
                   value: category,
-                  label: getCategoryLabel(category, locale),
+                  label: localizeCategory(category, locale),
                 })),
               ].map((category) => {
                 const isActive = activeCategory === category.value;
@@ -254,11 +221,12 @@ const HomePageContent = () => {
           <Pagination
             aria-label={locale === "en" ? "Product pages" : "صفحات المنتجات"}
           >
-            <PaginationContent className="flex-wrap gap-1">
+            <PaginationContent className="flex-wrap gap-2 sm:gap-3">
               <PaginationItem>
                 <PaginationPrevious
                   href="#products-section"
-                  size="icon-sm"
+                  size="default"
+                  className="min-w-[7rem]"
                   text={locale === "en" ? "Previous" : "السابق"}
                   aria-label={
                     locale === "en" ? "Previous page" : "الصفحة السابقة"
@@ -278,7 +246,11 @@ const HomePageContent = () => {
                 if (typeof item === "string") {
                   return (
                     <PaginationItem key={item}>
-                      <PaginationEllipsis />
+                      <PaginationEllipsis
+                        label={
+                          locale === "en" ? "More pages" : "صفحات إضافية"
+                        }
+                      />
                     </PaginationItem>
                   );
                 }
@@ -313,7 +285,8 @@ const HomePageContent = () => {
               <PaginationItem>
                 <PaginationNext
                   href="#products-section"
-                  size="icon-sm"
+                  size="default"
+                  className="min-w-[7rem]"
                   text={locale === "en" ? "Next" : "التالي"}
                   aria-label={locale === "en" ? "Next page" : "الصفحة التالية"}
                   disabled={activePage >= totalPages}

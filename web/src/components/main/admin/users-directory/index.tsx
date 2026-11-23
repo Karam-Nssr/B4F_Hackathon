@@ -27,6 +27,7 @@ type RoleFilter = UserRole | "all";
 
 interface AdminUsersDirectoryProps {
   compact?: boolean;
+  recentOnly?: boolean;
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -54,7 +55,10 @@ const formatCreatedAt = (value: string, locale: string): string => {
   }).format(date);
 };
 
-const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
+const AdminUsersDirectory = ({
+  compact = false,
+  recentOnly = false,
+}: AdminUsersDirectoryProps) => {
   const locale = useLocale();
   const { adminUsers, isLoading, error } = useInstaMallStore();
   const [nameFilter, setNameFilter] = useState("");
@@ -64,7 +68,8 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
   const nameQuery = nameFilter.trim().toLocaleLowerCase(locale);
   const emailQuery = emailFilter.trim().toLocaleLowerCase(locale);
 
-  const filteredUsers = adminUsers.filter((user) => {
+  const directoryUsers = recentOnly ? adminUsers.slice(0, 5) : adminUsers;
+  const filteredUsers = directoryUsers.filter((user) => {
     if (roleFilter !== "all" && user.role !== roleFilter) return false;
     if (
       nameQuery &&
@@ -94,9 +99,9 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
     useTablePagination(filteredUsers);
   const Heading = compact ? "h2" : "h1";
   const filterInputClass =
-    "h-8 rounded-md px-2 text-[11px] dark:border-gray-700 dark:bg-gray-900";
+    "h-9 w-full min-w-[140px] rounded-md px-2.5 text-xs dark:border-gray-700 dark:bg-gray-900";
   const filterSelectClass =
-    "h-8 w-full min-w-24 rounded-md border border-gray-300 bg-white px-2 text-[11px] text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
+    "h-9 w-full min-w-[140px] rounded-md border border-gray-300 bg-white px-2.5 text-xs text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
   return (
     <section
@@ -114,7 +119,7 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
               : "text-2xl font-bold text-gray-800 md:text-3xl dark:text-white/90"
           }
         >
-          المستخدمون
+          {recentOnly ? "أحدث المستخدمين" : "المستخدمون"}
         </Heading>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {compact
@@ -134,7 +139,7 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
 
       <div className="shadow-theme-xs rounded-card border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="overflow-x-auto">
-          <Table className="min-w-full text-start text-sm">
+          <Table className="min-w-[620px] text-start text-sm">
             <TableHeader className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
               <TableRow>
                 <TableCell
@@ -157,7 +162,10 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
                 </TableCell>
               </TableRow>
               <TableRow className="border-t border-gray-200 dark:border-gray-800">
-                <TableCell isHeader className="space-y-1 px-2 py-2 sm:px-3">
+                <TableCell
+                  isHeader
+                  className="min-w-[190px] space-y-1 px-2 py-2 sm:px-3"
+                >
                   <Input
                     type="search"
                     aria-label="تصفية حسب اسم المستخدم"
@@ -181,7 +189,10 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
                     className={filterInputClass}
                   />
                 </TableCell>
-                <TableCell isHeader className="px-2 py-2 sm:px-3">
+                <TableCell
+                  isHeader
+                  className="min-w-[160px] px-2 py-2 sm:px-3"
+                >
                   <select
                     aria-label="تصفية حسب دور المستخدم"
                     value={roleFilter}
@@ -191,13 +202,16 @@ const AdminUsersDirectory = ({ compact = false }: AdminUsersDirectoryProps) => {
                     }}
                     className={filterSelectClass}
                   >
-                    <option value="all">كل الأدوار</option>
+                    <option value="all" className="text-end">كل الأدوار</option>
                     <option value="user">مشتري</option>
                     <option value="shop">صاحب متجر</option>
                     <option value="admin">مشرف</option>
                   </select>
                 </TableCell>
-                <TableCell isHeader className="px-2 py-2 sm:px-3">
+                <TableCell
+                  isHeader
+                  className="min-w-[170px] px-2 py-2 sm:px-3"
+                >
                   <Input
                     type="date"
                     aria-label="تصفية حسب تاريخ التسجيل"

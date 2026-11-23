@@ -19,6 +19,7 @@ import { MinusIcon, PlusIcon, TrashBinIcon } from "@/icons";
 import getErrorMessage from "@/utils/get-error-message";
 import formatSypPrice from "@/utils/format-syp-price";
 import localizeProductTitle from "@/utils/localize-product-title";
+import { localizeShopName } from "@/utils/localize-catalog-text";
 import { useLocale } from "next-intl";
 
 const formatPhone = (phone: string): string => {
@@ -200,7 +201,7 @@ const CartPage = () => {
                           طلب فرعي #{groupIndex + 1}:
                         </span>
                         <span className="text-sm font-medium text-[#0F172A]">
-                          متجر {group.shopName}
+                          متجر {localizeShopName(group.shopName, locale)}
                         </span>
                         <span className="rounded-full bg-[#F6F0E9] px-2.5 py-0.5 text-xs text-[#475569]">
                           {group.shopCity}
@@ -344,7 +345,7 @@ const CartPage = () => {
                       className="flex items-center justify-between text-sm"
                     >
                       <span className="text-[#475569]">
-                        طلب {group.shopName}
+                        طلب {localizeShopName(group.shopName, locale)}
                       </span>
                       <span className="font-mono font-semibold text-[#0F172A]">
                         {formatSypPrice(subTotal)} ل.س
