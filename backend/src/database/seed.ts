@@ -20,6 +20,14 @@ const demoAccounts = [
     nationalId: '00000000001',
   },
   {
+    fullName: 'haidra Buyer',
+    email: 'buyer@instamall.local',
+    password: 'Buyer12345!',
+    role: 'user' as const,
+    phone: '+963900000001',
+    nationalId: '00000000001',
+  },
+  {
     fullName: 'Demo Shop Owner',
     email: 'shop@instamall.local',
     password: 'Shop12345!',
