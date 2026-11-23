@@ -23,6 +23,7 @@ import { authRoutes } from "@/lib/auth-routes";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { BrandLogo } from "./brand-logo";
 import { CartIcon, SearchIcon } from "@/icons";
+import ThemeToggleButton from "@/layout/header/theme-toggler";
 
 const StorefrontNavbar = () => {
   const t = useTranslations("storefront");
@@ -52,7 +53,7 @@ const StorefrontNavbar = () => {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
             <BrandLogo className="size-9" />
-            <span className="font-brand text-2xl font-normal tracking-wide text-white select-none">
+            <span className="hidden font-brand text-2xl font-normal tracking-wide text-white select-none sm:inline">
               InstaMall
             </span>
           </Link>
@@ -144,24 +145,26 @@ const StorefrontNavbar = () => {
         </div>
 
         {/* Left side in RTL: Cart + Auth (Sign In or Avatar) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ThemeToggleButton className="hidden border-[#BEC6E0]/60 bg-transparent text-[#BEC6E0] hover:bg-[#26354D] hover:text-white md:inline-flex dark:border-[#BEC6E0]/60 dark:bg-transparent dark:text-white dark:hover:bg-[#26354D]" />
+
           {/* Cart Pill (Visible to everyone) */}
           <Link
             href="/cart"
-            className="flex h-11 items-center gap-2 rounded-full border border-[#BEC6E0]/60 bg-[#1E293B] px-4 text-white transition-all hover:border-white hover:bg-[#26354D]"
+            className="flex h-11 items-center gap-2 rounded-full border border-[#BEC6E0]/60 bg-[#1E293B] px-3 text-white transition-all hover:border-white hover:bg-[#26354D] sm:px-4"
           >
             <span className="flex size-5 items-center justify-center rounded-full bg-[#C40027] font-mono text-xs font-bold text-white shadow-[0_2px_8px_rgba(196,0,39,0.4)]">
               {cartCount}
             </span>
             <CartIcon className="size-4.5 shrink-0" />
-            <span className="text-sm font-medium">السلة</span>
+            <span className="hidden text-sm font-medium sm:inline">السلة</span>
           </Link>
 
           {/* Guest State: Sign In Button */}
           {isGuest ? (
             <Link
               href="/signin"
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[#C40027] px-5 text-sm font-semibold text-white shadow-[0px_4px_12px_rgba(196,0,39,0.28)] transition-all hover:bg-[#a50021] active:scale-95"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#C40027] px-3 text-sm font-semibold text-white shadow-[0px_4px_12px_rgba(196,0,39,0.28)] transition-all hover:bg-[#a50021] active:scale-95 sm:px-5"
             >
               {tAuth("signInLink")}
             </Link>
@@ -317,6 +320,11 @@ const StorefrontNavbar = () => {
                 تسجيل الخروج ({currentUser?.fullName})
               </button>
             )}
+
+            <div className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-[#BEC6E0]">
+              <span>المظهر</span>
+              <ThemeToggleButton className="border-[#BEC6E0]/60 bg-transparent text-[#BEC6E0] hover:bg-[#26354D] hover:text-white dark:border-[#BEC6E0]/60 dark:bg-transparent dark:text-white dark:hover:bg-[#26354D]" />
+            </div>
           </nav>
         </div>
       )}

@@ -60,15 +60,11 @@ export const notify = ({
     priority: type === "error" ? "high" : "low",
   });
 
-export const notifySuccess = (
-  description: string,
-  title?: string,
-): string => notify({ description, title, type: "success" });
+export const notifySuccess = (description: string, title?: string): string =>
+  notify({ description, title, type: "success" });
 
-export const notifyError = (
-  description: string,
-  title?: string,
-): string => notify({ description, title, type: "error" });
+export const notifyError = (description: string, title?: string): string =>
+  notify({ description, title, type: "error" });
 
 const ToastTypeIcon = ({ type }: { type: NotificationType }) => {
   const iconClassName = "size-5 shrink-0";
@@ -107,14 +103,14 @@ const ToastRegion = () => {
               swipeDirection="up"
               className={cn(
                 "pointer-events-auto absolute start-0 top-0 w-full origin-top overflow-hidden rounded-form border shadow-card outline-none",
-                "[--gap:0.75rem] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)+(var(--toast-index)*var(--gap))+var(--toast-swipe-movement-y))]",
+                "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)+(var(--toast-index)*var(--gap))+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
                 "h-[var(--height)] [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)+(var(--toast-index)*var(--peek))+(var(--shrink)*var(--height))))_scale(var(--scale))]",
                 "transition-[transform,opacity,height] duration-200 ease-out data-[expanded]:h-[var(--toast-height)] data-[expanded]:[transform:translateX(var(--toast-swipe-movement-x))_translateY(var(--offset-y))]",
-                "data-[limited]:opacity-0 data-[starting-style]:opacity-0 data-[starting-style]:[transform:translateY(-150%)] data-[ending-style]:opacity-0 data-[ending-style]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))]",
+                "data-[ending-style]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))] data-[ending-style]:opacity-0 data-[limited]:opacity-0 data-[starting-style]:[transform:translateY(-150%)] data-[starting-style]:opacity-0",
                 "border-lineStrong bg-surface text-navy dark:border-gray-700 dark:bg-navy2 dark:text-white",
                 "data-[type=success]:border-ok/40 data-[type=success]:bg-okBg data-[type=success]:text-ok dark:data-[type=success]:border-ok/60 dark:data-[type=success]:bg-ok/15",
                 "data-[type=warning]:border-warn/40 data-[type=warning]:bg-warnBg data-[type=warning]:text-warn dark:data-[type=warning]:border-warn/60 dark:data-[type=warning]:bg-warn/15",
-                "data-[type=error]:border-err/40 data-[type=error]:bg-errBg data-[type=error]:text-err dark:data-[type=error]:border-err/60 dark:data-[type=error]:bg-err/15",
+                "data-[type=error]:border-err/60 data-[type=error]:bg-errBg data-[type=error]:text-err dark:data-[type=error]:border-err/70 dark:data-[type=error]:bg-errBg",
                 "data-[type=info]:border-kpi3 data-[type=info]:bg-white dark:data-[type=info]:border-kpi3/40 dark:data-[type=info]:bg-kpi3/10",
               )}
             >
@@ -132,7 +128,12 @@ const ToastRegion = () => {
                     {toast.title ?? t(TITLE_KEYS[type])}
                   </Toast.Title>
                   {toast.description ? (
-                    <Toast.Description className="break-words text-xs leading-5 text-current opacity-80">
+                    <Toast.Description
+                      className={cn(
+                        "text-xs leading-5 break-words text-current",
+                        type === "error" ? "opacity-100" : "opacity-80",
+                      )}
+                    >
                       {toast.description}
                     </Toast.Description>
                   ) : null}

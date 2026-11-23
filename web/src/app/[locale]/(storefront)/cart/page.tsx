@@ -16,6 +16,10 @@ import { useMemo, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { MinusIcon, PlusIcon, TrashBinIcon } from "@/icons";
+import getErrorMessage from "@/utils/get-error-message";
+import formatSypPrice from "@/utils/format-syp-price";
+import localizeProductTitle from "@/utils/localize-product-title";
+import { useLocale } from "next-intl";
 
 const formatPhone = (phone: string): string => {
   const digits = phone.replace(/\D/g, "");
@@ -30,6 +34,7 @@ const maskNationalId = (id: string): string => {
 };
 
 const CartPage = () => {
+  const locale = useLocale();
   const router = useRouter();
   const { cart, currentUser, checkout, updateQuantity, removeFromCart, error } =
     useInstaMallStore();
@@ -68,7 +73,10 @@ const CartPage = () => {
   }, [cart]);
 
   const grandTotal = useMemo(() => {
-    return cart.reduce((acc, item) => acc + item.unitPriceSyp * item.quantity, 0);
+    return cart.reduce(
+      (acc, item) => acc + item.unitPriceSyp * item.quantity,
+      0,
+    );
   }, [cart]);
 
   const handleCheckout = async () => {
@@ -79,9 +87,7 @@ const CartPage = () => {
       const order = await checkout();
       if (order) router.push("/orders");
     } catch (caught) {
-      setCheckoutError(
-        caught instanceof Error ? caught.message : "تعذر إرسال الطلب",
-      );
+      setCheckoutError(getErrorMessage(caught, locale, "تعذر إرسال الطلب"));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +97,9 @@ const CartPage = () => {
     <div className="space-y-8 text-right">
       {/* Page Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">السلة الموحدة</h1>
+        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">
+          السلة الموحدة
+        </h1>
         <p className="text-base text-[#475569]">
           أضف من عدة متاجر؛ نقسّم الطلب تلقائياً إلى طلب وفاتورة لكل متجر.
         </p>
@@ -105,7 +113,9 @@ const CartPage = () => {
 
       {cart.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#EBE1D6] bg-white p-12 text-center shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
-          <p className="text-lg font-medium text-[#475569]">سلة التسوق فارغة حالياً</p>
+          <p className="text-lg font-medium text-[#475569]">
+            سلة التسوق فارغة حالياً
+          </p>
           <p className="mt-1 text-sm text-[#94A3B8]">
             تصفح التشكيلة وأضف منتجاتك المفضلة من المتاجر السورية
           </p>
@@ -123,7 +133,9 @@ const CartPage = () => {
             {/* Attached Identity Card */}
             <div className="rounded-[22px] border border-[#EBE1D6] bg-white p-5 shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
               <div className="flex items-center justify-between border-b border-[#EBE1D6]/70 pb-3">
-                <h2 className="text-base font-semibold text-[#0F172A]">هويتك مرفقة بالفاتورة</h2>
+                <h2 className="text-base font-semibold text-[#0F172A]">
+                  هويتك مرفقة بالفاتورة
+                </h2>
                 <Link
                   href="/account"
                   className="text-sm font-medium text-[#C40027] hover:underline"
@@ -134,15 +146,21 @@ const CartPage = () => {
 
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="rounded-[14px] border border-[#94A3B8]/30 bg-[#FBF8F4] p-3">
-                  <span className="block text-xs font-medium text-[#475569]">الهاتف</span>
+                  <span className="block text-xs font-medium text-[#475569]">
+                    الهاتف
+                  </span>
                   <span className="mt-1 block font-mono text-sm font-semibold text-[#0F172A]">
-                    {currentUser?.phone ? formatPhone(currentUser.phone) : "غير متوفر"}
+                    {currentUser?.phone
+                      ? formatPhone(currentUser.phone)
+                      : "غير متوفر"}
                   </span>
                 </div>
 
                 <div className="rounded-[14px] border border-[#94A3B8]/30 bg-[#FBF8F4] p-3">
                   <div className="flex items-center justify-between">
-                    <span className="block text-xs font-medium text-[#475569]">الرقم الوطني</span>
+                    <span className="block text-xs font-medium text-[#475569]">
+                      الرقم الوطني
+                    </span>
                     <button
                       type="button"
                       onClick={() => setShowFullId(!showFullId)}
@@ -192,7 +210,7 @@ const CartPage = () => {
                       <div className="text-xs text-[#475569]">
                         المجموع الفرعي:{" "}
                         <span className="font-mono font-bold text-[#0F172A]">
-                          {shopSubtotal.toLocaleString("en-US")}
+                          {formatSypPrice(shopSubtotal)}
                         </span>{" "}
                         ل.س
                       </div>
@@ -212,19 +230,21 @@ const CartPage = () => {
                             <div className="flex items-center gap-3.5">
                               <img
                                 src={item.imageUrl}
-                                alt={item.title}
-                                className="size-14 rounded-[14px] object-cover bg-[#F6F0E9] ring-1 ring-[#EBE1D6]"
+                                alt={localizeProductTitle(item.title, locale)}
+                                className="size-14 rounded-[14px] bg-[#F6F0E9] object-cover ring-1 ring-[#EBE1D6]"
                               />
                               <div>
                                 <h4 className="text-sm font-semibold text-[#0F172A]">
-                                  {item.title}
+                                  {localizeProductTitle(item.title, locale)}
                                 </h4>
                                 {item.variantNote && (
-                                  <p className="text-xs text-[#475569]">{item.variantNote}</p>
+                                  <p className="text-xs text-[#475569]">
+                                    {item.variantNote}
+                                  </p>
                                 )}
                                 <p className="mt-0.5 text-xs text-[#475569]">
                                   <span className="font-mono font-medium text-[#0F172A]">
-                                    {item.unitPriceSyp.toLocaleString("en-US")}
+                                    {formatSypPrice(item.unitPriceSyp)}
                                   </span>{" "}
                                   ل.س للقطعة
                                 </p>
@@ -232,13 +252,16 @@ const CartPage = () => {
                             </div>
 
                             {/* Stepper + Line Subtotal */}
-                            <div className="flex items-center justify-between sm:justify-end gap-6">
+                            <div className="flex items-center justify-between gap-6 sm:justify-end">
                               {/* Unified Quantity Stepper Pill */}
                               <div className="inline-flex h-11 items-center rounded-full border border-[#94A3B8] bg-white px-2 shadow-xs">
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    updateQuantity(item.productId, item.quantity - 1)
+                                    updateQuantity(
+                                      item.productId,
+                                      item.quantity - 1,
+                                    )
                                   }
                                   className="flex size-7 items-center justify-center rounded-full text-[#475569] transition-colors hover:bg-[#F6F0E9] hover:text-[#0F172A]"
                                   aria-label="إنقاص"
@@ -253,7 +276,10 @@ const CartPage = () => {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    updateQuantity(item.productId, item.quantity + 1)
+                                    updateQuantity(
+                                      item.productId,
+                                      item.quantity + 1,
+                                    )
                                   }
                                   className="flex size-7 items-center justify-center rounded-full text-[#475569] transition-colors hover:bg-[#F6F0E9] hover:text-[#0F172A]"
                                   aria-label="زيادة"
@@ -265,9 +291,11 @@ const CartPage = () => {
                               {/* Line Total */}
                               <div className="min-w-[100px] text-end">
                                 <span className="font-mono text-base font-semibold text-[#0F172A]">
-                                  {lineTotal.toLocaleString("en-US")}
+                                  {formatSypPrice(lineTotal)}
                                 </span>
-                                <span className="ms-1 text-xs text-[#475569]">ل.س</span>
+                                <span className="ms-1 text-xs text-[#475569]">
+                                  ل.س
+                                </span>
                               </div>
 
                               {/* Remove item */}
@@ -287,7 +315,8 @@ const CartPage = () => {
 
                     {/* Sub-order footer note */}
                     <div className="mt-2 border-t border-[#EBE1D6]/70 pt-3 text-xs text-[#475569]">
-                      بانتظار رد المتجر · عادةً خلال {group.shopResponseHours} ساعات (مهلة حتى 24 ساعة)
+                      بانتظار رد المتجر · عادةً خلال {group.shopResponseHours}{" "}
+                      ساعات (مهلة حتى 24 ساعة)
                     </div>
                   </div>
                 );
@@ -296,9 +325,11 @@ const CartPage = () => {
           </div>
 
           {/* Left Column in RTL: Master Order Summary Box */}
-          <div className="w-full lg:w-[360px] shrink-0">
-            <div className="sticky top-24 rounded-[22px] border border-[#EBE1D6] bg-[#FFF3F1] p-5 shadow-[0px_4px_16px_rgba(15,23,42,0.06)] space-y-4">
-              <h2 className="text-lg font-semibold text-[#0F172A]">ملخص الطلب الرئيسي</h2>
+          <div className="w-full shrink-0 lg:w-[360px]">
+            <div className="sticky top-24 space-y-4 rounded-[22px] border border-[#EBE1D6] bg-[#FFF3F1] p-5 shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
+              <h2 className="text-lg font-semibold text-[#0F172A]">
+                ملخص الطلب الرئيسي
+              </h2>
 
               {/* Per-Shop breakdown */}
               <div className="space-y-2">
@@ -312,9 +343,11 @@ const CartPage = () => {
                       key={group.shopId}
                       className="flex items-center justify-between text-sm"
                     >
-                      <span className="text-[#475569]">طلب {group.shopName}</span>
+                      <span className="text-[#475569]">
+                        طلب {group.shopName}
+                      </span>
                       <span className="font-mono font-semibold text-[#0F172A]">
-                        {subTotal.toLocaleString("en-US")} ل.س
+                        {formatSypPrice(subTotal)} ل.س
                       </span>
                     </div>
                   );
@@ -325,12 +358,16 @@ const CartPage = () => {
 
               {/* Grand Total Row */}
               <div className="flex items-center justify-between">
-                <span className="text-base font-semibold text-[#0F172A]">الإجمالي الكلي</span>
+                <span className="text-base font-semibold text-[#0F172A]">
+                  الإجمالي الكلي
+                </span>
                 <div className="flex items-baseline gap-1">
                   <span className="font-mono text-2xl font-bold text-[#0F172A]">
-                    {grandTotal.toLocaleString("en-US")}
+                    {formatSypPrice(grandTotal)}
                   </span>
-                  <span className="text-sm font-medium text-[#475569]">ل.س</span>
+                  <span className="text-sm font-medium text-[#475569]">
+                    ل.س
+                  </span>
                 </div>
               </div>
 

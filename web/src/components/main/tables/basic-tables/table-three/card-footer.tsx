@@ -10,6 +10,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/utils";
+import getPaginationPages from "@/utils/get-pagination-pages";
 
 export interface CardFooterProps {
   currentPage?: number;
@@ -24,39 +25,7 @@ const CardFooter = ({
   onPageChange,
   className,
 }: CardFooterProps) => {
-  const getPageNumbers = (): (number | "ellipsis-start" | "ellipsis-end")[] => {
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, "ellipsis-end", totalPages];
-    }
-
-    if (currentPage >= totalPages - 3) {
-      return [
-        1,
-        "ellipsis-start",
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      1,
-      "ellipsis-start",
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      "ellipsis-end",
-      totalPages,
-    ];
-  };
-
-  const pages = getPageNumbers();
+  const pages = getPaginationPages(currentPage, totalPages);
 
   return (
     <div className={cn("border-t-0 px-5 py-4 sm:px-6", className)}>

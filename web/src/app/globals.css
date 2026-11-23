@@ -61,29 +61,30 @@
 
 .dark {
   color-scheme: dark;
-  --color-bg: #0b1120;
-  --color-surface: #111827;
-  --color-low: #1e293b;
-  --color-high: #334155;
-  --color-line: #334155;
-  --color-lineStrong: #64748b;
-  --color-text: #f1f5f9;
-  --color-muted: #aab8ca;
-  --color-ok: #4ade80;
-  --color-okBg: #123323;
-  --color-warn: #fbbf24;
-  --color-warnBg: #3b2a10;
-  --color-err: #fca5a5;
-  --color-errBg: #3b1e24;
-  --color-kpi1: #12352a;
-  --color-kpi2: #3b2a10;
-  --color-kpi3: #142e46;
-  --color-kpi4: #2e2354;
-  --color-kpi5: #421c25;
-  --color-cartSummary: #3b2027;
-  --color-brand-link: #9db4ff;
-  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.24);
-  --shadow-product: 0 6px 20px rgba(0, 0, 0, 0.3);
+  --color-bg: #111822;
+  --color-surface: #192331;
+  --color-navy2: #1c2837;
+  --color-low: #222e3d;
+  --color-high: #303d4e;
+  --color-line: #354254;
+  --color-lineStrong: #617184;
+  --color-text: #e5eaf1;
+  --color-muted: #aab6c6;
+  --color-ok: #66d99a;
+  --color-okBg: #1c3a2f;
+  --color-warn: #f3c96b;
+  --color-warnBg: #3a311f;
+  --color-err: #ffaaa6;
+  --color-errBg: #3d252b;
+  --color-kpi1: #20392f;
+  --color-kpi2: #3a311f;
+  --color-kpi3: #203246;
+  --color-kpi4: #302b48;
+  --color-kpi5: #3b292d;
+  --color-cartSummary: #37282d;
+  --color-brand-link: #aebeff;
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.2);
+  --shadow-product: 0 6px 20px rgba(0, 0, 0, 0.24);
 }
 
 @layer base {
@@ -138,7 +139,103 @@
   scrollbar-width: none;
 }
 
+html {
+  scrollbar-color: #94a3b8 transparent;
+  scrollbar-width: thin;
+}
+
+html.dark {
+  scrollbar-color: #475569 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: #94a3b8;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+  background-clip: padding-box;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  background-clip: padding-box;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+  background-clip: padding-box;
+}
+
+[class~="overflow-x-auto"]:not(.no-scrollbar) {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scrollbar-color: #94a3b8 transparent;
+  scrollbar-width: thin;
+}
+
+html.dark [class~="overflow-x-auto"]:not(.no-scrollbar) {
+  scrollbar-color: #475569 transparent;
+}
+
+[class~="overflow-x-auto"]:not(.no-scrollbar)::-webkit-scrollbar {
+  height: 10px;
+}
+
 @layer utilities {
+  .dark [class~="dark:bg-gray-950"] {
+    background-color: var(--color-bg);
+  }
+
+  .dark [class~="dark:bg-gray-900"],
+  .dark [class~="dark:bg-white/3"] {
+    background-color: var(--color-surface);
+  }
+
+  .dark [class~="dark:bg-gray-800"] {
+    background-color: var(--color-low);
+  }
+
+  .dark [class~="dark:bg-gray-800/50"] {
+    background-color: color-mix(in srgb, var(--color-low) 72%, transparent);
+  }
+
+  .dark [class~="dark:bg-gray-800/60"] {
+    background-color: color-mix(in srgb, var(--color-low) 82%, transparent);
+  }
+
+  .dark [class~="dark:border-gray-800"] {
+    border-color: var(--color-line);
+  }
+
+  .dark [class~="dark:text-gray-400"] {
+    color: var(--color-muted);
+  }
+
   .dark .text-navy:not([class*="dark:text-"]),
   .dark [class~="text-[#0F172A]"]:not([class*="dark:text-"]),
   .dark [class~="hover:text-navy"]:not([class*="dark:hover:text-"]):hover,
@@ -222,5 +319,20 @@
     [class~="divide-[#EBE1D6]/60"]:not([class*="dark:divide-"])
     > :not(:last-child) {
     border-color: var(--color-line);
+  }
+
+  .dark table tbody tr[class*="hover:bg-"]:hover {
+    background-color: var(--color-low);
+    color: var(--color-text);
+  }
+
+  .dark table tbody tr[class*="hover:bg-"]:hover > td,
+  .dark table tbody tr[class*="hover:bg-"]:hover > th {
+    color: var(--color-text);
+  }
+
+  .dark table tbody tr[class*="hover:bg-"]:hover
+    :is([class~="text-black"], [class~="text-gray-700"], [class~="text-gray-800"], [class~="text-gray-900"]) {
+    color: var(--color-text);
   }
 }

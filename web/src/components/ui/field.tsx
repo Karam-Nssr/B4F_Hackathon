@@ -3,7 +3,12 @@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/utils";
+import {
+  getValidationErrorMessage,
+  localizeErrorMessage,
+} from "@/utils/localize-error-message";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useLocale } from "next-intl";
 import { createContext, useContext, useId, useMemo } from "react";
 
 interface FieldContextValue {
@@ -217,9 +222,16 @@ const FieldError = ({
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>;
 }) => {
+  const locale = useLocale();
   const content = useMemo(() => {
     if (children) {
-      return children;
+      return typeof children === "string"
+        ? localizeErrorMessage(
+            children,
+            locale,
+            getValidationErrorMessage(locale),
+          )
+        : children;
     }
 
     if (!errors?.length) {
@@ -227,22 +239,32 @@ const FieldError = ({
     }
 
     const uniqueErrors = [
-      ...new Map(errors.map((error) => [error?.message, error])).values(),
+      ...new Set(
+        errors
+          .map((error) => error?.message)
+          .filter((message): message is string => Boolean(message?.trim()))
+          .map((message) =>
+            localizeErrorMessage(
+              message,
+              locale,
+              getValidationErrorMessage(locale),
+            ),
+          ),
+      ),
     ];
 
     if (uniqueErrors?.length == 1) {
-      return uniqueErrors[0]?.message;
+      return uniqueErrors[0];
     }
 
     return (
       <ul className="ms-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map(
-          (error, index) =>
-            error?.message && <li key={index}>{error.message}</li>,
-        )}
+        {uniqueErrors.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
       </ul>
     );
-  }, [children, errors]);
+  }, [children, errors, locale]);
 
   if (!content) {
     return null;

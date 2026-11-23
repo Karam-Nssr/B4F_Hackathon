@@ -19,8 +19,11 @@ import ShopHeader from "@/components/shop/shop-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { Link } from "@/i18n/navigation";
+import getErrorMessage from "@/utils/get-error-message";
+import { useLocale } from "next-intl";
 
 const ShopLayout = ({ children }: { children: React.ReactNode }) => {
+  const locale = useLocale();
   const { currentUser, loginAsDemo, error } = useInstaMallStore();
   const [demoError, setDemoError] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ const ShopLayout = ({ children }: { children: React.ReactNode }) => {
     try {
       await loginAsDemo("shop");
     } catch (caught) {
-      setDemoError(caught instanceof Error ? caught.message : "تعذر تسجيل الدخول");
+      setDemoError(getErrorMessage(caught, locale, "تعذر تسجيل الدخول"));
     }
   };
 

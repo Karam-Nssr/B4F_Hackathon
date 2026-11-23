@@ -9,6 +9,7 @@ Output: an accessible, localized error screen without a success-shaped fallback.
 
 import { Button } from "@/components/ui/button";
 import getErrorMessage from "@/utils/get-error-message";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
@@ -18,8 +19,10 @@ interface ErrorBoundaryProps {
 }
 
 const ErrorBoundary = ({ error, retry }: ErrorBoundaryProps) => {
-  let title = "حدث خطأ غير متوقع";
-  let retryLabel = "إعادة المحاولة";
+  const pathname = usePathname() ?? "/";
+  const locale = pathname.split("/")[1] === "en" ? "en" : "ar";
+  let title = locale === "en" ? "Something went wrong" : "حدث خطأ غير متوقع";
+  let retryLabel = locale === "en" ? "Try again" : "إعادة المحاولة";
 
   try {
     const t = useTranslations("errorBoundary");
@@ -40,7 +43,7 @@ const ErrorBoundary = ({ error, retry }: ErrorBoundaryProps) => {
           {title}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {getErrorMessage(error)}
+          {getErrorMessage(error, locale)}
         </p>
         <Button className="mx-auto" onClick={retry}>
           {retryLabel}

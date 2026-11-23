@@ -1,0 +1,48 @@
+.card {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  isolation: isolate;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    180px circle at var(--pointer-x) var(--pointer-y),
+    rgb(196 0 39 / 38%),
+    transparent 72%
+  );
+  filter: blur(18px);
+  transition: opacity 180ms ease-out;
+}
+
+@keyframes product-card-rock {
+  0%,
+  100% {
+    transform: translateY(-2px) rotate(-1deg) scale(1.02);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1deg) scale(1.04);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .glow {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .card:hover {
+    animation: product-card-rock 760ms ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow {
+    transition: none;
+  }
+}

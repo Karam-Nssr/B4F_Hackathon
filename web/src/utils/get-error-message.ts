@@ -1,21 +1,28 @@
-/*
-Pseudocode:
-Objective: turn unknown request/runtime failures into a displayable message.
-Input: any caught value.
-Process: preserve non-empty Error messages and strings; otherwise use a safe
-generic fallback rather than pretending the operation succeeded.
-Output: a non-empty user-facing string.
-*/
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error && error.message.trim()) {
-    return error.message;
-  }
+import {
+  getUnexpectedErrorMessage,
+  localizeErrorMessage,
+} from "@/utils/localize-error-message";
 
-  if (typeof error === "string" && error.trim()) {
-    return error;
-  }
+const getErrorMessage = (
+  error: unknown,
+  locale = "ar",
+  fallback?: string,
+): string => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : undefined;
+  const fallbackMessage = fallback
+    ? localizeErrorMessage(fallback, locale, getUnexpectedErrorMessage(locale))
+    : getUnexpectedErrorMessage(locale);
 
-  return "An unexpected error occurred.";
+  return localizeErrorMessage(
+    message,
+    locale,
+    fallbackMessage,
+  );
 };
 
 export default getErrorMessage;

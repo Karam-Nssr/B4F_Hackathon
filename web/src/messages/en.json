@@ -3,7 +3,7 @@
     "close": "إغلاق",
     "loading": "جارٍ التحميل...",
     "toastSuccess": "تم بنجاح",
-    "toastError": "حدث خطأ",
+    "toastError": "Something went wrong",
     "toastWarning": "تنبيه",
     "toastInfo": "معلومة"
   },

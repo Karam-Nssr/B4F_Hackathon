@@ -92,7 +92,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Embroidered Cushion',
         priceSyp: 65000,
-        category: 'Home & Living',
+        category: 'Home Decor',
         description:
           'A cushion cover finished with traditional Syrian embroidery.',
         imageUrl:
@@ -148,7 +148,11 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
     ],
     products: [
       { title: 'Aleppo Laurel Soap Bar', priceSyp: 9000 },
-      { title: 'Olive Oil Soap Gift Set', priceSyp: 32000 },
+      {
+        title: 'Olive Oil Soap Gift Set',
+        priceSyp: 32000,
+        category: 'Gifts',
+      },
       { title: 'Natural Olive Shampoo Bar', priceSyp: 18000 },
       { title: 'Damascus Rose Water', priceSyp: 15000 },
       { title: 'Laurel Soap Travel Pack', priceSyp: 14000 },
@@ -158,7 +162,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Natural Soap Dish',
         priceSyp: 17000,
-        category: 'Home & Living',
+        category: 'Household Supplies',
         imageUrl: pexelsImage(17962521),
       },
       { title: 'Olive and Laurel Body Bar', priceSyp: 12000 },
@@ -189,7 +193,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
     ],
   },
   textiles: {
-    category: 'Clothing & Textiles',
+    category: 'Clothing',
     description:
       'A textile piece stitched or woven by Syrian makers using durable, traditional techniques.',
     images: [
@@ -200,19 +204,43 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
     ],
     products: [
       { title: 'Embroidered Cotton Scarf', priceSyp: 48000 },
-      { title: 'Damascus Hand-Stitched Table Runner', priceSyp: 72000 },
+      {
+        title: 'Damascus Hand-Stitched Table Runner',
+        priceSyp: 72000,
+        category: 'Household Supplies',
+      },
       { title: 'Traditional Cotton Kaftan', priceSyp: 180000 },
-      { title: 'Hand-Embroidered Cushion Cover', priceSyp: 68000 },
+      {
+        title: 'Hand-Embroidered Cushion Cover',
+        priceSyp: 68000,
+        category: 'Home Decor',
+      },
       { title: 'Woven Cotton Shawl', priceSyp: 95000 },
-      { title: 'Aleppo Cross-Stitch Wall Panel', priceSyp: 115000 },
-      { title: 'Linen Kitchen Towel Pair', priceSyp: 32000 },
+      {
+        title: 'Aleppo Cross-Stitch Wall Panel',
+        priceSyp: 115000,
+        category: 'Ornaments',
+      },
+      {
+        title: 'Linen Kitchen Towel Pair',
+        priceSyp: 32000,
+        category: 'Household Supplies',
+      },
       { title: 'Traditional Embroidered Vest', priceSyp: 210000 },
-      { title: 'Handwoven Cotton Tote', priceSyp: 55000 },
-      { title: 'Decorative Embroidered Pillow', priceSyp: 78000 },
+      {
+        title: 'Handwoven Cotton Tote',
+        priceSyp: 55000,
+        category: 'Accessories',
+      },
+      {
+        title: 'Decorative Embroidered Pillow',
+        priceSyp: 78000,
+        category: 'Home Decor',
+      },
     ],
   },
   home: {
-    category: 'Home & Living',
+    category: 'Home Decor',
     description:
       'A practical home piece inspired by Syrian weaving, ceramics, and inlay work.',
     images: [
@@ -230,6 +258,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Small Hama Ceramic Bowl',
         priceSyp: 38000,
+        category: 'Household Supplies',
         imageUrl: pexelsImage(13575092),
       },
       {
@@ -245,16 +274,19 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Hand-Painted Ceramic Vase',
         priceSyp: 85000,
+        category: 'Ornaments',
         imageUrl: pexelsImage(13575092),
       },
       {
         title: 'Woven Table Runner',
         priceSyp: 69000,
+        category: 'Household Supplies',
         imageUrl: pexelsImage(29893325),
       },
       {
         title: 'Patterned Ceramic Serving Plate',
         priceSyp: 54000,
+        category: 'Household Supplies',
         imageUrl: pexelsImage(13575092),
       },
       {
@@ -265,6 +297,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Handmade Clay Coffee Cups',
         priceSyp: 46000,
+        category: 'Household Supplies',
         imageUrl: pexelsImage(13575092),
       },
       {
@@ -275,7 +308,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
     ],
   },
   crafts: {
-    category: 'Handmade Gifts',
+    category: 'Gifts',
     description:
       'A locally made gift finished by hand in a small Syrian workshop.',
     images: [
@@ -285,16 +318,44 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       pexelsImage(35263485),
     ],
     products: [
-      { title: 'Handmade Olive-Wood Serving Board', priceSyp: 78000 },
+      {
+        title: 'Handmade Olive-Wood Serving Board',
+        priceSyp: 78000,
+        category: 'Household Supplies',
+      },
       { title: 'Miniature Aleppo Soap Gift Box', priceSyp: 42000 },
-      { title: 'Embroidered Coin Purse', priceSyp: 36000 },
-      { title: 'Painted Ceramic Ornament', priceSyp: 28000 },
-      { title: 'Handwoven Market Basket', priceSyp: 65000 },
-      { title: 'Mosaic Coaster Set', priceSyp: 48000 },
+      {
+        title: 'Embroidered Coin Purse',
+        priceSyp: 36000,
+        category: 'Accessories',
+      },
+      {
+        title: 'Painted Ceramic Ornament',
+        priceSyp: 28000,
+        category: 'Ornaments',
+      },
+      {
+        title: 'Handwoven Market Basket',
+        priceSyp: 65000,
+        category: 'Household Supplies',
+      },
+      {
+        title: 'Mosaic Coaster Set',
+        priceSyp: 48000,
+        category: 'Household Supplies',
+      },
       { title: 'Traditional Embroidery Bookmark', priceSyp: 18000 },
-      { title: 'Olive-Wood Kitchen Spoon Set', priceSyp: 52000 },
+      {
+        title: 'Olive-Wood Kitchen Spoon Set',
+        priceSyp: 52000,
+        category: 'Household Supplies',
+      },
       { title: 'Syrian Craft Gift Bundle', priceSyp: 95000 },
-      { title: 'Handmade Fabric Pouch', priceSyp: 33000 },
+      {
+        title: 'Handmade Fabric Pouch',
+        priceSyp: 33000,
+        category: 'Accessories',
+      },
     ],
   },
   coffee: {
@@ -320,7 +381,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
       {
         title: 'Traditional Coffee Cup Pair',
         priceSyp: 35000,
-        category: 'Home & Living',
+        category: 'Household Supplies',
         imageUrl: pexelsImage(13575092),
       },
     ],
@@ -411,7 +472,7 @@ const productSets: Record<ProductSetKey, DemoProductSet> = {
     ],
   },
   leather: {
-    category: 'Leather Goods',
+    category: 'Accessories',
     description:
       'A durable leather accessory cut and finished by a Syrian craft workshop.',
     images: [
@@ -494,7 +555,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Lina Nasser',
     shopName: 'Damascus Tailoring',
-    category: 'Traditional Clothing',
+    category: 'Clothing',
     description: 'Traditional and contemporary clothing sewn by local tailors.',
     imageUrl: pexelsImage(36730419),
     productSet: 'textiles',
@@ -502,7 +563,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Yazan Suleiman',
     shopName: 'Aleppo Embroidery',
-    category: 'Embroidery & Textiles',
+    category: 'Clothing',
     description:
       'Hand-embroidered textiles and cotton pieces from Aleppo makers.',
     imageUrl: pexelsImage(35263485),
@@ -511,7 +572,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Huda Saad',
     shopName: 'Levant Rugs',
-    category: 'Carpets & Rugs',
+    category: 'Home Decor',
     description:
       'Woven rugs, runners, and cushions in traditional Levantine patterns.',
     imageUrl: pexelsImage(15896109),
@@ -520,7 +581,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Khaled Issa',
     shopName: 'Hama Homeware',
-    category: 'Home & Living',
+    category: 'Household Supplies',
     description: 'Ceramics and practical home pieces from Syrian workshops.',
     imageUrl: pexelsImage(13575092),
     productSet: 'home',
@@ -528,7 +589,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Dima Mustafa',
     shopName: 'Souq Handmade Gifts',
-    category: 'Handmade Gifts',
+    category: 'Gifts',
     description: 'Small handmade gifts inspired by the old Damascus souqs.',
     imageUrl: pexelsImage(4690306),
     productSet: 'crafts',
@@ -536,7 +597,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Tareq Jaber',
     shopName: 'Artisan Corner',
-    category: 'Local Crafts',
+    category: 'Gifts',
     description:
       'Hand-finished ceramics, embroidery, and gifts from local artisans.',
     imageUrl: pexelsImage(8033894),
@@ -595,7 +656,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Rima Shami',
     shopName: 'Damascus Leatherworks',
-    category: 'Leather Goods',
+    category: 'Accessories',
     description:
       'Hand-stitched bags and accessories made by Damascus leatherworkers.',
     imageUrl: pexelsImage(6650001),
@@ -604,7 +665,7 @@ const demoShops: DemoShop[] = [
   {
     ownerName: 'Samer Alwan',
     shopName: 'Aleppo Leather Bags',
-    category: 'Leather Bags',
+    category: 'Accessories',
     description:
       'Everyday leather bags and accessories finished by Aleppo makers.',
     imageUrl: pexelsImage(27046146),
@@ -670,7 +731,6 @@ const demoAccounts: DemoAccount[] = [
     phone: '+963900000001',
     nationalId: '00000000001',
   },
-<<<<<<< HEAD
   ...buyerNames.slice(1).map((fullName, index): DemoAccount => {
     const buyerNumber = index + 2;
     return {
@@ -685,19 +745,6 @@ const demoAccounts: DemoAccount[] = [
   ...demoShops.map((shop, index): DemoAccount => ({
     fullName: shop.ownerName,
     email: shopOwnerEmail(index),
-=======
-  {
-    fullName: 'haidra Buyer',
-    email: 'buyer@instamall.local',
-    password: 'Buyer12345!',
-    role: 'user' as const,
-    phone: '+963900000001',
-    nationalId: '00000000001',
-  },
-  {
-    fullName: 'Demo Shop Owner',
-    email: 'shop@instamall.local',
->>>>>>> fe28a030207d08e00b725cecbe5bdaacd15df8a3
     password: 'Shop12345!',
     role: 'shop',
   })),

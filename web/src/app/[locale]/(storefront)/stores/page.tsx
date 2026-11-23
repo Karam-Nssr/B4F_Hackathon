@@ -15,30 +15,65 @@ import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { ShopImage } from "@/components/storefront/shop-image";
+import { useLocale } from "next-intl";
 
-type CategoryFilter = "الكل" | "أزياء" | "هدايا" | "ديكور" | "إكسسوارات";
+type CategoryFilter =
+  | "all"
+  | "Clothing"
+  | "Gifts"
+  | "Accessories"
+  | "Ornaments"
+  | "Home Decor"
+  | "Household Supplies";
 
-const CATEGORY_FILTERS: CategoryFilter[] = [
-  "الكل",
-  "أزياء",
-  "هدايا",
-  "ديكور",
-  "إكسسوارات",
+const CATEGORY_FILTERS: { value: CategoryFilter; label: string }[] = [
+  { value: "all", label: "الكل" },
+  { value: "Clothing", label: "ملابس" },
+  { value: "Gifts", label: "هدايا" },
+  { value: "Accessories", label: "إكسسوارات" },
+  { value: "Ornaments", label: "زينة" },
+  { value: "Home Decor", label: "ديكور" },
+  { value: "Household Supplies", label: "مستلزمات منزلية" },
 ];
 
+const CATEGORY_ALIASES: Record<Exclude<CategoryFilter, "all">, string[]> = {
+  Clothing: [
+    "clothing",
+    "traditional clothing",
+    "clothing & textiles",
+    "embroidery & textiles",
+  ],
+  Gifts: ["gifts", "handmade gifts", "local crafts"],
+  Accessories: ["accessories", "leather goods", "leather bags"],
+  Ornaments: ["ornaments", "decoration", "decorations"],
+  "Home Decor": ["home decor", "home & living", "carpets & rugs"],
+  "Household Supplies": [
+    "household supplies",
+    "pantry & household goods",
+    "home & living",
+  ],
+};
+
+const CATEGORY_LABELS_AR: Record<string, string> = {
+  Accessories: "إكسسوارات",
+  Clothing: "ملابس",
+  Gifts: "هدايا",
+  "Home Decor": "ديكور",
+  "Household Supplies": "مستلزمات منزلية",
+  Ornaments: "زينة",
+};
+
 const StoresDirectory = () => {
+  const locale = useLocale();
   const { shops, currentUser, loginAsDemo } = useInstaMallStore();
-  const [selectedCat, setSelectedCat] = useState<CategoryFilter>("الكل");
+  const [selectedCat, setSelectedCat] = useState<CategoryFilter>("all");
 
   const filteredShops = useMemo(() => {
     return shops.filter((s) => {
       if (!s.isActive) return false;
       return (
-        selectedCat === "الكل" ||
-        (selectedCat === "أزياء" && s.category.includes("أزياء")) ||
-        (selectedCat === "هدايا" && s.category.includes("هدايا")) ||
-        (selectedCat === "ديكور" && s.category.includes("ديكور")) ||
-        (selectedCat === "إكسسوارات" && s.category.includes("إكسسوارات"))
+        selectedCat === "all" ||
+        CATEGORY_ALIASES[selectedCat].includes(s.category.trim().toLowerCase())
       );
     });
   }, [shops, selectedCat]);
@@ -58,9 +93,12 @@ const StoresDirectory = () => {
           🏪
         </div>
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-[#0F172A]">تسجيل الدخول مطلوب لاستعراض دليل المتاجر</h2>
+          <h2 className="text-xl font-bold text-[#0F172A]">
+            تسجيل الدخول مطلوب لاستعراض دليل المتاجر
+          </h2>
           <p className="max-w-md text-sm text-[#475569]">
-            دليل المتاجر المحلية مخصص لمستخدمي المنصة المسجلين لاستكشاف المتاجر وتفاصيل التوصيل ومواعيد الرد.
+            دليل المتاجر المحلية مخصص لمستخدمي المنصة المسجلين لاستكشاف المتاجر
+            وتفاصيل التوصيل ومواعيد الرد.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -86,15 +124,16 @@ const StoresDirectory = () => {
     <div className="space-y-8 text-right">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">دليل المتاجر</h1>
-        <p className="text-base text-[#475569]">
-          تصفح متاجر المنصة بطلب موحد.
-        </p>
+        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">
+          دليل المتاجر
+        </h1>
+        <p className="text-base text-[#475569]">تصفح متاجر المنصة بطلب موحد.</p>
       </div>
 
       {/* Notice Banner */}
       <div className="rounded-[22px] border border-[#EBE1D6] bg-[#F6F0E9] p-4 text-sm font-medium text-[#0F172A]">
-        نافذة تأكيد الطلب: 1–24 ساعة لكل متجر، وتظهر المدة المتبقية لتأكيد كل طلب.
+        نافذة تأكيد الطلب: 1–24 ساعة لكل متجر، وتظهر المدة المتبقية لتأكيد كل
+        طلب.
       </div>
 
       {/* Dual Filter Toolbar */}
@@ -107,20 +146,20 @@ const StoresDirectory = () => {
         <div className="flex flex-wrap items-center gap-2">
           {/* Category Pills */}
           <div className="flex flex-wrap items-center gap-1.5">
-            {CATEGORY_FILTERS.map((cat) => {
-              const active = selectedCat === cat;
+            {CATEGORY_FILTERS.map(({ value, label }) => {
+              const active = selectedCat === value;
               return (
                 <button
-                  key={cat}
+                  key={value}
                   type="button"
-                  onClick={() => setSelectedCat(cat)}
+                  onClick={() => setSelectedCat(value)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                     active
                       ? "bg-[#0F172A] text-white"
                       : "border border-[#94A3B8]/60 bg-white text-[#0F172A] hover:bg-[#F6F0E9]"
                   }`}
                 >
-                  {cat}
+                  {label}
                 </button>
               );
             })}
@@ -135,7 +174,9 @@ const StoresDirectory = () => {
       {/* Stores Grid (2 cards per row on desktop) */}
       {filteredShops.length === 0 ? (
         <div className="rounded-[22px] border border-[#EBE1D6] bg-white py-16 text-center">
-          <p className="text-base text-[#475569]">لا توجد متاجر مطابقة للفلتر المحدد</p>
+          <p className="text-base text-[#475569]">
+            لا توجد متاجر مطابقة للفلتر المحدد
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -151,9 +192,14 @@ const StoresDirectory = () => {
                     <ShopImage shop={shop} sizeClassName="size-14" />
 
                     <div>
-                      <h2 className="text-lg font-semibold text-[#0F172A]">{shop.shopName}</h2>
+                      <h2 className="text-lg font-semibold text-[#0F172A]">
+                        {shop.shopName}
+                      </h2>
                       <p className="text-xs text-[#475569]">
-                        {shop.category} · {shop.city || "المدينة غير متوفرة"} ·{" "}
+                        {locale === "ar"
+                          ? (CATEGORY_LABELS_AR[shop.category] ?? shop.category)
+                          : shop.category}{" "}
+                        · {shop.city || "المدينة غير متوفرة"} ·{" "}
                         {shop.productCount ?? "—"} منتج
                       </p>
                     </div>
@@ -163,7 +209,9 @@ const StoresDirectory = () => {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm leading-relaxed text-[#475569]">{shop.description}</p>
+                <p className="text-sm leading-relaxed text-[#475569]">
+                  {shop.description}
+                </p>
               </div>
 
               {/* Footer Row: Response Time + CTA */}
@@ -176,7 +224,7 @@ const StoresDirectory = () => {
                 </span>
 
                 <Link
-                  href="/"
+                  href={`/?shopId=${encodeURIComponent(shop.id)}#products-section`}
                   className="inline-flex h-11 items-center justify-center rounded-full border border-[#0F172A] bg-white px-5 text-sm font-semibold text-[#0F172A] transition-all hover:bg-[#0F172A] hover:text-white"
                 >
                   تصفح المنتجات

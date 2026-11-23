@@ -9,6 +9,7 @@ Output: a responsive admin header component.
 "use client";
 
 import { useSidebar } from "@/components/ui/sidebar";
+import ThemeToggleButton from "@/layout/header/theme-toggler";
 
 const AdminHeader = () => {
   const { setOpenMobile } = useSidebar();
@@ -36,9 +37,10 @@ const AdminHeader = () => {
         </div>
       </div>
 
-      {/* Role Indicator */}
+      {/* Header controls */}
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D8F1E4] px-3.5 py-1 text-xs font-semibold text-[#15803D]">
+        <ThemeToggleButton />
+        <span className="hidden items-center gap-1.5 rounded-full bg-[#D8F1E4] px-3.5 py-1 text-xs font-semibold text-[#15803D] sm:inline-flex">
           <span className="size-2 rounded-full bg-[#15803D]" />
           <span>المشرف العام (Admin)</span>
         </span>

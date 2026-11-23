@@ -18,10 +18,19 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useInstaMallStore } from "@/context/instamall-store";
 import type { Product } from "@/types/instamall";
-import { PencilIcon, TrashBinIcon, PlusIcon } from "@/icons";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { PlusIcon } from "@/icons";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import getErrorMessage from "@/utils/get-error-message";
+import { useLocale } from "next-intl";
+import ShopProductsTable from "@/components/shop/shop-products-table";
 
 interface ProductFormData {
   title: string;
@@ -34,10 +43,13 @@ const productSchema = z.object({
   title: z.string().min(2, "عنوان المنتج مطلوب"),
   category: z.string().min(2, "التصنيف مطلوب"),
   description: z.string().min(2, "الوصف مطلوب"),
-  priceSyp: z.string().regex(/^\d+$/, "السعر يجب أن يكون رقماً صحيحاً بالليرة السورية"),
+  priceSyp: z
+    .string()
+    .regex(/^\d+$/, "السعر يجب أن يكون رقماً صحيحاً بالليرة السورية"),
 });
 
 const ShopProductsPage = () => {
+  const locale = useLocale();
   const {
     products,
     currentShop,
@@ -50,7 +62,9 @@ const ShopProductsPage = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(
+    null,
+  );
 
   const shopProducts = currentShop?.id
     ? products.filter((p) => p.shopId === currentShop.id)
@@ -68,7 +82,7 @@ const ShopProductsPage = () => {
       title: "",
       category: "أزياء شبابية",
       description: "",
-      priceSyp: "150000",
+      priceSyp: "1500",
     },
   });
 
@@ -78,7 +92,7 @@ const ShopProductsPage = () => {
       title: "",
       category: "أزياء شبابية",
       description: "",
-      priceSyp: "150000",
+      priceSyp: "1500",
     });
     setIsDialogOpen(true);
   };
@@ -88,7 +102,7 @@ const ShopProductsPage = () => {
     setValue("title", product.title);
     setValue("category", product.category);
     setValue("description", product.description);
-    setValue("priceSyp", String(product.priceSyp));
+    setValue("priceSyp", String(Math.trunc(product.priceSyp / 100)));
     setIsDialogOpen(true);
   };
 
@@ -100,11 +114,13 @@ const ShopProductsPage = () => {
           title: data.title,
           category: data.category,
           description: data.description,
-          priceSyp: Number(data.priceSyp),
+          priceSyp: Number(data.priceSyp) * 100,
         });
       } else {
         if (!currentShop) {
-          setActionError("لم يتم تحديد متجر لهذا الحساب بعد");
+          setActionError(
+            getErrorMessage("لم يتم تحديد متجر لهذا الحساب بعد", locale),
+          );
           return;
         }
         await addProduct({
@@ -113,14 +129,14 @@ const ShopProductsPage = () => {
           title: data.title,
           category: data.category,
           description: data.description,
-          priceSyp: Number(data.priceSyp),
+          priceSyp: Number(data.priceSyp) * 100,
           imageUrl: "/images/product/product-01.jpg",
           isActive: true,
         });
       }
       setIsDialogOpen(false);
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "تعذر حفظ المنتج");
+      setActionError(getErrorMessage(caught, locale, "تعذر حفظ المنتج"));
     }
   };
 
@@ -131,7 +147,7 @@ const ShopProductsPage = () => {
       await deleteProduct(deletingProductId);
       setDeletingProductId(null);
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "تعذر حذف المنتج");
+      setActionError(getErrorMessage(caught, locale, "تعذر حذف المنتج"));
     }
   };
 
@@ -143,9 +159,11 @@ const ShopProductsPage = () => {
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#EBE1D6]/70 pb-4">
+      <div className="flex flex-col gap-4 border-b border-[#EBE1D6]/70 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] md:text-3xl">إدارة المنتجات</h1>
+          <h1 className="text-2xl font-bold text-[#0F172A] md:text-3xl">
+            إدارة المنتجات
+          </h1>
           <p className="text-sm text-[#475569]">
             التسعير بالليرة السورية · التحكم الكامل في معروضات المتجر
           </p>
@@ -154,93 +172,23 @@ const ShopProductsPage = () => {
         <button
           type="button"
           onClick={openCreateDialog}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#C40027] px-6 text-sm font-semibold text-white shadow-[0px_4px_12px_rgba(196,0,39,0.28)] hover:bg-[#a50021] active:scale-95 transition-all"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#C40027] px-6 text-sm font-semibold text-white shadow-[0px_4px_12px_rgba(196,0,39,0.28)] transition-all hover:bg-[#a50021] active:scale-95"
         >
           <PlusIcon className="size-4" />
           <span>إضافة منتج جديد</span>
         </button>
       </div>
 
-      <div dir="rtl" className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
-        <table dir="rtl" className="w-full min-w-[700px] text-right text-sm">
-          <thead className="bg-[#F6F0E9] border-b border-[#EBE1D6]">
-            <tr>
-              <th className="py-3.5 px-4 text-xs font-semibold text-[#475569]">المنتج</th>
-              <th className="py-3.5 px-4 text-xs font-semibold text-[#475569]">التصنيف</th>
-              <th className="py-3.5 px-4 text-xs font-semibold text-[#475569]">السعر</th>
-              <th className="py-3.5 px-4 text-xs font-semibold text-[#475569]">الحالة</th>
-              <th className="py-3.5 px-4 text-center text-xs font-semibold text-[#475569]">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#EBE1D6]/60">
-            {shopProducts.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-12 text-center text-sm text-[#475569]">
-                  لا توجد منتجات مسجلة في هذا المتجر حالياً
-                </td>
-              </tr>
-            ) : (
-              shopProducts.map((p) => (
-                <tr key={p.id} className="hover:bg-[#FBF8F4] transition-colors">
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={p.imageUrl}
-                        alt={p.title}
-                        className="size-10 rounded-[10px] object-cover bg-[#F6F0E9]"
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-[#0F172A]">{p.title}</p>
-                        <p className="text-xs text-[#475569] line-clamp-1">{p.description}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-sm text-[#475569]">{p.category}</td>
-                  <td className="py-4 px-4 font-mono font-semibold text-sm text-[#0F172A]">
-                    {p.priceSyp.toLocaleString("en-US")} ل.س
-                  </td>
-                  <td className="py-4 px-4">
-                    <span
-                      className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                        p.isActive
-                          ? "bg-[#D8F1E4] text-[#15803D]"
-                          : "bg-[#F6F0E9] text-[#475569]"
-                      }`}
-                    >
-                      {p.isActive ? "نشط" : "غير نشط"}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openEditDialog(p)}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#0F172A] bg-white px-3.5 text-xs font-semibold text-[#0F172A] hover:bg-[#0F172A] hover:text-white transition-all"
-                      >
-                        <PencilIcon className="size-3.5" />
-                        <span>تعديل</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeletingProductId(p.id)}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#BA1A1A] bg-white px-3.5 text-xs font-semibold text-[#BA1A1A] hover:bg-[#BA1A1A] hover:text-white transition-all"
-                      >
-                        <TrashBinIcon className="size-3.5" />
-                        <span>حذف</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ShopProductsTable
+        products={shopProducts}
+        onEdit={openEditDialog}
+        onDelete={setDeletingProductId}
+      />
 
       {/* Add / Edit Product Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md rounded-[24px] bg-white p-6 text-right">
-          <DialogHeader className="text-right border-b border-[#EBE1D6] pb-3">
+          <DialogHeader className="border-b border-[#EBE1D6] pb-3 text-right">
             <DialogTitle className="text-lg font-bold text-[#0F172A]">
               {editingProduct ? "تعديل المنتج" : "إضافة منتج جديد"}
             </DialogTitle>
@@ -257,7 +205,9 @@ const ShopProductsPage = () => {
             noValidate
           >
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">اسم المنتج</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                اسم المنتج
+              </FieldLabel>
               <Input
                 {...register("title")}
                 type="text"
@@ -268,7 +218,9 @@ const ShopProductsPage = () => {
             </Field>
 
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">التصنيف</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                التصنيف
+              </FieldLabel>
               <Input
                 {...register("category")}
                 type="text"
@@ -286,13 +238,15 @@ const ShopProductsPage = () => {
                 {...register("priceSyp")}
                 type="text"
                 placeholder="مثال: 185000"
-                className="font-mono h-11 rounded-[14px]"
+                className="h-11 rounded-[14px] font-mono"
               />
               <FieldError errors={[errors.priceSyp]} />
             </Field>
 
             <Field>
-              <FieldLabel className="text-xs font-semibold text-[#0F172A]">الوصف</FieldLabel>
+              <FieldLabel className="text-xs font-semibold text-[#0F172A]">
+                الوصف
+              </FieldLabel>
               <Input
                 {...register("description")}
                 type="text"
@@ -302,7 +256,7 @@ const ShopProductsPage = () => {
               <FieldError errors={[errors.description]} />
             </Field>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EBE1D6]">
+            <div className="flex items-center justify-end gap-3 border-t border-[#EBE1D6] pt-3">
               <button
                 type="button"
                 onClick={() => setIsDialogOpen(false)}
@@ -324,13 +278,16 @@ const ShopProductsPage = () => {
 
       {/* Delete Confirmation Dialog */}
       {deletingProductId && (
-        <Dialog open={Boolean(deletingProductId)} onOpenChange={() => setDeletingProductId(null)}>
+        <Dialog
+          open={Boolean(deletingProductId)}
+          onOpenChange={() => setDeletingProductId(null)}
+        >
           <DialogContent className="max-w-sm rounded-[24px] bg-white p-6 text-right">
             <DialogHeader className="text-right">
               <DialogTitle className="text-base font-bold text-[#BA1A1A]">
                 تأكيد حذف المنتج
               </DialogTitle>
-              <DialogDescription className="text-xs text-[#475569] mt-2">
+              <DialogDescription className="mt-2 text-xs text-[#475569]">
                 هل أنت متأكد من رغبتك في حذف هذا المنتج من متجرك نهائياً؟
               </DialogDescription>
             </DialogHeader>

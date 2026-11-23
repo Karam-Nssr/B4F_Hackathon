@@ -18,7 +18,15 @@ import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
 import type { ShopSubOrder } from "@/types/instamall";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import formatSypPrice from "@/utils/format-syp-price";
+import localizeProductTitle from "@/utils/localize-product-title";
+import { useLocale } from "next-intl";
 
 type StatusTab = "الكل" | "بانتظار" | "مؤكد" | "ملغي";
 
@@ -30,6 +38,7 @@ const tabFilters: { label: StatusTab; value: string }[] = [
 ];
 
 const OrdersPage = () => {
+  const locale = useLocale();
   const router = useRouter();
   const {
     masterOrders,
@@ -40,7 +49,9 @@ const OrdersPage = () => {
     loginAsDemo,
   } = useInstaMallStore();
   const [activeTab, setActiveTab] = useState<StatusTab>("الكل");
-  const [selectedInvoice, setSelectedInvoice] = useState<ShopSubOrder | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<ShopSubOrder | null>(
+    null,
+  );
   const [reorderError, setReorderError] = useState<string | null>(null);
 
   const handleDemoLogin = async () => {
@@ -53,14 +64,17 @@ const OrdersPage = () => {
 
   if (!currentUser) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-[28px] border border-[#EBE1D6] bg-white p-10 text-center shadow-card space-y-5 my-8">
+      <div className="my-8 flex flex-col items-center justify-center space-y-5 rounded-[28px] border border-[#EBE1D6] bg-white p-10 text-center shadow-card">
         <div className="flex size-14 items-center justify-center rounded-[18px] bg-[#FDE7EA] text-2xl">
           📋
         </div>
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-[#0F172A]">تسجيل الدخول مطلوب لعرض طلباتك</h2>
+          <h2 className="text-xl font-bold text-[#0F172A]">
+            تسجيل الدخول مطلوب لعرض طلباتك
+          </h2>
           <p className="text-sm text-[#475569]">
-            يرجى تسجيل الدخول بحساب المشتري لمتابعة فواتيرك وحالة تأكيد المتاجر والعد التنازلي (1-24h).
+            يرجى تسجيل الدخول بحساب المشتري لمتابعة فواتيرك وحالة تأكيد المتاجر
+            والعد التنازلي (1-24h).
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -86,7 +100,8 @@ const OrdersPage = () => {
     if (activeTab === "الكل") return true;
     if (activeTab === "بانتظار") return sub.status === "PENDING";
     if (activeTab === "مؤكد") return sub.status === "CONFIRMED";
-    if (activeTab === "ملغي") return sub.status === "CANCELLED" || sub.status === "COMPLETED";
+    if (activeTab === "ملغي")
+      return sub.status === "CANCELLED" || sub.status === "COMPLETED";
     return true;
   });
 
@@ -97,7 +112,9 @@ const OrdersPage = () => {
     setReorderError(null);
     let matched = 0;
     for (const item of sub.items) {
-      const product = products.find((candidate) => candidate.title === item.title);
+      const product = products.find(
+        (candidate) => candidate.title === item.title,
+      );
       if (!product) continue;
       matched += 1;
       addToCart({
@@ -123,7 +140,9 @@ const OrdersPage = () => {
     <div className="space-y-8 text-right">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">طلباتي والفواتير</h1>
+        <h1 className="text-3xl font-bold text-[#0F172A] md:text-4xl">
+          طلباتي والفواتير
+        </h1>
         <p className="text-base text-[#475569]">
           كل طلب رئيسي ينقسم إلى فواتير مستقلة لكل متجر.
         </p>
@@ -141,9 +160,15 @@ const OrdersPage = () => {
           const isActive = activeTab === tab.label;
           let activeClass = "bg-[#0F172A] text-white";
           if (isActive) {
-            if (tab.label === "بانتظار") activeClass = "bg-[#FFF1D2] text-[#B45309] font-bold ring-1 ring-[#B45309]";
-            else if (tab.label === "مؤكد") activeClass = "bg-[#D8F1E4] text-[#15803D] font-bold ring-1 ring-[#15803D]";
-            else if (tab.label === "ملغي") activeClass = "bg-[#F6F0E9] text-[#475569] font-bold ring-1 ring-[#94A3B8]";
+            if (tab.label === "بانتظار")
+              activeClass =
+                "bg-[#FFF1D2] text-[#B45309] font-bold ring-1 ring-[#B45309]";
+            else if (tab.label === "مؤكد")
+              activeClass =
+                "bg-[#D8F1E4] text-[#15803D] font-bold ring-1 ring-[#15803D]";
+            else if (tab.label === "ملغي")
+              activeClass =
+                "bg-[#F6F0E9] text-[#475569] font-bold ring-1 ring-[#94A3B8]";
           }
 
           return (
@@ -169,7 +194,9 @@ const OrdersPage = () => {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* Master Order Number */}
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#475569]">الطلب الرئيسي:</span>
+              <span className="text-sm font-medium text-[#475569]">
+                الطلب الرئيسي:
+              </span>
               <span className="font-mono text-lg font-bold text-[#0F172A]">
                 {latestMasterOrder.orderNumber}
               </span>
@@ -178,19 +205,24 @@ const OrdersPage = () => {
             {/* Total + Date */}
             <div className="flex flex-wrap items-center gap-6">
               <div className="flex items-baseline gap-1">
-                <span className="text-sm font-medium text-[#475569]">الإجمالي:</span>
+                <span className="text-sm font-medium text-[#475569]">
+                  الإجمالي:
+                </span>
                 <span className="font-mono text-xl font-bold text-[#0F172A]">
-                  {latestMasterOrder.totalAmountSyp.toLocaleString("en-US")}
+                  {formatSypPrice(latestMasterOrder.totalAmountSyp)}
                 </span>
                 <span className="text-xs text-[#475569]">ل.س</span>
               </div>
 
               <div className="text-xs text-[#475569]">
-                {new Date(latestMasterOrder.createdAt).toLocaleDateString("ar-SY", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
+                {new Date(latestMasterOrder.createdAt).toLocaleDateString(
+                  "ar-SY",
+                  {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  },
+                )}
               </div>
             </div>
           </div>
@@ -201,22 +233,28 @@ const OrdersPage = () => {
       <div className="space-y-4">
         {filteredSubOrders.length === 0 ? (
           <div className="rounded-[22px] border border-[#EBE1D6] bg-white py-16 text-center">
-            <p className="text-base text-[#475569]">لا توجد طلبات في هذه الحالة</p>
+            <p className="text-base text-[#475569]">
+              لا توجد طلبات في هذه الحالة
+            </p>
           </div>
         ) : (
           filteredSubOrders.map((sub) => {
             const isPending = sub.status === "PENDING";
             const isConfirmed = sub.status === "CONFIRMED";
-            const isCancelled = sub.status === "CANCELLED" || sub.status === "COMPLETED";
+            const isCancelled =
+              sub.status === "CANCELLED" || sub.status === "COMPLETED";
 
             const remainingPct = isPending
-              ? Math.max(5, Math.min(100, Math.round((sub.remainingHours / 24) * 100)))
+              ? Math.max(
+                  5,
+                  Math.min(100, Math.round((sub.remainingHours / 24) * 100)),
+                )
               : 0;
 
             return (
               <div
                 key={sub.id}
-                className="rounded-[22px] border border-[#EBE1D6] bg-white p-5 shadow-[0px_4px_16px_rgba(15,23,42,0.06)] space-y-4"
+                className="space-y-4 rounded-[22px] border border-[#EBE1D6] bg-white p-5 shadow-[0px_4px_16px_rgba(15,23,42,0.06)]"
               >
                 {/* Header Row: Invoice ID + Badge + Amount */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -246,25 +284,27 @@ const OrdersPage = () => {
 
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-lg font-bold text-[#0F172A]">
-                      {sub.subtotalSyp.toLocaleString("en-US")}
+                      {formatSypPrice(sub.subtotalSyp)}
                     </span>
                     <span className="text-xs text-[#475569]">ل.س</span>
                   </div>
                 </div>
 
                 {/* Shop details & Items */}
-                <div className="text-sm text-[#475569] space-y-1">
+                <div className="space-y-1 text-sm text-[#475569]">
                   <p className="font-medium text-[#0F172A]">
                     متجر {sub.shopName} · {sub.shopCity || "المدينة غير متوفرة"}
                   </p>
                   <p className="text-xs text-[#475569]">
-                    {sub.items.map((it) => `${it.title} × ${it.quantity}`).join("، ")}
+                    {sub.items
+                      .map((it) => `${it.title} × ${it.quantity}`)
+                      .join("، ")}
                   </p>
                 </div>
 
                 {/* Countdown Timer Widget for Pending Sub-Orders */}
                 {isPending && (
-                  <div className="rounded-[14px] bg-[#FFF9F2] p-3.5 border border-[#B45309]/20 space-y-2">
+                  <div className="space-y-2 rounded-[14px] border border-[#B45309]/20 bg-[#FFF9F2] p-3.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-[#475569]">
                         متبقّي حتى انتهاء مهلة المتجر:
@@ -312,9 +352,12 @@ const OrdersPage = () => {
 
       {/* Invoice Modal / Dialog */}
       {selectedInvoice && (
-        <Dialog open={Boolean(selectedInvoice)} onOpenChange={() => setSelectedInvoice(null)}>
+        <Dialog
+          open={Boolean(selectedInvoice)}
+          onOpenChange={() => setSelectedInvoice(null)}
+        >
           <DialogContent className="max-w-lg rounded-[24px] bg-white p-6 text-right">
-            <DialogHeader className="text-right border-b border-[#EBE1D6] pb-4">
+            <DialogHeader className="border-b border-[#EBE1D6] pb-4 text-right">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-base font-bold text-[#C40027]">
                   {selectedInvoice.invoiceNumber}
@@ -341,7 +384,9 @@ const OrdersPage = () => {
                 </div>
                 <div>
                   <span className="block text-[#475569]">المشتري:</span>
-                  <span className="font-semibold text-[#0F172A]">{selectedInvoice.customerName}</span>
+                  <span className="font-semibold text-[#0F172A]">
+                    {selectedInvoice.customerName}
+                  </span>
                 </div>
                 <div>
                   <span className="block text-[#475569]">الهاتف:</span>
@@ -353,16 +398,25 @@ const OrdersPage = () => {
 
               {/* Items List */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-[#0F172A]">تفاصيل المنتجات:</h4>
+                <h4 className="font-semibold text-[#0F172A]">
+                  تفاصيل المنتجات:
+                </h4>
                 <div className="divide-y divide-[#EBE1D6]/60 rounded-[14px] border border-[#EBE1D6] p-3">
                   {selectedInvoice.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between py-2 text-xs">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between py-2 text-xs"
+                    >
                       <div>
-                        <span className="font-medium text-[#0F172A]">{item.title}</span>
-                        <span className="text-[#475569] ms-2">× {item.quantity}</span>
+                        <span className="font-medium text-[#0F172A]">
+                          {localizeProductTitle(item.title, locale)}
+                        </span>
+                        <span className="ms-2 text-[#475569]">
+                          × {item.quantity}
+                        </span>
                       </div>
                       <span className="font-mono font-bold text-[#0F172A]">
-                        {(item.unitPriceSyp * item.quantity).toLocaleString("en-US")} ل.س
+                        {formatSypPrice(item.unitPriceSyp * item.quantity)} ل.س
                       </span>
                     </div>
                   ))}
@@ -371,9 +425,11 @@ const OrdersPage = () => {
 
               {/* Subtotal */}
               <div className="flex items-center justify-between rounded-[14px] bg-[#FFF3F1] p-3">
-                <span className="font-semibold text-[#0F172A]">إجمالي الفاتورة:</span>
+                <span className="font-semibold text-[#0F172A]">
+                  إجمالي الفاتورة:
+                </span>
                 <span className="font-mono text-lg font-bold text-[#C40027]">
-                  {selectedInvoice.subtotalSyp.toLocaleString("en-US")} ل.س
+                  {formatSypPrice(selectedInvoice.subtotalSyp)} ل.س
                 </span>
               </div>
 

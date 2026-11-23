@@ -2,23 +2,24 @@
 Pseudocode:
 Objective: render an accessible loading state for route navigation.
 Input: none.
-Process: announce loading to assistive technology and show a small spinner.
-Output: a lightweight centered status indicator.
+Process: resolve the active locale and render the localized orbital loader.
+Output: an accessible, animated marketplace loading screen.
 */
-import { getTranslations } from "next-intl/server";
+import LuxuryOrbitalHero from "@/components/LuxuryOrbitalHero";
+import { getLocale, getTranslations } from "next-intl/server";
 
 const RouteLoading = async () => {
-  const t = await getTranslations("common");
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("common"),
+  ]);
 
   return (
-    <div
-      role="status"
-      className="flex min-h-40 items-center justify-center"
-      aria-label={t("loading")}
-    >
-      <span className="size-8 animate-spin rounded-full border-2 border-gray-300 border-t-brand-500 dark:border-gray-700 dark:border-t-brand-400" />
-      <span className="sr-only">{t("loading")}</span>
-    </div>
+    <LuxuryOrbitalHero
+      variant="loader"
+      locale={locale}
+      loadingLabel={t("loading")}
+    />
   );
 };
 

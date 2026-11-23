@@ -21,6 +21,8 @@ import { useInstaMallStore } from "@/context/instamall-store";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import getErrorMessage from "@/utils/get-error-message";
+import { useLocale } from "next-intl";
 
 const formatPhone = (phone: string): string => {
   const digits = phone.replace(/\D/g, "");
@@ -51,6 +53,7 @@ const accountSchema = z.object({
 });
 
 const AccountPage = () => {
+  const locale = useLocale();
   const router = useRouter();
   const { currentUser, updateIdentity, logout, loginAsDemo } = useInstaMallStore();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -59,8 +62,10 @@ const AccountPage = () => {
   const handleDemoLogin = async () => {
     try {
       await loginAsDemo("user");
-    } catch {
-      setSaveError("تعذر تسجيل الدخول التجريبي");
+    } catch (caught) {
+      setSaveError(
+        getErrorMessage(caught, locale, "تعذر تسجيل الدخول التجريبي"),
+      );
     }
   };
 
@@ -115,7 +120,7 @@ const AccountPage = () => {
       setSuccessMessage("تم حفظ بيانات الهوية بنجاح واستخدامها في الفواتير المستقبلية.");
       setTimeout(() => setSuccessMessage(null), 3500);
     } catch (caught) {
-      setSaveError(caught instanceof Error ? caught.message : "تعذر حفظ البيانات");
+      setSaveError(getErrorMessage(caught, locale, "تعذر حفظ البيانات"));
     }
   };
 

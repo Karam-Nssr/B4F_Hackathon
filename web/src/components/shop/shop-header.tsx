@@ -1,17 +1,15 @@
 /*
 Pseudocode:
-Objective: render the Shop Vendor Dashboard top header with mobile sidebar toggle and quick action CTA.
+Objective: render the Shop Vendor Dashboard top header with mobile sidebar toggle.
 Input: none.
 Process:
 - Provide sticky top bar with breadcrumb/title and mobile hamburger button.
-- Provide "إضافة منتج جديد" action that links directly to /shop/products.
 Output: a responsive shop dashboard header component.
 */
 "use client";
 
-import { Link } from "@/i18n/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
-import { PlusIcon } from "@/icons";
+import ThemeToggleButton from "@/layout/header/theme-toggler";
 
 const ShopHeader = () => {
   const { setOpenMobile } = useSidebar();
@@ -39,16 +37,7 @@ const ShopHeader = () => {
         </div>
       </div>
 
-      {/* Action CTA */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/shop/products"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#C40027] px-5 text-sm font-semibold text-white shadow-[0px_4px_12px_rgba(196,0,39,0.28)] transition-all hover:bg-[#a50021] active:scale-95"
-        >
-          <PlusIcon className="size-4.5" />
-          <span>إضافة منتج جديد</span>
-        </Link>
-      </div>
+      <ThemeToggleButton />
     </header>
   );
 };

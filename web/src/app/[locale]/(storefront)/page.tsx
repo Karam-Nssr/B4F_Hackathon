@@ -1,124 +1,237 @@
 /*
 Pseudocode:
-Objective: render the marketplace home page with Hero banner, Category filter bar, and reactive Product Grid.
-Input: products list from useInstaMallStore.
+Objective: render the marketplace home page with a timed Hero loader, localized titles, and reactive product grid.
+Input: products, shops, and loading state from useInstaMallStore plus an optional shopId query.
 Process:
-- Render hero banner matching Figma wireframe with glow circles, title, subtitle, and CTA.
-- Render category filters with dynamic item counts.
-- Filter products reactively by category.
+- Keep the orbital loader visible briefly while catalog data loads.
+- Scope products to a selected shop and render live category filters.
 - Render 4-column responsive product card grid.
 Output: a responsive and interactive marketplace home page.
 */
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useInstaMallStore } from "@/context/instamall-store";
 import ProductCard from "@/components/storefront/product-card";
+import LuxuryOrbitalHero from "@/components/LuxuryOrbitalHero";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import getPaginationPages from "@/utils/get-pagination-pages";
+import { useLocale } from "next-intl";
 
-type Category = "الكل" | "أزياء شبابية" | "ديكور منزلي" | "هدايا" | "إكسسوارات";
+const PRODUCTS_PER_PAGE = 12;
+const INITIAL_LOADER_MIN_MS = 2000;
+const INITIAL_LOADER_MAX_MS = 3000;
+const CATEGORY_LABELS_AR: Record<string, string> = {
+  Accessories: "إكسسوارات",
+  "Aleppo Soap": "صابون حلبي",
+  "Aleppo Sweets": "حلويات حلبية",
+  "Bakery & Sweets": "مخبوزات وحلويات",
+  "Carpets & Rugs": "سجاد وبسط",
+  "Citrus & Preserves": "حمضيات ومعلّبات",
+  Clothing: "ملابس",
+  "Clothing & Textiles": "ألبسة ومنسوجات",
+  "Coffee & Roastery": "قهوة ومحمصة",
+  "Coffee & Tea": "قهوة وشاي",
+  "Embroidery & Textiles": "تطريز ومنسوجات",
+  "Fresh Produce": "منتجات طازجة",
+  "General Store": "متجر عام",
+  Gifts: "هدايا",
+  Groceries: "بقالة",
+  "Handmade Gifts": "هدايا يدوية",
+  "Home Decor": "ديكور",
+  "Home & Living": "المنزل والمعيشة",
+  "Household Supplies": "مستلزمات منزلية",
+  "Leather Bags": "حقائب جلدية",
+  "Leather Goods": "منتجات جلدية",
+  "Local Crafts": "حرف محلية",
+  "Natural Care": "عناية طبيعية",
+  Ornaments: "زينة",
+  "Pantry & Household Goods": "مؤن وأدوات منزلية",
+  "Personal Care": "عناية شخصية",
+  Spices: "بهارات",
+  "Spices & Herbs": "بهارات وأعشاب",
+  "Sweets & Bakery": "حلويات ومخبوزات",
+  Sweets: "حلويات",
+  "Syrian Spices": "بهارات سورية",
+  "Tea & Coffee": "شاي وقهوة",
+  "Traditional Clothing": "أزياء تراثية",
+};
 
-const CATEGORIES: Category[] = [
-  "الكل",
-  "أزياء شبابية",
-  "ديكور منزلي",
-  "هدايا",
-  "إكسسوارات",
-];
+const getCategoryLabel = (category: string, locale: string) =>
+  locale === "ar" ? (CATEGORY_LABELS_AR[category] ?? category) : category;
 
-const HomePage = () => {
-  const { products } = useInstaMallStore();
-  const [selectedCategory, setSelectedCategory] = useState<Category>("الكل");
+const HomePageContent = () => {
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const { products, shops, isLoading } = useInstaMallStore();
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showInitialLoader, setShowInitialLoader] = useState(true);
+  const loaderStartedAt = useRef<number | null>(null);
+  const selectedShopId = searchParams.get("shopId");
 
+  useEffect(() => {
+    if (!showInitialLoader) return;
+
+    const now = Date.now();
+    const startedAt = loaderStartedAt.current ?? now;
+    loaderStartedAt.current = startedAt;
+
+    const maxTimer = window.setTimeout(
+      () => setShowInitialLoader(false),
+      Math.max(0, INITIAL_LOADER_MAX_MS - (now - startedAt)),
+    );
+    const minTimer = isLoading
+      ? undefined
+      : window.setTimeout(
+          () => setShowInitialLoader(false),
+          Math.max(0, INITIAL_LOADER_MIN_MS - (now - startedAt)),
+        );
+
+    return () => {
+      window.clearTimeout(maxTimer);
+      if (minTimer !== undefined) window.clearTimeout(minTimer);
+    };
+  }, [isLoading, showInitialLoader]);
+
+  useEffect(() => {
+    if (!selectedShopId || showInitialLoader) return;
+
+    document
+      .getElementById("products-section")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [selectedShopId, showInitialLoader]);
+
+  const activeProducts = useMemo(
+    () => products.filter((product) => product.isActive),
+    [products],
+  );
+  const shopProducts = useMemo(
+    () =>
+      selectedShopId
+        ? activeProducts.filter((product) => product.shopId === selectedShopId)
+        : activeProducts,
+    [activeProducts, selectedShopId],
+  );
+  const categories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          shopProducts
+            .map((product) => product.category.trim())
+            .filter(Boolean),
+        ),
+      ).sort((first, second) => first.localeCompare(second, locale)),
+    [locale, shopProducts],
+  );
+  const selectedShop = shops.find((shop) => shop.id === selectedShopId);
+  const activeCategory =
+    selectedCategory === "all" || categories.includes(selectedCategory)
+      ? selectedCategory
+      : "all";
   const filteredProducts = useMemo(() => {
-    const activeProds = products.filter((p) => p.isActive);
-    if (selectedCategory === "الكل") return activeProds;
-    return activeProds.filter((p) => p.category === selectedCategory);
-  }, [products, selectedCategory]);
+    if (activeCategory === "all") return shopProducts;
+    return shopProducts.filter(
+      (product) => product.category.trim() === activeCategory,
+    );
+  }, [activeCategory, shopProducts]);
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const activePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const pageProducts = useMemo(
+    () =>
+      filteredProducts.slice(
+        (activePage - 1) * PRODUCTS_PER_PAGE,
+        activePage * PRODUCTS_PER_PAGE,
+      ),
+    [activePage, filteredProducts],
+  );
+  const pageItems = getPaginationPages(activePage, totalPages);
+  const firstProduct = filteredProducts.length
+    ? (activePage - 1) * PRODUCTS_PER_PAGE + 1
+    : 0;
+  const lastProduct = Math.min(
+    activePage * PRODUCTS_PER_PAGE,
+    filteredProducts.length,
+  );
 
-  const scrollToProducts = () => {
-    const el = document.getElementById("products-section");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  if (showInitialLoader) {
+    return (
+      <div className="-mx-4 -mt-[22px] sm:-mx-6 lg:-mx-8">
+        <LuxuryOrbitalHero variant="loader" fullBleed locale={locale} />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-10">
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-l from-[#2C4180] to-[#0F172A] p-8 text-right md:p-12">
-        {/* Ambient Glow Circles */}
-        <div className="pointer-events-none absolute -top-20 -left-12 h-64 w-64 rounded-full bg-[rgba(253,231,234,0.10)] blur-xl" />
-        <div className="pointer-events-none absolute -right-12 -bottom-24 h-72 w-72 rounded-full bg-[rgba(224,238,251,0.12)] blur-xl" />
-
-        <div className="relative z-10 flex flex-col items-center justify-between gap-8 lg:flex-row-reverse">
-          {/* Banner Graphic / Showcase */}
-          <div className="w-full shrink-0 lg:w-[360px]">
-            <img
-              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=720&q=80"
-              alt="InstaMall Products Showcase"
-              onError={(e) => {
-                e.currentTarget.src = "/images/product/product-01.jpg";
-              }}
-              className="h-[220px] w-full rounded-[24px] object-cover shadow-2xl ring-2 ring-white/10 md:h-[240px]"
-            />
-          </div>
-
-          {/* Hero Content */}
-          <div className="flex flex-1 flex-col items-start gap-4 text-right">
-            <h1 className="text-3xl leading-tight font-bold text-white md:text-[44px]">
-              ستايلك من متاجر سوريا بطلب واحد
-            </h1>
-            <p className="max-w-2xl text-base leading-relaxed text-[#BEC6E0]">
-              نقسّم طلبك لكل متجر تلقائياً · الأسعار بالليرة السورية · الدفع
-              والتسليم مباشرة مع المتجر
-            </p>
-
-            <div className="mt-2 flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={scrollToProducts}
-                className="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-[#0F172A] shadow-md transition-all hover:scale-105 hover:bg-slate-100 active:scale-95"
-              >
-                تصفح التشكيلة
-              </button>
-              <Link
-                href="/stores"
-                className="text-sm font-medium text-[#FFB3AF] transition-colors hover:text-white hover:underline"
-              >
-                استكشف دليل المتاجر ←
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="-mt-[22px] space-y-10">
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+        <LuxuryOrbitalHero fullBleed locale={locale} />
+      </div>
 
       {/* Products Section */}
-      <section id="products-section" className="space-y-6">
+      <section id="products-section" className="scroll-mt-20 space-y-6">
         {/* Category Filter Bar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-medium text-[#475569]">
-            عرض {filteredProducts.length} منتجات مختارة
+            عرض {firstProduct}–{lastProduct} من {filteredProducts.length} منتجات
+            مختارة
+            {selectedShop ? ` من متجر ${selectedShop.shopName}` : ""}
           </p>
 
-          <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
-            {CATEGORIES.map((cat) => {
-              const isActive = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    isActive
-                      ? "bg-[#0F172A] text-white shadow-sm"
-                      : "border border-[#94A3B8]/60 bg-white text-[#0F172A] hover:bg-[#F6F0E9]"
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {selectedShopId && (
+              <Link
+                href="/#products-section"
+                onClick={() => {
+                  setCurrentPage(1);
+                  setSelectedCategory("all");
+                }}
+                className="text-sm font-semibold text-[#C40027] hover:underline"
+              >
+                {locale === "en" ? "View all products" : "عرض كل المنتجات"}
+              </Link>
+            )}
+            <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
+              {[
+                {
+                  value: "all",
+                  label: locale === "en" ? "All" : "الكل",
+                },
+                ...categories.map((category) => ({
+                  value: category,
+                  label: getCategoryLabel(category, locale),
+                })),
+              ].map((category) => {
+                const isActive = activeCategory === category.value;
+                return (
+                  <button
+                    key={category.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(category.value);
+                      setCurrentPage(1);
+                    }}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-[#0F172A] text-white shadow-sm"
+                        : "border border-[#94A3B8]/60 bg-white text-[#0F172A] hover:bg-[#F6F0E9]"
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -131,13 +244,109 @@ const HomePage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {filteredProducts.map((p) => (
+            {pageProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         )}
+
+        {totalPages > 1 && (
+          <Pagination
+            aria-label={locale === "en" ? "Product pages" : "صفحات المنتجات"}
+          >
+            <PaginationContent className="flex-wrap gap-1">
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#products-section"
+                  size="icon-sm"
+                  text={locale === "en" ? "Previous" : "السابق"}
+                  aria-label={
+                    locale === "en" ? "Previous page" : "الصفحة السابقة"
+                  }
+                  disabled={activePage <= 1}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setCurrentPage(activePage - 1);
+                    document
+                      .getElementById("products-section")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                />
+              </PaginationItem>
+
+              {pageItems.map((item) => {
+                if (typeof item === "string") {
+                  return (
+                    <PaginationItem key={item}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+
+                return (
+                  <PaginationItem key={item}>
+                    <PaginationLink
+                      href="#products-section"
+                      size="icon-sm"
+                      variant="outline"
+                      isActive={activePage === item}
+                      aria-label={
+                        locale === "en" ? `Page ${item}` : `الصفحة ${item}`
+                      }
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setCurrentPage(item);
+                        document
+                          .getElementById("products-section")
+                          ?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                      }}
+                    >
+                      {item}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#products-section"
+                  size="icon-sm"
+                  text={locale === "en" ? "Next" : "التالي"}
+                  aria-label={locale === "en" ? "Next page" : "الصفحة التالية"}
+                  disabled={activePage >= totalPages}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setCurrentPage(activePage + 1);
+                    document
+                      .getElementById("products-section")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </section>
     </div>
+  );
+};
+
+const HomePage = () => {
+  const locale = useLocale();
+
+  return (
+    <Suspense
+      fallback={
+        <div className="-mx-4 -mt-[22px] sm:-mx-6 lg:-mx-8">
+          <LuxuryOrbitalHero variant="loader" fullBleed locale={locale} />
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 };
 

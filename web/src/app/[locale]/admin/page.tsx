@@ -12,33 +12,7 @@ Output: a responsive platform admin overview with no fabricated data.
 
 import AdminUsersDirectory from "@/components/main/admin/users-directory";
 import { useInstaMallStore } from "@/context/instamall-store";
-<<<<<<< HEAD
-import { ShopImage } from "@/components/storefront/shop-image";
-import { SearchIcon } from "@/icons";
-import type { UserRole } from "@/types/instamall";
-
-type RoleFilter = "الكل" | "user" | "shop" | "admin";
-
-const ROLE_FILTERS: Array<{ value: RoleFilter; label: string }> = [
-  { value: "الكل", label: "الكل" },
-  { value: "user", label: "مشتري" },
-  { value: "shop", label: "صاحب متجر" },
-  { value: "admin", label: "مشرف" },
-];
-
-const roleLabel = (role: UserRole): string => {
-  if (role === "shop") return "صاحب متجر";
-  if (role === "admin") return "مشرف";
-  return "مشتري";
-};
-
-const roleClass = (role: UserRole): string => {
-  if (role === "shop") return "bg-[#FFF1D2] text-[#B45309]";
-  if (role === "admin") return "bg-[#D8F1E4] text-[#15803D]";
-  return "bg-[#E0EEFB] text-[#1D4ED8]";
-};
-=======
->>>>>>> fe28a030207d08e00b725cecbe5bdaacd15df8a3
+import AdminShopsTable from "@/components/admin/admin-shops-table";
 
 const AdminOverview = () => {
   const { adminStats, adminShops, error, isLoading } = useInstaMallStore();
@@ -93,58 +67,7 @@ const AdminOverview = () => {
             </p>
           </div>
 
-          <div dir="rtl" className="overflow-x-auto rounded-[22px] border border-[#EBE1D6] bg-white shadow-[0px_4px_16px_rgba(15,23,42,0.06)]">
-            <table dir="rtl" className="w-full min-w-[620px] text-right text-sm">
-              <thead className="bg-[#F6F0E9] border-b border-[#EBE1D6]">
-                <tr>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المتجر</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">التصنيف</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المدينة</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">المنتجات</th>
-                  <th className="py-3 px-3 text-xs font-semibold text-[#475569]">الحالة</th>
-                  <th className="py-3 px-3 text-center text-xs font-semibold text-[#475569]">إجراء</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EBE1D6]/60">
-                {adminShops.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-sm text-[#475569]">
-                      لا توجد متاجر مسجلة
-                    </td>
-                  </tr>
-                ) : (
-                  adminShops.map((shop) => (
-                    <tr key={shop.id} className="hover:bg-[#FBF8F4] transition-colors">
-                      <td className="py-3.5 px-3">
-                        <div className="flex items-center gap-3">
-                          <ShopImage shop={shop} sizeClassName="size-9" />
-                          <div>
-                            <p className="text-xs font-bold text-[#0F172A]">{shop.shopName}</p>
-                            <p className="text-[11px] text-[#475569]">{shop.description || "—"}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-3 text-xs text-[#475569]">{shop.category}</td>
-                      <td className="py-3.5 px-3 text-xs text-[#475569]">—</td>
-                      <td className="py-3.5 px-3 text-xs text-[#475569]">—</td>
-                      <td className="py-3.5 px-3">
-                        <span
-                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                            shop.isActive
-                              ? "bg-[#D8F1E4] text-[#15803D]"
-                              : "bg-[#FDDFDC] text-[#BA1A1A]"
-                          }`}
-                        >
-                          {shop.isActive ? "نشط" : "متوقف"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-center text-xs text-[#94A3B8]">—</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <AdminShopsTable compact shops={adminShops} isLoading={isLoading} />
         </div>
 
         <div className="lg:col-span-5">

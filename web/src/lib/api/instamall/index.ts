@@ -28,6 +28,12 @@ import {
   deriveOrderNumber,
 } from "./mappers";
 import { getApiBaseUrl, getStoredToken } from "./session";
+import {
+  getApiErrorFallbackMessage,
+  getNetworkErrorMessage,
+  getUnexpectedErrorMessage,
+  localizeErrorMessage,
+} from "@/utils/localize-error-message";
 import type {
   AdminStatsDto,
   AdminUserDto,
@@ -76,57 +82,82 @@ const client = createApiClient({
   },
 });
 
-export const getApiErrorMessage = (error: unknown): string => {
+const readApiErrorMessages = (body: string): string[] => {
+  try {
+    const parsed = JSON.parse(body) as {
+      message?: unknown;
+      error?: unknown;
+    };
+    const message = parsed.message;
+    if (typeof message === "string" && message.trim()) {
+      return [message.trim()];
+    }
+    if (Array.isArray(message)) {
+      return message.filter(
+        (part): part is string =>
+          typeof part === "string" && part.trim().length > 0,
+      );
+    }
+    if (typeof parsed.error === "string" && parsed.error.trim()) {
+      return [parsed.error.trim()];
+    }
+  } catch {
+    // Non-JSON response bodies do not contain a reliable user-facing message.
+  }
+
+  return [];
+};
+
+export const getApiErrorMessage = (
+  error: unknown,
+  locale = "ar",
+): string => {
   if (
     error &&
     typeof error === "object" &&
     "status" in error &&
-    "body" in error
+    typeof error.status === "number" &&
+    "body" in error &&
+    typeof error.body === "string"
   ) {
     const { status, body } = error as ApiError;
-    if (status === 401) {
-      return "انتهت صلاحية الجلسة أو بيانات الدخول غير صحيحة. يرجى تسجيل الدخول مجدداً.";
-    }
-    if (status === 403) return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
+    const fallback = getApiErrorFallbackMessage(status, locale);
+    if (status >= 500 || status === 408 || status === 429) return fallback;
 
-    let message: string | undefined;
-    try {
-      const parsed = JSON.parse(body) as {
-        message?: unknown;
-        error?: unknown;
-      };
-      if (typeof parsed.message === "string" && parsed.message.trim()) {
-        message = parsed.message.trim();
-      } else if (Array.isArray(parsed.message)) {
-        const parts = parsed.message.filter(
-          (part): part is string =>
-            typeof part === "string" && part.trim().length > 0,
-        );
-        if (parts.length > 0) message = parts.join("، ");
-      }
-      if (!message && typeof parsed.error === "string" && parsed.error.trim()) {
-        message = parsed.error.trim();
-      }
-    } catch {
-      // Non-JSON response bodies are not suitable for user-facing messages.
+    const messages = readApiErrorMessages(body).map((message) =>
+      localizeErrorMessage(message, locale, fallback),
+    );
+    const uniqueMessages = [...new Set(messages)];
+    const usefulMessages = uniqueMessages.filter(
+      (message) => message !== fallback,
+    );
+    if (usefulMessages.length > 0) {
+      return usefulMessages.join(locale === "en" ? "; " : "، ");
     }
-
-    if (status === 429)
-      return "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة.";
-    if (status >= 500)
-      return "حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.";
-    if (message) return message;
-    if (status === 404) return "لم يتم العثور على البيانات المطلوبة.";
-    if (status === 408)
-      return "استغرق الطلب وقتاً طويلاً. يرجى المحاولة مرة أخرى.";
-    return "تعذر إكمال الطلب. يرجى التحقق من البيانات والمحاولة مرة أخرى.";
+    return fallback;
   }
 
-  if (error instanceof TypeError) {
-    return "تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.";
+  if (
+    error instanceof TypeError ||
+    (error instanceof Error &&
+      /failed to fetch|fetch failed|networkerror|load failed|econnrefused/i.test(
+        error.message,
+      ))
+  ) {
+    return getNetworkErrorMessage(locale);
   }
-  if (error instanceof Error && error.message.trim()) return error.message;
-  return "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : undefined;
+  return localizeErrorMessage(
+    message,
+    locale,
+    getUnexpectedErrorMessage(locale),
+  );
 };
 
 let productShopNames = new Map<string, string>();

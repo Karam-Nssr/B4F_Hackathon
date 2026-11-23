@@ -20,6 +20,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useLocale } from "next-intl";
 import type {
   AdminStats,
   AdminUser,
@@ -139,6 +140,7 @@ const toUpdateProductBody = (updates: Partial<Product>): UpdateProductBody => {
 export const InstaMallStoreProvider = ({
   children,
 }: InstaMallStoreProviderProps) => {
+  const locale = useLocale();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -155,10 +157,10 @@ export const InstaMallStoreProvider = ({
   const [reloadKey, setReloadKey] = useState(0);
 
   const reportError = useCallback((caught: unknown) => {
-    const message = api.getApiErrorMessage(caught);
+    const message = api.getApiErrorMessage(caught, locale);
     setError(message);
     notifyError(message);
-  }, []);
+  }, [locale]);
 
   // Restore the persisted session once on mount so navigation guards work after refresh.
   useEffect(() => {

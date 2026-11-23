@@ -19,8 +19,11 @@ import AdminHeader from "@/components/admin/admin-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useInstaMallStore } from "@/context/instamall-store";
 import { Link } from "@/i18n/navigation";
+import getErrorMessage from "@/utils/get-error-message";
+import { useLocale } from "next-intl";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  const locale = useLocale();
   const { currentUser, loginAsDemo, error } = useInstaMallStore();
   const [demoError, setDemoError] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     try {
       await loginAsDemo("admin");
     } catch (caught) {
-      setDemoError(caught instanceof Error ? caught.message : "تعذر تسجيل الدخول");
+      setDemoError(getErrorMessage(caught, locale, "تعذر تسجيل الدخول"));
     }
   };
 
