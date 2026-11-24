@@ -32,8 +32,6 @@ class SubOrderModel extends SubOrderEntity {
     super.createdAt,
   });
 
-  /// `GET /api/orders/my` populates `shopId` into
-  /// `{ _id, shopName, category }`; a plain id string is accepted too.
   factory SubOrderModel.fromJson(Map<String, dynamic> json) {
     final rawShop = json['shopId'];
     final shop = rawShop is Map ? Map<String, dynamic>.from(rawShop) : null;

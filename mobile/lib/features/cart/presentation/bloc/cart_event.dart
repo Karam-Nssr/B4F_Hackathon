@@ -9,10 +9,8 @@ abstract class CartEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Restore the cart from local storage (dispatched once at app start).
 class CartLoadRequested extends CartEvent {}
 
-/// The red "+" button on a product card.
 class CartItemAdded extends CartEvent {
   final ProductEntity product;
 
@@ -31,7 +29,6 @@ class CartItemRemoved extends CartEvent {
   List<Object?> get props => [productId];
 }
 
-/// Quantity stepper — `quantity <= 0` removes the line.
 class CartQuantityChanged extends CartEvent {
   final String productId;
   final int quantity;
@@ -42,8 +39,15 @@ class CartQuantityChanged extends CartEvent {
   List<Object?> get props => [productId, quantity];
 }
 
-/// Submit the cart to `POST /api/orders`.
 class CartCheckoutRequested extends CartEvent {}
 
-/// The success dialog was dismissed.
 class CartOrderAcknowledged extends CartEvent {}
+
+class CartPaymentMethodChanged extends CartEvent {
+  final String paymentOptionId;
+
+  const CartPaymentMethodChanged({required this.paymentOptionId});
+
+  @override
+  List<Object?> get props => [paymentOptionId];
+}

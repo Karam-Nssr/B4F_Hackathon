@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Navy gradient banner under the header (Figma M/Home hero card).
 class HeroBanner extends StatelessWidget {
   const HeroBanner({super.key});
 

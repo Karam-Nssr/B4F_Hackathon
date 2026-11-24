@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Arabic label + brand color for each backend order status
-/// (SAD appendix A: PENDING → CONFIRMED → COMPLETED, CANCELLED possible).
 class OrderStatusChip extends StatelessWidget {
   static const Map<String, String> labels = {
     'PENDING': 'قيد الانتظار',

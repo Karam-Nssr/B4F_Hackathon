@@ -12,7 +12,6 @@ abstract class StoresState extends Equatable {
 
 class StoresInitial extends StoresState {}
 
-// ── Shops directory ────────────────────────────────────────────────────────
 class StoresLoading extends StoresState {}
 
 class StoresLoaded extends StoresState {
@@ -33,7 +32,6 @@ class StoresFailure extends StoresState {
   List<Object?> get props => [message];
 }
 
-// ── Store detail ───────────────────────────────────────────────────────────
 class StoreDetailLoading extends StoresState {}
 
 class StoreDetailLoaded extends StoresState {

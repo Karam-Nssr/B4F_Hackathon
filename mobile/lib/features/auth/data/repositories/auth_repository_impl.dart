@@ -77,7 +77,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final user = UserModel.fromJson(Map<String, dynamic>.from(rawUser));
 
-    // Shops and admins use the web dashboard; this app is for clients only.
     if (user.role != 'user') {
       throw const ServerException(
         'هذا الحساب غير مخصص لتطبيق الموبايل، يرجى استخدام لوحة التحكم على الويب',
@@ -89,7 +88,6 @@ class AuthRepositoryImpl implements AuthRepository {
     return user;
   }
 
-  /// Translates data-layer exceptions into domain [Failure]s.
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());

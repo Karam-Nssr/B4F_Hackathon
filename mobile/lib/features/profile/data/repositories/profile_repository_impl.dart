@@ -30,7 +30,22 @@ class ProfileRepositoryImpl implements ProfileRepository {
     });
   }
 
-  /// Translates data-layer exceptions into domain [Failure]s.
+  @override
+  Future<Either<Failure, ProfileEntity>> uploadPhoto(String filePath) {
+    return _guard(() async {
+      final json = await remoteDataSource.uploadPhoto(filePath);
+      return ProfileModel.fromJson(json);
+    });
+  }
+
+  @override
+  Future<Either<Failure, ProfileEntity>> deletePhoto() {
+    return _guard(() async {
+      final json = await remoteDataSource.deletePhoto();
+      return ProfileModel.fromJson(json);
+    });
+  }
+
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());

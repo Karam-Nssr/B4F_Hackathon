@@ -18,7 +18,6 @@ abstract class AuthRemoteDataSource {
   });
 }
 
-/// Real implementation – talks to the NestJS API (SAD §7.1).
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio client;
 
@@ -41,7 +40,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String email = '',
   }) {
     return _post(ApiEndpoints.register, {
-      'role': 'user', // the mobile app only creates normal clients
+      'role': 'user',
       'fullName': fullName,
       'phone': phone,
       'nationalId': nationalId,
@@ -75,7 +74,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         break;
     }
 
-    // NestJS errors look like { statusCode, message: string | string[], error }
     final data = e.response?.data;
     String? message;
     if (data is Map && data['message'] != null) {
@@ -86,8 +84,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 }
 
-/// Offline mock used while the backend isn't ready.
-/// Enabled via `--dart-define=USE_FAKE_BACKEND=true` (the default for now).
 class AuthRemoteDataSourceFake implements AuthRemoteDataSource {
   @override
   Future<Map<String, dynamic>> login({

@@ -13,7 +13,6 @@ class ShopDetailModel extends ShopDetailEntity {
     super.products,
   });
 
-  /// Parses `{ ...shop, products: [...] }` from `GET /api/shops/:id`.
   factory ShopDetailModel.fromJson(Map<String, dynamic> json) {
     final active = json['isActive'] ?? json['is_active'];
     final image = json['imageUrl'] ?? json['image_url'] ?? json['image'] ?? json['logo'];

@@ -9,7 +9,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: 'Cairo',
+      fontFamily: 'IBMPlexSansArabic',
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
@@ -94,7 +94,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBackground,
-      fontFamily: 'Cairo',
+      fontFamily: 'IBMPlexSansArabic',
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.dark,

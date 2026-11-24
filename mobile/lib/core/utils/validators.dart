@@ -1,10 +1,6 @@
-/// Form validators + input normalisation shared by auth screens.
-/// Rules follow SAD §6.3.
 class Validators {
   Validators._();
 
-  /// Converts Arabic-Indic (٠-٩) and Persian (۰-۹) digits to ASCII so the
-  /// regexes work with Arabic keyboards.
   static String normalizeDigits(String input) {
     final buffer = StringBuffer();
     for (final unit in input.runes) {
@@ -19,7 +15,6 @@ class Validators {
     return buffer.toString();
   }
 
-  /// Digits normalised and spaces / dashes / brackets removed.
   static String normalizePhone(String input) =>
       normalizeDigits(input).replaceAll(RegExp(r'[\s\-()]'), '');
 
@@ -38,13 +33,11 @@ class Validators {
     return null;
   }
 
-  /// Empty is fine; otherwise must be a valid email.
   static String? optionalEmail(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     return email(value);
   }
 
-  /// Syrian mobile: 09XXXXXXXX, +9639XXXXXXXX or 009639XXXXXXXX.
   static String? syrianPhone(String? value) {
     if (value == null || value.trim().isEmpty) return 'رقم الهاتف مطلوب';
     final phone = normalizePhone(value);
@@ -54,7 +47,6 @@ class Validators {
     return null;
   }
 
-  /// National number: exactly 11 digits.
   static String? nationalId(String? value) {
     if (value == null || value.trim().isEmpty) return 'الرقم الوطني مطلوب';
     if (!RegExp(r'^\d{11}$').hasMatch(normalizeDigits(value.trim()))) {

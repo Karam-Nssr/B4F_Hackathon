@@ -6,8 +6,8 @@ class ProfileState extends Equatable {
   final ProfileEntity? profile;
   final bool isLoading;
   final bool isSaving;
+  final bool isUploadingPhoto;
 
-  /// Transient feedback (snackbar), cleared by the next event.
   final String? message;
   final bool messageIsError;
 
@@ -15,6 +15,7 @@ class ProfileState extends Equatable {
     this.profile,
     this.isLoading = false,
     this.isSaving = false,
+    this.isUploadingPhoto = false,
     this.message,
     this.messageIsError = true,
   });
@@ -23,6 +24,7 @@ class ProfileState extends Equatable {
     ProfileEntity? profile,
     bool? isLoading,
     bool? isSaving,
+    bool? isUploadingPhoto,
     String? message,
     bool? messageIsError,
     bool clearMessage = false,
@@ -31,6 +33,7 @@ class ProfileState extends Equatable {
       profile: profile ?? this.profile,
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
+      isUploadingPhoto: isUploadingPhoto ?? this.isUploadingPhoto,
       message: clearMessage ? null : message ?? this.message,
       messageIsError: messageIsError ?? this.messageIsError,
     );
@@ -38,5 +41,5 @@ class ProfileState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [profile, isLoading, isSaving, message, messageIsError];
+      [profile, isLoading, isSaving, isUploadingPhoto, message, messageIsError];
 }

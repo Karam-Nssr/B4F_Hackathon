@@ -2,9 +2,6 @@ import 'package:dio/dio.dart';
 
 import '../error/exceptions.dart';
 
-/// Translates a [DioException] into the data-layer exception the
-/// repositories understand. Shared by every remote data source so error
-/// handling stays identical across features.
 Exception mapDioException(DioException e) {
   switch (e.type) {
     case DioExceptionType.connectionTimeout:
@@ -16,7 +13,6 @@ Exception mapDioException(DioException e) {
       break;
   }
 
-  // NestJS errors look like { statusCode, message: string | string[], error }
   final data = e.response?.data;
   String? message;
   if (data is Map && data['message'] != null) {

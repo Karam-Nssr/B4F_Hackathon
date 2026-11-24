@@ -2,17 +2,18 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/entities/checkout_result_entity.dart';
+import '../../domain/entities/payment_option.dart';
 
 class CartState extends Equatable {
   final List<CartItemEntity> items;
   final bool isLoading;
   final bool isSubmitting;
 
-  /// Transient error (shown as a snackbar, cleared by the next event).
   final String? message;
 
-  /// Set after a successful checkout — drives the success dialog.
   final CheckoutResultEntity? lastOrder;
+
+  final PaymentOption paymentOption;
 
   const CartState({
     this.items = const [],
@@ -20,12 +21,11 @@ class CartState extends Equatable {
     this.isSubmitting = false,
     this.message,
     this.lastOrder,
+    this.paymentOption = PaymentOptions.defaultOption,
   });
 
-  /// Total units in the cart (the badge on the header pill).
   int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
 
-  /// Grand total in SYP (FR-04).
   num get totalSyp => items.fold(0, (sum, item) => sum + item.totalSyp);
 
   CartState copyWith({
@@ -36,6 +36,7 @@ class CartState extends Equatable {
     bool clearMessage = false,
     CheckoutResultEntity? lastOrder,
     bool clearOrder = false,
+    PaymentOption? paymentOption,
   }) {
     return CartState(
       items: items ?? this.items,
@@ -43,10 +44,11 @@ class CartState extends Equatable {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       message: clearMessage ? null : message ?? this.message,
       lastOrder: clearOrder ? null : lastOrder ?? this.lastOrder,
+      paymentOption: paymentOption ?? this.paymentOption,
     );
   }
 
   @override
   List<Object?> get props =>
-      [items, isLoading, isSubmitting, message, lastOrder];
+      [items, isLoading, isSubmitting, message, lastOrder, paymentOption];
 }

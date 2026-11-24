@@ -7,8 +7,6 @@ import '../entities/cart_item_entity.dart';
 import '../entities/checkout_result_entity.dart';
 import '../repositories/cart_repository.dart';
 
-/// Submits the cart as an order (requires a logged-in user — the backend
-/// guards `POST /api/orders` with JWT + role `user`).
 class CheckoutUseCase
     implements UseCase<CheckoutResultEntity, CheckoutParams> {
   final CartRepository repository;

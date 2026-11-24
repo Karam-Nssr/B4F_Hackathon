@@ -11,7 +11,6 @@ class CartItemModel extends CartItemEntity {
     super.quantity,
   });
 
-  /// The cart is persisted as JSON in Hive, so both directions live here.
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     final price = json['unitPriceSyp'] ?? json['priceSyp'];
     final quantity = json['quantity'];

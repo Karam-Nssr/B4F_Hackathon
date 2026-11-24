@@ -20,7 +20,30 @@ class OrdersRepositoryImpl implements OrdersRepository {
     });
   }
 
-  /// Translates data-layer exceptions into domain [Failure]s.
+  @override
+  Future<Either<Failure, OrderEntity>> getOrderById(String orderId) {
+    return _guard(() async {
+      final row = await remoteDataSource.getOrderById(orderId);
+      return OrderModel.fromJson(row);
+    });
+  }
+
+  @override
+  Future<Either<Failure, OrderEntity>> cancelSubOrder(String subOrderId) {
+    return _guard(() async {
+      final row = await remoteDataSource.cancelSubOrder(subOrderId);
+      return OrderModel.fromJson(row);
+    });
+  }
+
+  @override
+  Future<Either<Failure, OrderEntity>> cancelOrder(String orderId) {
+    return _guard(() async {
+      final row = await remoteDataSource.cancelOrder(orderId);
+      return OrderModel.fromJson(row);
+    });
+  }
+
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());

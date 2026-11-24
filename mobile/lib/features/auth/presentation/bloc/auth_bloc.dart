@@ -87,7 +87,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await getCachedUserUseCase(const NoParams());
 
     result.fold(
-      // If the device storage can't be read we simply start logged out.
       (_) => emit(AuthUnauthenticated()),
       (user) => emit(
         user == null ? AuthUnauthenticated() : AuthAuthenticated(user),

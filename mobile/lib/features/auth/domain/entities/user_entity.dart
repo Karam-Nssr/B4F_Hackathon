@@ -7,7 +7,6 @@ class UserEntity extends Equatable {
   final String nationalId;
   final String email;
 
-  /// 'user' | 'shop' | 'admin'
   final String role;
 
   const UserEntity({

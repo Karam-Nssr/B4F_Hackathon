@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
-/// Returns the user of the saved session (token + cached profile), or null.
 class GetCachedUserUseCase implements UseCase<UserEntity?, NoParams> {
   final AuthRepository repository;
 

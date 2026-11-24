@@ -11,7 +11,6 @@ import '../bloc/auth_state.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 
-/// Registration for normal clients only (shops/admins use the web dashboard).
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -55,8 +54,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
@@ -85,10 +86,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: AppColors.border.withValues(alpha: 0.6),
+                            color: theme.dividerColor.withValues(alpha: 0.6),
                           ),
                           boxShadow: AppColors.softShadow,
                         ),
@@ -97,20 +98,20 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
+                              Text(
                                 'إنشاء حساب جديد',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: theme.textTheme.titleMedium?.color,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'قم بتعبئة البيانات التالية للبدء بالتسوق',
                                 style: TextStyle(
                                   fontSize: 12.5,
-                                  color: AppColors.textSecondary,
+                                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -213,14 +214,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                       color: AppColors.warning,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Expanded(
+                                    Expanded(
                                       child: Text(
                                         'نحفظ بيانات الهوية مرة واحدة ونرفقها تلقائياً '
                                         'مع كل فاتورة ليتحقق المتجر من الطلب.',
                                         style: TextStyle(
                                           fontSize: 12,
                                           height: 1.5,
-                                          color: AppColors.textPrimary,
+                                          color: theme.textTheme.bodyMedium?.color,
                                         ),
                                       ),
                                     ),
@@ -235,12 +236,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                 onPressed: _submit,
                               ),
                               const SizedBox(height: 16),
-                              const Text(
+                              Text(
                                 'الدفع والتسليم مباشرة بينك وبين المتجر بعد التأكيد',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  color: AppColors.textSecondary,
+                                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                 ),
                               ),
                             ],

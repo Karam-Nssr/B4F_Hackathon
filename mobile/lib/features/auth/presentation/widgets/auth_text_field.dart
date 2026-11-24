@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Label-above text field matching the Figma auth screens.
 class AuthTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -29,15 +28,17 @@ class AuthTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: theme.textTheme.titleSmall?.color,
           ),
         ),
         const SizedBox(height: 8),
@@ -47,9 +48,9 @@ class AuthTextField extends StatelessWidget {
           keyboardType: keyboardType,
           validator: validator,
           textDirection: textDirection,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14.5,
-            color: AppColors.textPrimary,
+            color: theme.textTheme.bodyLarge?.color,
           ),
           decoration: InputDecoration(
             hintText: hint,
@@ -60,18 +61,18 @@ class AuthTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: theme.cardColor,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

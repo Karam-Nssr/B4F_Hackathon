@@ -4,8 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/product_entity.dart';
 
-/// Product tile of the home grid (Figma M/Home): image, shop, title, price
-/// in SYP and the red quick-add button.
 class ProductCard extends StatelessWidget {
   final ProductEntity product;
   final VoidCallback onAddToCart;

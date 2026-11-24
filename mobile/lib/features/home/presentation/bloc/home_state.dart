@@ -12,7 +12,6 @@ abstract class HomeState extends Equatable {
 class HomeInitial extends HomeState {}
 
 class HomeLoading extends HomeState {
-  /// Previous results (if any) so the grid stays visible while filtering.
   final List<ProductEntity> products;
 
   const HomeLoading([this.products = const []]);
@@ -52,7 +51,6 @@ class HomeLoaded extends HomeState {
 class HomeFailure extends HomeState {
   final String message;
 
-  /// Last successful results, so a failed refresh doesn't wipe the screen.
   final List<ProductEntity> products;
 
   const HomeFailure(this.message, [this.products = const []]);

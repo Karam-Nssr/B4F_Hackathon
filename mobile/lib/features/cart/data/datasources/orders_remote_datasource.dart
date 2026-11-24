@@ -4,8 +4,6 @@ import '../../../../core/endpoints/api_endpoints.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 
-/// Submits an order. The payload is exactly what `POST /api/orders`
-/// expects: `{ items: [{ productId, quantity }] }`.
 abstract class OrdersRemoteDataSource {
   Future<Map<String, dynamic>> createOrder(
     List<Map<String, dynamic>> items,
@@ -35,7 +33,6 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 }
 
-/// Offline mock — pretends the order was accepted after a short delay.
 class OrdersRemoteDataSourceFake implements OrdersRemoteDataSource {
   @override
   Future<Map<String, dynamic>> createOrder(

@@ -9,11 +9,11 @@ class ProfileModel extends ProfileEntity {
     super.nationalId,
     super.role,
     super.createdAt,
+    super.photoUrl,
   });
 
-  /// Parses `GET /api/users/me` / the `PATCH` response (the server strips
-  /// `passwordHash`, so it never appears here).
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    final photoUrl = json['photoUrl']?.toString();
     return ProfileModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       fullName: json['fullName']?.toString() ?? '',
@@ -22,10 +22,10 @@ class ProfileModel extends ProfileEntity {
       nationalId: json['nationalId']?.toString() ?? '',
       role: json['role']?.toString() ?? 'user',
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+      photoUrl: photoUrl == null || photoUrl.isEmpty ? null : photoUrl,
     );
   }
 
-  /// Body for `PATCH /api/users/me`.
   Map<String, dynamic> toJson() {
     return {
       'fullName': fullName,

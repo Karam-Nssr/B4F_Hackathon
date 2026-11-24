@@ -29,13 +29,17 @@ import '../../features/home/presentation/bloc/home_bloc.dart';
 import '../../features/orders/data/datasources/my_orders_remote_datasource.dart';
 import '../../features/orders/data/repositories/orders_repository_impl.dart';
 import '../../features/orders/domain/repositories/orders_repository.dart';
+import '../../features/orders/domain/usecases/cancel_order_usecase.dart';
+import '../../features/orders/domain/usecases/cancel_sub_order_usecase.dart';
 import '../../features/orders/domain/usecases/get_my_orders_usecase.dart';
+import '../../features/orders/domain/usecases/get_order_details_usecase.dart';
 import '../../features/orders/presentation/bloc/orders_bloc.dart';
 import '../../features/profile/data/datasources/profile_remote_datasource.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/get_profile_usecase.dart';
 import '../../features/profile/domain/usecases/update_profile_usecase.dart';
+import '../../features/profile/domain/usecases/upload_photo_usecase.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/stores/data/datasources/stores_remote_datasource.dart';
 import '../../features/stores/data/repositories/stores_repository_impl.dart';
@@ -49,49 +53,40 @@ import '../theme/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
-/// The real API is used by default. To use the offline mock instead:
-///   flutter run --dart-define=USE_FAKE_BACKEND=true
 const bool useFakeBackend = bool.fromEnvironment(
   'USE_FAKE_BACKEND',
   defaultValue: false,
 );
 
 Future<void> initDependencies() async {
-  // External
   sl.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
   );
 
-  // Theme Cubit (persists mode to secure storage)
   sl.registerLazySingleton<ThemeCubit>(
     () => ThemeCubit(storage: sl()),
   );
 
-  // Local storage — Hive backs the cart (opened once, app-wide).
   await Hive.initFlutter();
   final cartBox = await Hive.openBox<String>('instamall_cart');
   sl.registerLazySingleton<Box<String>>(() => cartBox);
 
-  // Auth local data source (registered first: the HTTP client reads the token)
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(storage: sl()),
   );
 
-  // Network
   sl.registerLazySingleton<Dio>(
     () => ApiClient.create(
       tokenProvider: () => sl<AuthLocalDataSource>().getToken(),
     ),
   );
 
-  // Auth remote data source
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => useFakeBackend
         ? AuthRemoteDataSourceFake()
         : AuthRemoteDataSourceImpl(client: sl()),
   );
 
-  // Auth Repository
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       remoteDataSource: sl(),
@@ -99,13 +94,11 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // Auth Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetCachedUserUseCase(sl()));
 
-  // Auth Bloc (one instance, provided at the app root in main.dart)
   sl.registerFactory(
     () => AuthBloc(
       loginUseCase: sl(),
@@ -115,7 +108,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // ── Home (public browsing, SAD §7.1) ──────────────────────────────────
   sl.registerLazySingleton<HomeRemoteDataSource>(
     () => useFakeBackend
         ? HomeRemoteDataSourceFake()
@@ -129,7 +121,6 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetShopsUseCase(sl()));
 
-  // Home Bloc (created by the home page, disposed with it)
   sl.registerFactory(
     () => HomeBloc(
       getProductsUseCase: sl(),
@@ -137,7 +128,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // ── Stores (public shops directory, SAD §7.1) ──────────────────────────
   sl.registerLazySingleton<StoresRemoteDataSource>(
     () => useFakeBackend
         ? StoresRemoteDataSourceFake()
@@ -151,7 +141,6 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetStoresUseCase(sl()));
   sl.registerLazySingleton(() => GetShopDetailUseCase(sl()));
 
-  // Stores Bloc (one per page: directory / detail)
   sl.registerFactory(
     () => StoresBloc(
       getStoresUseCase: sl(),
@@ -159,7 +148,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // ── Cart (local Hive cart + POST /api/orders, SAD FR-05) ───────────────
   sl.registerLazySingleton<CartLocalDataSource>(
     () => CartLocalDataSourceImpl(box: sl()),
   );
@@ -181,7 +169,6 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => SaveCartUseCase(sl()));
   sl.registerLazySingleton(() => CheckoutUseCase(sl()));
 
-  // Cart Bloc (one instance, provided at the app root in main.dart)
   sl.registerFactory(
     () => CartBloc(
       getCartUseCase: sl(),
@@ -190,7 +177,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // ── Orders (GET /api/orders/my, SAD FR-07) ─────────────────────────────
   sl.registerLazySingleton<MyOrdersRemoteDataSource>(
     () => useFakeBackend
         ? MyOrdersRemoteDataSourceFake()
@@ -202,11 +188,19 @@ Future<void> initDependencies() async {
   );
 
   sl.registerLazySingleton(() => GetMyOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderDetailsUseCase(sl()));
+  sl.registerLazySingleton(() => CancelSubOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CancelOrderUseCase(sl()));
 
-  // Orders Bloc (one per page visit — fresh list each time)
-  sl.registerFactory(() => OrdersBloc(getMyOrdersUseCase: sl()));
+  sl.registerFactory(
+    () => OrdersBloc(
+      getMyOrdersUseCase: sl(),
+      getOrderDetailsUseCase: sl(),
+      cancelSubOrderUseCase: sl(),
+      cancelOrderUseCase: sl(),
+    ),
+  );
 
-  // ── Profile (GET/PATCH /api/users/me, SAD FR-07) ───────────────────────
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => useFakeBackend
         ? ProfileRemoteDataSourceFake()
@@ -219,12 +213,15 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UploadPhotoUseCase(sl()));
+  sl.registerLazySingleton(() => DeletePhotoUseCase(sl()));
 
-  // Profile Bloc (one per page visit)
   sl.registerFactory(
     () => ProfileBloc(
       getProfileUseCase: sl(),
       updateProfileUseCase: sl(),
+      uploadPhotoUseCase: sl(),
+      deletePhotoUseCase: sl(),
     ),
   );
 }

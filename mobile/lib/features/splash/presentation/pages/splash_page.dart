@@ -17,7 +17,6 @@ class SplashPage extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Decorative background circles for modern ambient glow
             Positioned(
               top: -60,
               right: -60,

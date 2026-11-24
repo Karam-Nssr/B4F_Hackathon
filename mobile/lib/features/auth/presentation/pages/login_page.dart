@@ -44,9 +44,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Uses the app-level AuthBloc provided in main.dart.
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
@@ -75,10 +76,10 @@ class _LoginPageState extends State<LoginPage> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: AppColors.border.withValues(alpha: 0.6),
+                            color: theme.dividerColor.withValues(alpha: 0.6),
                           ),
                           boxShadow: AppColors.softShadow,
                         ),
@@ -87,20 +88,20 @@ class _LoginPageState extends State<LoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
+                              Text(
                                 'تسجيل الدخول',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: theme.textTheme.titleMedium?.color,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'أدخل بيانات حسابك للمتابعة',
                                 style: TextStyle(
                                   fontSize: 12.5,
-                                  color: AppColors.textSecondary,
+                                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                 ),
                               ),
                               const SizedBox(height: 20),

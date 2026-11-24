@@ -6,8 +6,6 @@ import '../../domain/usecases/get_stores_usecase.dart';
 import 'stores_event.dart';
 import 'stores_state.dart';
 
-/// Drives both the stores directory and the store detail page (each page
-/// creates its own instance, so the two state streams never collide).
 class StoresBloc extends Bloc<StoresEvent, StoresState> {
   final GetStoresUseCase getStoresUseCase;
   final GetShopDetailUseCase getShopDetailUseCase;

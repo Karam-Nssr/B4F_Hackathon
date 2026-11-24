@@ -11,7 +11,6 @@ abstract class AuthLocalDataSource {
   Future<void> saveUser(UserModel user);
   Future<UserModel?> getCachedUser();
 
-  /// Removes both the token and the cached user.
   Future<void> clearSession();
 }
 

@@ -6,21 +6,21 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_page_header.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/checkout_result_entity.dart';
+import '../../domain/entities/payment_option.dart';
 import '../bloc/cart_bloc.dart';
 import '../bloc/cart_event.dart';
 import '../bloc/cart_state.dart';
 import '../widgets/cart_item_tile.dart';
+import '../widgets/payment_method_sheet.dart';
 
-/// Cart tab: local cart lines, grand total in SYP and checkout through
-/// `POST /api/orders` (SAD FR-05 — the backend splits it per shop).
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
   void _checkout(BuildContext context) {
-    // The backend requires a JWT with role `user` — send guests to login.
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,12 +40,11 @@ class CartPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return BlocListener<CartBloc, CartState>(
-      // One-shot: the success dialog appears exactly once per order.
       listenWhen: (prev, cur) =>
           cur.lastOrder != null && cur.lastOrder != prev.lastOrder,
       listener: (context, state) async {
         final order = state.lastOrder!;
-        await _showSuccessDialog(context, order);
+        await _showSuccessDialog(context, order, state.paymentOption);
         if (context.mounted) {
           context.read<CartBloc>().add(CartOrderAcknowledged());
         }
@@ -127,6 +126,12 @@ class CartPage extends StatelessWidget {
             },
           ),
         ),
+        _PaymentBar(
+          option: state.paymentOption,
+          onChanged: (id) => context
+              .read<CartBloc>()
+              .add(CartPaymentMethodChanged(paymentOptionId: id)),
+        ),
         _CheckoutBar(
           totalSyp: state.totalSyp,
           isSubmitting: state.isSubmitting,
@@ -139,6 +144,7 @@ class CartPage extends StatelessWidget {
   Future<void> _showSuccessDialog(
     BuildContext context,
     CheckoutResultEntity order,
+    PaymentOption paymentOption,
   ) {
     final theme = Theme.of(context);
 
@@ -208,6 +214,35 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      paymentOption.timing == PaymentTiming.now
+                          ? Icons.account_balance_wallet_outlined
+                          : Icons.payments_outlined,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      paymentOption.label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -231,54 +266,115 @@ class _CartHeader extends StatelessWidget {
 
   const _CartHeader({required this.itemCount, required this.totalSyp});
 
+  static String _countLabel(int count) {
+    if (count == 1) return 'قطعة واحدة';
+    if (count == 2) return 'قطعتان';
+    if (count <= 10) return '$count قطع';
+    return '$count قطعة';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.navyGradient,
+    return AppPageHeader(
+      title: 'سلة التسوق',
+      subtitle: 'راجع منتجاتك قبل إتمام الطلب',
+      icon: Icons.shopping_cart_outlined,
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _countLabel(itemCount),
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            Formatters.syp(totalSyp),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+    );
+  }
+}
+
+class _PaymentBar extends StatelessWidget {
+  final PaymentOption option;
+  final ValueChanged<String> onChanged;
+
+  const _PaymentBar({required this.option, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.cardColor,
+      child: InkWell(
+        onTap: () => showPaymentMethodSheet(
+          context,
+          selected: option,
+          onSelected: onChanged,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.6)),
+            ),
+          ),
           child: Row(
             children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'سلة التسوق',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'راجع منتجاتك قبل إتمام الطلب',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  option.timing == PaymentTiming.now
+                      ? Icons.account_balance_wallet_outlined
+                      : Icons.payments_outlined,
+                  size: 17,
+                  color: AppColors.primary,
+                ),
               ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$itemCount ${itemCount == 1 ? 'قطعة' : 'قطعة'}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    Formatters.syp(totalSyp),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'طريقة الدفع',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: theme.textTheme.bodyMedium?.color
+                            ?.withValues(alpha: 0.65),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      option.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.titleMedium?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color:
+                    theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
               ),
             ],
           ),

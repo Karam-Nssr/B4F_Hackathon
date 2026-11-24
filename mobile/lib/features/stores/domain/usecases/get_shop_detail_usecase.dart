@@ -6,7 +6,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/shop_detail_entity.dart';
 import '../repositories/stores_repository.dart';
 
-/// A single shop page with its product grid.
 class GetShopDetailUseCase
     implements UseCase<ShopDetailEntity, ShopDetailParams> {
   final StoresRepository repository;

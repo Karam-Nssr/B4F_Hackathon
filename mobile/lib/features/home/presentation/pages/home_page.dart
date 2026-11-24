@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_status_views.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
@@ -22,8 +23,6 @@ import '../widgets/hero_banner.dart';
 import '../widgets/home_header.dart';
 import '../widgets/product_card.dart';
 
-/// Marketplace home (SAD FR-02 / Figma M/Home): header with search, hero
-/// banner, category chips, product grid and the bottom navigation.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -35,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   Timer? _searchDebounce;
-  String _selectedCategory = 'الكل';
+  String _selectedCategory = '';
 
   @override
   void initState() {
@@ -184,7 +183,11 @@ class _HomePageState extends State<HomePage> {
             else if (state is HomeFailure && products.isEmpty)
               _errorView(context, state.message)
             else if (state is HomeLoaded && products.isEmpty)
-              const _EmptyView()
+              const AppEmptyState(
+                icon: Icons.search_off_rounded,
+                title: 'لا توجد منتجات مطابقة',
+                message: 'جرّب كلمة بحث أو تصنيفاً آخر',
+              )
             else
               Column(
                 children: [
@@ -322,32 +325,6 @@ class _PaginationButton extends StatelessWidget {
       label: const Text(
         'عرض المزيد من المنتجات',
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 40),
-      child: Column(
-        children: [
-          Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted),
-          SizedBox(height: 12),
-          Text(
-            'لا توجد منتجات مطابقة',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'جرّب كلمة بحث أو تصنيفاً آخر',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-        ],
       ),
     );
   }

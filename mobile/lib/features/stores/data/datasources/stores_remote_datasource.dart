@@ -11,7 +11,6 @@ abstract class StoresRemoteDataSource {
   Future<Map<String, dynamic>> getShopById(String id);
 }
 
-/// Real implementation – the public shops endpoints (SAD §7.1).
 class StoresRemoteDataSourceImpl implements StoresRemoteDataSource {
   final Dio client;
 

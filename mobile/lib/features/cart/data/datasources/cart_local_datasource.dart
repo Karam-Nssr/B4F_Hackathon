@@ -4,8 +4,6 @@ import 'package:hive/hive.dart';
 
 import '../../../../core/error/exceptions.dart';
 
-/// Cart persistence: the whole cart is stored as one JSON array so reads
-/// and writes stay atomic (the cart is small — a few dozen items at most).
 abstract class CartLocalDataSource {
   Future<List<Map<String, dynamic>>> readItems();
 
@@ -31,7 +29,6 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
           .map((row) => Map<String, dynamic>.from(row))
           .toList();
     } catch (_) {
-      // Corrupted JSON — treat the cart as empty instead of crashing.
       return const [];
     }
   }

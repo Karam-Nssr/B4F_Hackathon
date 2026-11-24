@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 
-/// Bottom navigation shared by the user screens (Figma M/Home).
-/// RTL order: the first item is rendered on the right.
 class AppBottomNavBar extends StatelessWidget {
   static const List<String> labels = [
     'الرئيسية',
@@ -22,9 +20,6 @@ class AppBottomNavBar extends StatelessWidget {
     Icons.person_outline_rounded,
   ];
 
-  /// Single source of truth for tab navigation — every screen's bar calls
-  /// this, so tapping the current tab is a no-op and the rest go to the
-  /// right route.
   static void goToTab(BuildContext context, int index) {
     switch (index) {
       case 0:

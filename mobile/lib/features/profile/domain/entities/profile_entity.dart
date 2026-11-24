@@ -1,16 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-/// The signed-in user's profile (`GET /api/users/me`, SAD FR-07).
 class ProfileEntity extends Equatable {
   final String id;
   final String fullName;
   final String email;
   final String phone;
   final String nationalId;
-
-  /// 'user' | 'shop' | 'admin'
   final String role;
   final DateTime? createdAt;
+  final String? photoUrl;
 
   const ProfileEntity({
     required this.id,
@@ -20,6 +18,7 @@ class ProfileEntity extends Equatable {
     this.nationalId = '',
     this.role = 'user',
     this.createdAt,
+    this.photoUrl,
   });
 
   @override
@@ -31,5 +30,6 @@ class ProfileEntity extends Equatable {
         nationalId,
         role,
         createdAt,
+        photoUrl,
       ];
 }

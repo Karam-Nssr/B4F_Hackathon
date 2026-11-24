@@ -27,7 +27,6 @@ class InstaMallApp extends StatelessWidget {
       providers: [
         BlocProvider.value(value: sl<ThemeCubit>()),
         BlocProvider(create: (_) => sl<AuthBloc>()),
-        // App-level: the cart badge on every screen reads this instance.
         BlocProvider(create: (_) => sl<CartBloc>()..add(CartLoadRequested())),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
@@ -39,9 +38,6 @@ class InstaMallApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
             routerConfig: AppRouter.router,
-            // With the Arabic locale + localization delegates Flutter applies RTL
-            // itself and Material widgets (date pickers, text-selection menus,
-            // tooltips) are properly Arabic. No forced Directionality needed.
             locale: const Locale('ar'),
             supportedLocales: const [Locale('ar')],
             localizationsDelegates: const [

@@ -16,7 +16,6 @@ abstract class HomeRemoteDataSource {
   Future<List<Map<String, dynamic>>> getShops();
 }
 
-/// Real implementation – talks to the public browsing endpoints (SAD §7.1).
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   final Dio client;
 
@@ -66,8 +65,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 }
 
-/// Offline mock used while the backend isn't ready.
-/// Enabled via `--dart-define=USE_FAKE_BACKEND=true`.
 class HomeRemoteDataSourceFake implements HomeRemoteDataSource {
   static const _shops = [
     {

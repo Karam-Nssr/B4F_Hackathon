@@ -14,8 +14,6 @@ class ProductModel extends ProductEntity {
     super.createdAt,
   });
 
-  /// Parses a document from `GET /api/products` (snake_case fallbacks are
-  /// accepted so the mock / seeded data works too).
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     final price = json['priceSyp'] ?? json['price_syp'];
     final active = json['isActive'] ?? json['is_active'];

@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/order_entity.dart';
 import '../repositories/orders_repository.dart';
 
-/// Order history shown on the "طلباتي" tab.
 class GetMyOrdersUseCase implements UseCase<List<OrderEntity>, NoParams> {
   final OrdersRepository repository;
 

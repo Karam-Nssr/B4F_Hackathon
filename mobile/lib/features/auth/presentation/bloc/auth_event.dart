@@ -38,5 +38,4 @@ class AuthRegisterRequested extends AuthEvent {
 
 class AuthLogoutRequested extends AuthEvent {}
 
-/// Dispatched by the splash page: restores a cached session if one exists.
 class AuthTokenCheckRequested extends AuthEvent {}

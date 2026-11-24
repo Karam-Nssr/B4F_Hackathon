@@ -6,6 +6,8 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_page_header.dart';
+import '../../../../core/widgets/app_status_views.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../bloc/orders_bloc.dart';
@@ -13,11 +15,15 @@ import '../bloc/orders_event.dart';
 import '../bloc/orders_state.dart';
 import '../widgets/order_card.dart';
 
-/// "طلباتي" tab (SAD FR-07 / §8): the signed-in user's orders, each card
-/// split per shop with invoice number, status, totals in SYP and the
-/// attached verification data. Requires login (backend is JWT-guarded).
 class OrdersPage extends StatelessWidget {
   const OrdersPage({super.key});
+
+  Future<void> _openDetails(BuildContext context, String orderId) async {
+    final changed = await context.push<bool>('/orders/$orderId');
+    if (changed == true && context.mounted) {
+      context.read<OrdersBloc>().add(OrdersLoadRequested());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,11 @@ class OrdersPage extends StatelessWidget {
                   backgroundColor: theme.scaffoldBackgroundColor,
                   body: Column(
                     children: [
-                      const _OrdersHeader(),
+                      const AppPageHeader(
+                        title: 'طلباتي',
+                        subtitle: 'طلب واحد يضم كل متاجرك في مكان واحد',
+                        icon: Icons.receipt_long_rounded,
+                      ),
                       Expanded(child: _buildBody(context, state)),
                     ],
                   ),
@@ -68,14 +78,22 @@ class OrdersPage extends StatelessWidget {
       );
     }
     if (state is OrdersFailure) {
-      return _ErrorView(
+      return AppErrorState(
         message: state.message,
         onRetry: () =>
             context.read<OrdersBloc>().add(OrdersLoadRequested()),
       );
     }
     if (state is OrdersLoaded) {
-      if (state.orders.isEmpty) return const _EmptyView();
+      if (state.orders.isEmpty) {
+        return AppEmptyState(
+          icon: Icons.receipt_long_outlined,
+          title: 'لا توجد طلبات بعد',
+          message: 'أول طلب لك سيظهر هنا بتفاصيله وفواتيره',
+          actionLabel: 'ابدأ التسوق',
+          onAction: () => context.go('/home'),
+        );
+      }
       return RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async =>
@@ -85,162 +103,17 @@ class OrdersPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: state.orders.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) => OrderCard(order: state.orders[index]),
+          itemBuilder: (context, index) {
+            final order = state.orders[index];
+            return OrderCard(
+              order: order,
+              onTap: () => _openDetails(context, order.id),
+            );
+          },
         ),
       );
     }
     return const SizedBox.shrink();
-  }
-}
-
-class _OrdersHeader extends StatelessWidget {
-  const _OrdersHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.navyGradient,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-          child: Row(
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'طلباتي',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'تابع طلباتك وفواتير كل متجر',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: AppColors.primary, width: 2),
-                ),
-                child: const Icon(
-                  Icons.receipt_long_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_off_rounded,
-              size: 48, color: AppColors.textMuted),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 200,
-            child: AppButton(
-              text: 'إعادة المحاولة',
-              height: 44,
-              onPressed: onRetry,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: AppColors.navy.withValues(alpha: 0.06),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.receipt_long_outlined,
-              size: 44,
-              color: AppColors.navy,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            'لا توجد طلبات بعد',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: theme.textTheme.titleLarge?.color,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'طلباتك ستظهر هنا بعد إتمام أول طلب',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13.5,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: 210,
-            child: AppButton(
-              text: 'ابدأ التسوق',
-              height: 46,
-              icon: Icons.shopping_bag_outlined,
-              onPressed: () => context.go('/home'),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -256,7 +129,11 @@ class _LoginRequiredView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const _OrdersHeader(),
+            const AppPageHeader(
+              title: 'طلباتي',
+              subtitle: 'تابع طلباتك وفواتير كل متجر',
+              icon: Icons.receipt_long_rounded,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -291,7 +168,8 @@ class _LoginRequiredView extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13.5,
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color
+                            ?.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 24),

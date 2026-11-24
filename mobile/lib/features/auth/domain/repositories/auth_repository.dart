@@ -9,7 +9,6 @@ abstract class AuthRepository {
     required String password,
   });
 
-  /// The mobile app only registers normal clients (role `user`).
   Future<Either<Failure, UserEntity>> register({
     required String fullName,
     required String phone,
@@ -20,6 +19,5 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> logout();
 
-  /// The user from the cached session, or null if there is no saved session.
   Future<Either<Failure, UserEntity?>> getCachedUser();
 }

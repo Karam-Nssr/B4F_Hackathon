@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/shop_entity.dart';
 import '../repositories/home_repository.dart';
 
-/// Active shops, used to attach a shop name to every product card.
 class GetShopsUseCase implements UseCase<List<ShopEntity>, NoParams> {
   final HomeRepository repository;
 

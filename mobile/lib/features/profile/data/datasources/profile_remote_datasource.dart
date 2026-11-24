@@ -5,11 +5,14 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../domain/repositories/profile_repository.dart';
 
-/// `GET /api/users/me` + `PATCH /api/users/me` (JWT + role `user`).
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getProfile();
 
   Future<Map<String, dynamic>> updateProfile(UpdateProfileParams params);
+
+  Future<Map<String, dynamic>> uploadPhoto(String filePath);
+
+  Future<Map<String, dynamic>> deletePhoto();
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -49,9 +52,34 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw const ServerException('استجابة غير متوقعة من الخادم');
   }
+
+  @override
+  Future<Map<String, dynamic>> uploadPhoto(String filePath) async {
+    try {
+      final form = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(filePath),
+      });
+      final response = await client.patch(
+        ApiEndpoints.userPhoto,
+        data: form,
+      );
+      return _asMap(response.data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> deletePhoto() async {
+    try {
+      final response = await client.delete(ApiEndpoints.userPhoto);
+      return _asMap(response.data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
 }
 
-/// Offline mock — keeps the edited profile in memory for the session.
 class ProfileRemoteDataSourceFake implements ProfileRemoteDataSource {
   Map<String, dynamic> _profile = {
     '_id': 'user_fake',
@@ -83,6 +111,20 @@ class ProfileRemoteDataSourceFake implements ProfileRemoteDataSource {
       'phone': params.phone,
       'nationalId': params.nationalId,
     };
+    return Map<String, dynamic>.from(_profile);
+  }
+
+  @override
+  Future<Map<String, dynamic>> uploadPhoto(String filePath) async {
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    _profile = {..._profile, 'photoUrl': '/api/media/avatars/fake-photo.jpg'};
+    return Map<String, dynamic>.from(_profile);
+  }
+
+  @override
+  Future<Map<String, dynamic>> deletePhoto() async {
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    _profile = {..._profile, 'photoUrl': null};
     return Map<String, dynamic>.from(_profile);
   }
 }

@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 
 import '../endpoints/api_endpoints.dart';
 
-/// Builds the app-wide [Dio] instance.
-/// [tokenProvider] is called per request so the JWT is always the latest one.
 class ApiClient {
   ApiClient._();
 
@@ -31,8 +29,6 @@ class ApiClient {
     );
 
     if (kDebugMode) {
-      // Shows URL, status and response in the console (request body is not
-      // logged so passwords stay out of it).
       dio.interceptors.add(
         LogInterceptor(requestBody: false, responseBody: true),
       );

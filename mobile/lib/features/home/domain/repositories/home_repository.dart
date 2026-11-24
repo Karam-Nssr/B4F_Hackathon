@@ -5,8 +5,6 @@ import '../entities/product_entity.dart';
 import '../entities/shop_entity.dart';
 
 abstract class HomeRepository {
-  /// Active products, optionally filtered exactly like `GET /api/products`
-  /// (search / category / shop / price range, SAD §7.1).
   Future<Either<Failure, List<ProductEntity>>> getProducts({
     String? search,
     String? category,
@@ -15,6 +13,5 @@ abstract class HomeRepository {
     String? shopId,
   });
 
-  /// Active shops — used to resolve each product's shop name.
   Future<Either<Failure, List<ShopEntity>>> getShops();
 }

@@ -7,10 +7,8 @@ abstract class ProfileEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial load (and retry).
 class ProfileLoadRequested extends ProfileEvent {}
 
-/// The form's save button — all four SAD §8 fields are sent together.
 class ProfileUpdateRequested extends ProfileEvent {
   final String fullName;
   final String email;
@@ -27,3 +25,14 @@ class ProfileUpdateRequested extends ProfileEvent {
   @override
   List<Object?> get props => [fullName, email, phone, nationalId];
 }
+
+class ProfilePhotoUploadRequested extends ProfileEvent {
+  final String filePath;
+
+  const ProfilePhotoUploadRequested({required this.filePath});
+
+  @override
+  List<Object?> get props => [filePath];
+}
+
+class ProfilePhotoRemoveRequested extends ProfileEvent {}

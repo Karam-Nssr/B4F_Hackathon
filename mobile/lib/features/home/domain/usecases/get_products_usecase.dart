@@ -23,7 +23,6 @@ class GetProductsUseCase implements UseCase<List<ProductEntity>, ProductsParams>
   }
 }
 
-/// Filters accepted by the home screen (SAD §7.1 query parameters).
 class ProductsParams extends Equatable {
   final String? search;
   final String? category;

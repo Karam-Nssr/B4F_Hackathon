@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// An active shop from `GET /api/shops` (SAD §6.2 — shops collection).
 class ShopEntity extends Equatable {
   final String id;
   final String shopName;

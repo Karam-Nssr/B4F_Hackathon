@@ -10,7 +10,6 @@ class ShopModel extends ShopEntity {
     super.isActive,
   });
 
-  /// Parses a document from `GET /api/shops`.
   factory ShopModel.fromJson(Map<String, dynamic> json) {
     final active = json['isActive'] ?? json['is_active'];
     final image = json['imageUrl'] ?? json['image_url'] ?? json['image'] ?? json['logo'];

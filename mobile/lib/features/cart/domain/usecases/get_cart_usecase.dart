@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/cart_item_entity.dart';
 import '../repositories/cart_repository.dart';
 
-/// Restores the cart from local storage.
 class GetCartUseCase implements UseCase<List<CartItemEntity>, NoParams> {
   final CartRepository repository;
 

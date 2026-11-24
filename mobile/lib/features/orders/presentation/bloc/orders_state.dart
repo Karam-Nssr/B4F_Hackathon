@@ -30,3 +30,46 @@ class OrdersFailure extends OrdersState {
   @override
   List<Object?> get props => [message];
 }
+
+class OrderDetailsLoading extends OrdersState {}
+
+class OrderDetailsLoaded extends OrdersState {
+  final OrderEntity order;
+  final bool isCancelling;
+  final String? message;
+  final bool messageIsError;
+
+  const OrderDetailsLoaded(
+    this.order, {
+    this.isCancelling = false,
+    this.message,
+    this.messageIsError = false,
+  });
+
+  OrderDetailsLoaded copyWith({
+    OrderEntity? order,
+    bool? isCancelling,
+    String? message,
+    bool? messageIsError,
+    bool clearMessage = false,
+  }) {
+    return OrderDetailsLoaded(
+      order ?? this.order,
+      isCancelling: isCancelling ?? this.isCancelling,
+      message: clearMessage ? null : message ?? this.message,
+      messageIsError: messageIsError ?? this.messageIsError,
+    );
+  }
+
+  @override
+  List<Object?> get props => [order, isCancelling, message, messageIsError];
+}
+
+class OrderDetailsFailure extends OrdersState {
+  final String message;
+
+  const OrderDetailsFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

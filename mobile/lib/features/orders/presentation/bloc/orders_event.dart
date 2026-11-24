@@ -7,5 +7,31 @@ abstract class OrdersEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial load / pull-to-refresh / retry.
 class OrdersLoadRequested extends OrdersEvent {}
+
+class OrderDetailsLoadRequested extends OrdersEvent {
+  final String orderId;
+
+  const OrderDetailsLoadRequested({required this.orderId});
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class SubOrderCancelRequested extends OrdersEvent {
+  final String subOrderId;
+
+  const SubOrderCancelRequested({required this.subOrderId});
+
+  @override
+  List<Object?> get props => [subOrderId];
+}
+
+class OrderCancelRequested extends OrdersEvent {
+  final String orderId;
+
+  const OrderCancelRequested({required this.orderId});
+
+  @override
+  List<Object?> get props => [orderId];
+}

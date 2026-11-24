@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../home/domain/entities/shop_entity.dart';
 
-/// Shop tile of the stores directory: avatar/image, name, category and a short
-/// description (SAD §8 – shops directory).
 class StoreCard extends StatelessWidget {
   final ShopEntity shop;
   final VoidCallback onTap;

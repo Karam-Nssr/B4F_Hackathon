@@ -13,16 +13,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   static const int _pageSize = 6;
 
-  /// Current search filter (passed to backend search query if needed).
   String _search = '';
 
-  /// Active category filter — filtered locally in Flutter on the loaded list.
   String? _category;
 
-  /// Full unfiltered products list from the backend.
   List<ProductEntity> _allProducts = [];
 
-  /// Current pagination page.
   int _currentPage = 1;
 
   HomeBloc({
@@ -52,7 +48,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     await _fetchBackend(emit);
   }
 
-  /// Category filter is handled completely on the client side in Flutter.
   void _onCategory(
     HomeCategorySelected event,
     Emitter<HomeState> emit,
@@ -75,8 +70,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  /// Fetches products from backend without passing `category` param, so that
-  /// category filtering happens client-side in Flutter.
   Future<void> _fetchBackend(Emitter<HomeState> emit) async {
     final previous = state is HomeLoaded
         ? (state as HomeLoaded).products
@@ -88,7 +81,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     emit(HomeLoading(previous));
 
-    // Notice category parameter is NOT passed to backend: client-side filtering.
     final productsFuture = getProductsUseCase(
       ProductsParams(search: _search.isEmpty ? null : _search),
     );
@@ -116,7 +108,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     );
   }
 
-  /// Filters `_allProducts` client-side in Flutter by `_category`.
   List<ProductEntity> _getFilteredProducts() {
     if (_category == null || _category!.isEmpty) {
       return _allProducts;

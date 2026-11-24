@@ -2,8 +2,6 @@ import 'package:equatable/equatable.dart';
 
 import '../../../home/domain/entities/product_entity.dart';
 
-/// One line of the local cart: a snapshot of the product as it was added
-/// (title/price can change on the server, the cart keeps what the user saw).
 class CartItemEntity extends Equatable {
   final String productId;
   final String shopId;
@@ -23,7 +21,6 @@ class CartItemEntity extends Equatable {
     this.quantity = 1,
   });
 
-  /// Builds a cart line from a product tile (home / store grid).
   factory CartItemEntity.fromProduct(ProductEntity product) {
     return CartItemEntity(
       productId: product.id,

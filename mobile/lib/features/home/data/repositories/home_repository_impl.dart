@@ -42,7 +42,6 @@ class HomeRepositoryImpl implements HomeRepository {
     });
   }
 
-  /// Translates data-layer exceptions into domain [Failure]s.
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());

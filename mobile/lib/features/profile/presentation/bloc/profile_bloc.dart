@@ -4,19 +4,26 @@ import '../../../../core/usecase/usecase.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/upload_photo_usecase.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetProfileUseCase getProfileUseCase;
   final UpdateProfileUseCase updateProfileUseCase;
+  final UploadPhotoUseCase uploadPhotoUseCase;
+  final DeletePhotoUseCase deletePhotoUseCase;
 
   ProfileBloc({
     required this.getProfileUseCase,
     required this.updateProfileUseCase,
+    required this.uploadPhotoUseCase,
+    required this.deletePhotoUseCase,
   }) : super(const ProfileState()) {
     on<ProfileLoadRequested>(_onLoad);
     on<ProfileUpdateRequested>(_onUpdate);
+    on<ProfilePhotoUploadRequested>(_onUploadPhoto);
+    on<ProfilePhotoRemoveRequested>(_onDeletePhoto);
   }
 
   Future<void> _onLoad(
@@ -60,6 +67,60 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
           isSaving: false,
           message: 'تم حفظ التغييرات بنجاح',
+          messageIsError: false,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onUploadPhoto(
+    ProfilePhotoUploadRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (state.isUploadingPhoto) return;
+    emit(state.copyWith(isUploadingPhoto: true, clearMessage: true));
+
+    final result = await uploadPhotoUseCase(event.filePath);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          isUploadingPhoto: false,
+          message: failure.message,
+          messageIsError: true,
+        ),
+      ),
+      (profile) => emit(
+        state.copyWith(
+          profile: profile,
+          isUploadingPhoto: false,
+          message: 'تم تحديث صورة الحساب',
+          messageIsError: false,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onDeletePhoto(
+    ProfilePhotoRemoveRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (state.isUploadingPhoto) return;
+    emit(state.copyWith(isUploadingPhoto: true, clearMessage: true));
+
+    final result = await deletePhotoUseCase(const NoParams());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          isUploadingPhoto: false,
+          message: failure.message,
+          messageIsError: true,
+        ),
+      ),
+      (profile) => emit(
+        state.copyWith(
+          profile: profile,
+          isUploadingPhoto: false,
+          message: 'تم حذف صورة الحساب',
           messageIsError: false,
         ),
       ),

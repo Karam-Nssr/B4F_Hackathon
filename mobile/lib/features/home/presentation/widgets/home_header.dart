@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Navy header of the home screen (Figma M/Home): cart pill, brand logo and
-/// the search field.
 class HomeHeader extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSearchSubmitted;
@@ -37,7 +35,6 @@ class HomeHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // Brand (start side = right in RTL).
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

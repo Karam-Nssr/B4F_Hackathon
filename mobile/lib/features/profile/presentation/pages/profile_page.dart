@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/endpoints/api_endpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_page_header.dart';
+import '../../../../core/widgets/app_status_views.dart';
+import '../../../../core/widgets/confirm_dialog.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -17,9 +22,6 @@ import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
 
-/// "حسابي" tab (SAD FR-07 / §8): profile summary, the edit form for the
-/// full name / email / phone / national ID, a shortcut to "طلباتي" and
-/// logout. Requires login (backend is JWT-guarded).
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -65,40 +67,108 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _confirmLogout(AuthBloc authBloc) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
-          'تسجيل الخروج',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          'هل تريد تسجيل الخروج من حسابك؟',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'إلغاء',
-              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'تسجيل الخروج',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'تسجيل الخروج',
+      message: 'هل تريد تسجيل الخروج من حسابك؟',
+      confirmLabel: 'تسجيل الخروج',
+      destructive: true,
     );
-    if (confirmed == true) authBloc.add(AuthLogoutRequested());
+    if (confirmed) authBloc.add(AuthLogoutRequested());
+  }
+
+  Future<void> _pickPhoto(ProfileBloc bloc, ImageSource source) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+    bloc.add(ProfilePhotoUploadRequested(filePath: picked.path));
+  }
+
+  Future<void> _photoOptions(ProfileBloc bloc) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
+                  child: Text(
+                    'صورة الحساب',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: theme.textTheme.titleLarge?.color,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.photo_camera_outlined,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text('التقاط صورة جديدة'),
+                  onTap: () => Navigator.of(sheetContext).pop('camera'),
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.photo_library_outlined,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text('اختيار من المعرض'),
+                  onTap: () => Navigator.of(sheetContext).pop('gallery'),
+                ),
+                if (bloc.state.profile?.photoUrl != null)
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.error,
+                    ),
+                    title: const Text(
+                      'حذف الصورة الحالية',
+                      style: TextStyle(color: AppColors.error),
+                    ),
+                    onTap: () => Navigator.of(sheetContext).pop('delete'),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case 'camera':
+        await _pickPhoto(bloc, ImageSource.camera);
+      case 'gallery':
+        await _pickPhoto(bloc, ImageSource.gallery);
+      case 'delete':
+        final confirmed = await showConfirmDialog(
+          context,
+          title: 'حذف صورة الحساب',
+          message: 'هل تريد حذف صورتك الحالية؟ يمكنك رفع صورة أخرى لاحقاً.',
+          confirmLabel: 'حذف',
+          destructive: true,
+        );
+        if (confirmed) bloc.add(ProfilePhotoRemoveRequested());
+    }
   }
 
   @override
@@ -141,7 +211,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   backgroundColor: theme.scaffoldBackgroundColor,
                   body: Column(
                     children: [
-                      const _ProfileHeader(),
+                      const AppPageHeader(
+                        title: 'حسابي',
+                        subtitle: 'بياناتك وصورتك وإعداداتك',
+                        icon: Icons.person_outline_rounded,
+                      ),
                       Expanded(child: _buildBody(context, state)),
                     ],
                   ),
@@ -170,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: CircularProgressIndicator(color: AppColors.primary),
         );
       }
-      return _ErrorView(
+      return AppErrorState(
         message: state.message ?? 'تعذر تحميل بيانات الحساب',
         onRetry: () =>
             context.read<ProfileBloc>().add(ProfileLoadRequested()),
@@ -182,7 +256,12 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ProfileCard(profile: profile),
+          _ProfileCard(
+            profile: profile,
+            isUploading: state.isUploadingPhoto,
+            onPhotoTap: () =>
+                _photoOptions(context.read<ProfileBloc>()),
+          ),
           const SizedBox(height: 14),
           _EditForm(
             formKey: _formKey,
@@ -207,66 +286,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.navyGradient,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-          child: Row(
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'حسابي',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'إدارة بياناتك الشخصية',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: AppColors.primary, width: 2),
-                ),
-                child: const Icon(
-                  Icons.person_outline_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ProfileCard extends StatelessWidget {
   final ProfileEntity profile;
+  final bool isUploading;
+  final VoidCallback onPhotoTap;
 
-  const _ProfileCard({required this.profile});
+  const _ProfileCard({
+    required this.profile,
+    required this.isUploading,
+    required this.onPhotoTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -274,6 +303,7 @@ class _ProfileCard extends StatelessWidget {
     final initial = profile.fullName.trim().isEmpty
         ? 'م'
         : profile.fullName.trim()[0];
+    final photoUrl = profile.photoUrl;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -285,28 +315,87 @@ class _ProfileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: AppColors.navyGradient,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.navy.withValues(alpha: 0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+          GestureDetector(
+            onTap: isUploading ? null : onPhotoTap,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: photoUrl == null
+                        ? AppColors.navyGradient
+                        : null,
+                    color: photoUrl == null ? null : AppColors.surfaceSubtle,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.navy.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: isUploading
+                      ? const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                              strokeWidth: 2.4,
+                            ),
+                          ),
+                        )
+                      : photoUrl != null
+                          ? Image.network(
+                              ApiEndpoints.mediaUrl(photoUrl),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Center(
+                                child: Text(
+                                  initial,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                initial,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                ),
+                Positioned(
+                  bottom: -2,
+                  right: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
-            ),
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -332,6 +421,15 @@ class _ProfileCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  photoUrl == null ? 'اضغط لإضافة صورة' : 'اضغط لتغيير الصورة',
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -500,7 +598,7 @@ class _MenuCard extends StatelessWidget {
             ),
           ),
           trailing: Icon(
-            Icons.arrow_back_ios_new_rounded,
+            Icons.arrow_forward_ios_rounded,
             size: 16,
             color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
           ),
@@ -592,43 +690,6 @@ class _LogoutButton extends StatelessWidget {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_off_rounded,
-              size: 48, color: AppColors.textMuted),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 200,
-            child: AppButton(
-              text: 'إعادة المحاولة',
-              height: 44,
-              onPressed: () =>
-                  context.read<ProfileBloc>().add(ProfileLoadRequested()),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LoginRequiredView extends StatelessWidget {
   const _LoginRequiredView();
 
@@ -641,7 +702,11 @@ class _LoginRequiredView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const _ProfileHeader(),
+            const AppPageHeader(
+              title: 'حسابي',
+              subtitle: 'إدارة بياناتك الشخصية',
+              icon: Icons.person_outline_rounded,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),

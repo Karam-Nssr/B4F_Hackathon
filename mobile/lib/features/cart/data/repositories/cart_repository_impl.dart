@@ -65,9 +65,6 @@ class CartRepositoryImpl implements CartRepository {
 
       final response = await remoteDataSource.createOrder(payload);
 
-      // The totals are computed from the cart we submitted: it is what the
-      // user confirmed, and it keeps the success screen working even if the
-      // backend response shape changes.
       return CheckoutResultEntity(
         orderId: response['_id']?.toString() ?? '',
         totalAmountSyp: items.fold<num>(0, (sum, item) => sum + item.totalSyp),
@@ -76,7 +73,6 @@ class CartRepositoryImpl implements CartRepository {
     });
   }
 
-  /// Translates data-layer exceptions into domain [Failure]s.
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());

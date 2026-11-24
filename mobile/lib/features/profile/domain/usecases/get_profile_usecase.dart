@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/profile_entity.dart';
 import '../repositories/profile_repository.dart';
 
-/// Loads the profile for the "حسابي" tab.
 class GetProfileUseCase implements UseCase<ProfileEntity, NoParams> {
   final ProfileRepository repository;
 

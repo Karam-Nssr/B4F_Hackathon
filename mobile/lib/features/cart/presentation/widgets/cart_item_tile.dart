@@ -4,8 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/cart_item_entity.dart';
 
-/// One cart line: thumbnail, title/shop, unit price, quantity stepper and
-/// a remove button.
 class CartItemTile extends StatelessWidget {
   final CartItemEntity item;
   final VoidCallback onIncrement;

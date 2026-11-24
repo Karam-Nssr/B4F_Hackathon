@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -168,7 +169,75 @@ export class OrdersService {
     if (masterOrders.length === 0) {
       return [];
     }
+    return this.withSubOrders(masterOrders);
+  }
 
+  /** One master order the user owns, shaped like the items of `listMine`. */
+  async getOrder(userId: string, orderId: Types.ObjectId) {
+    return this.loadOwnedOrder(userId, orderId);
+  }
+
+  /** Cancels one sub-order of the user's order — 404 unless it is theirs and pending. */
+  async cancelSubOrder(userId: string, subOrderId: Types.ObjectId) {
+    const subOrder = await this.shopSubOrderModel
+      .findOne({ _id: subOrderId })
+      .lean()
+      .exec();
+    if (!subOrder) {
+      throw new NotFoundException('Sub-order not found');
+    }
+    const masterOrder = await this.masterOrderModel
+      .findOne({
+        _id: subOrder.masterOrderId,
+        userId: new Types.ObjectId(userId),
+      })
+      .lean()
+      .exec();
+    if (!masterOrder) {
+      throw new NotFoundException('Sub-order not found');
+    }
+    if (subOrder.status !== 'PENDING') {
+      throw new ConflictException(
+        'Only pending sub-orders can be cancelled',
+      );
+    }
+    await this.shopSubOrderModel
+      .updateOne({ _id: subOrderId }, { $set: { status: 'CANCELLED' } })
+      .exec();
+    return this.loadOwnedOrder(userId, subOrder.masterOrderId);
+  }
+
+  /** Cancels the whole order — 404 unless it is the user's, 409 unless all of it is pending. */
+  async cancelOrder(userId: string, orderId: Types.ObjectId) {
+    const order = await this.loadOwnedOrder(userId, orderId);
+    if (order.shopSubOrders.some((subOrder) => subOrder.status !== 'PENDING')) {
+      throw new ConflictException(
+        'The order can only be cancelled while every sub-order is still pending',
+      );
+    }
+    await this.shopSubOrderModel
+      .updateMany({ masterOrderId: orderId }, { $set: { status: 'CANCELLED' } })
+      .exec();
+    return this.loadOwnedOrder(userId, orderId);
+  }
+
+  /** One master order the user owns, with its sub-orders; anything else is a 404. */
+  private async loadOwnedOrder(userId: string, orderId: Types.ObjectId) {
+    const masterOrder = await this.masterOrderModel
+      .findOne({ _id: orderId, userId: new Types.ObjectId(userId) })
+      .lean()
+      .exec();
+    if (!masterOrder) {
+      throw new NotFoundException('Order not found');
+    }
+    const [order] = await this.withSubOrders([masterOrder]);
+    return order;
+  }
+
+  /** Every sub-order of these master orders, populated and attached to the order owning it. */
+  private async withSubOrders<T extends { _id: Types.ObjectId }>(
+    masterOrders: T[],
+  ) {
     const subOrders = await this.shopSubOrderModel
       .find({
         masterOrderId: { $in: masterOrders.map((order) => order._id) },

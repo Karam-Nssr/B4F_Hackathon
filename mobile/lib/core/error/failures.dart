@@ -1,10 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Base class for all domain-level failures.
-///
-/// Failures are returned (never thrown) from repositories and use cases,
-/// wrapped in `Either<Failure, T>`. This keeps error handling explicit and
-/// forces every call site to handle both the success and failure paths.
 abstract class Failure extends Equatable {
   final String message;
 

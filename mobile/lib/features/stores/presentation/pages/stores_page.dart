@@ -5,14 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
-import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_page_header.dart';
+import '../../../../core/widgets/app_status_views.dart';
 import '../bloc/stores_bloc.dart';
 import '../bloc/stores_event.dart';
 import '../bloc/stores_state.dart';
 import '../widgets/store_card.dart';
 
-/// Stores directory tab (SAD FR-02): every active shop, tappable to open
-/// its detail page with the shop's products.
 class StoresPage extends StatelessWidget {
   const StoresPage({super.key});
 
@@ -28,7 +27,11 @@ class StoresPage extends StatelessWidget {
             backgroundColor: theme.scaffoldBackgroundColor,
             body: Column(
               children: [
-                const _StoresHeader(),
+                const AppPageHeader(
+                  title: 'المتاجر',
+                  subtitle: 'متاجر مستقلة تبيع مباشرة',
+                  icon: Icons.storefront_rounded,
+                ),
                 Expanded(child: _buildBody(context, state)),
               ],
             ),
@@ -51,7 +54,7 @@ class StoresPage extends StatelessWidget {
       );
     }
     if (state is StoresFailure) {
-      return _ErrorView(
+      return AppErrorState(
         message: state.message,
         onRetry: () =>
             context.read<StoresBloc>().add(StoresLoadRequested()),
@@ -59,7 +62,11 @@ class StoresPage extends StatelessWidget {
     }
     if (state is StoresLoaded) {
       if (state.shops.isEmpty) {
-        return const _EmptyView();
+        return const AppEmptyState(
+          icon: Icons.storefront_outlined,
+          title: 'لا توجد متاجر بعد',
+          message: 'أول متجر سيظهر هنا قريباً',
+        );
       }
       return RefreshIndicator(
         color: AppColors.primary,
@@ -86,120 +93,5 @@ class StoresPage extends StatelessWidget {
       );
     }
     return const SizedBox.shrink();
-  }
-}
-
-class _StoresHeader extends StatelessWidget {
-  const _StoresHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.navyGradient,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-          child: Row(
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'المتاجر',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'متاجر مستقلة تبيع مباشرة',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: AppColors.primary, width: 2),
-                ),
-                child: const Icon(
-                  Icons.storefront_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_off_rounded,
-              size: 48, color: AppColors.textMuted),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 200,
-            child: AppButton(text: 'إعادة المحاولة', height: 44, onPressed: onRetry),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 48),
-      child: Column(
-        children: [
-          Icon(Icons.storefront_outlined,
-              size: 48, color: AppColors.textMuted),
-          SizedBox(height: 12),
-          Text(
-            'لا توجد متاجر بعد',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'أول متجر سيظهر هنا قريباً',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
   }
 }

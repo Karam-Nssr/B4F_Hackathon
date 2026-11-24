@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Navy header with the title and the login / register tabs (Figma
-/// M/Auth-Login and M/Auth-Register).
 class AuthHeader extends StatelessWidget {
   final bool isLogin;
 

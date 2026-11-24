@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// One product line inside a sub-order.
 class OrderItemEntity extends Equatable {
   final String productTitle;
   final num unitPriceSyp;
@@ -18,11 +17,6 @@ class OrderItemEntity extends Equatable {
   List<Object?> get props => [productTitle, unitPriceSyp, quantity];
 }
 
-/// One shop's slice of a master order — carries its own invoice number and
-/// status (SAD FR-06: the cart is split into a sub-order per shop).
-///
-/// [status] is one of `PENDING | CONFIRMED | COMPLETED | CANCELLED`; the
-/// shop confirms within 1–24h (SAD appendix A).
 class SubOrderEntity extends Equatable {
   final String id;
   final String shopId;
@@ -60,8 +54,6 @@ class SubOrderEntity extends Equatable {
       ];
 }
 
-/// An entry of `GET /api/orders/my`: the master order (total + the
-/// buyer's verification data) plus its per-shop sub-orders.
 class OrderEntity extends Equatable {
   final String id;
   final num totalAmountSyp;

@@ -14,8 +14,6 @@ import '../bloc/stores_bloc.dart';
 import '../bloc/stores_event.dart';
 import '../bloc/stores_state.dart';
 
-/// One shop: navy header (name / category / description) plus the grid of
-/// the shop's active products.
 class StoreDetailPage extends StatelessWidget {
   final String shopId;
 

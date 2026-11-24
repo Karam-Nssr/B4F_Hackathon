@@ -25,6 +25,10 @@ export class User {
   @Prop({ trim: true })
   nationalId?: string;
 
+  /** Where the profile photo lives on the avatars disk (see `src/storage/storage.config.ts`). */
+  @Prop({ trim: true })
+  photoKey?: string;
+
   createdAt!: Date;
 }
 

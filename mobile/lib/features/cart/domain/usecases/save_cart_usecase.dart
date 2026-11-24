@@ -6,7 +6,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/cart_item_entity.dart';
 import '../repositories/cart_repository.dart';
 
-/// Persists the cart after any change (add / remove / quantity).
 class SaveCartUseCase implements UseCase<List<CartItemEntity>, SaveCartParams> {
   final CartRepository repository;
 
